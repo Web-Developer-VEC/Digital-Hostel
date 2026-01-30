@@ -1,7 +1,7 @@
 const express = require('express');
 const { ensureAuthenticatedStudent } = require('../../middleware/authMiddelware');
 const upload = require('../../middleware/uploadMiddleware');
-const { verifyStudent, submitPassParentApproval, submitPassWardenApproval, saveDraftData, fetchDraft, submitPassSuperiorWardenApproval, getPassDetailsByPassID, EditPassDetails } = require('../../controllers/studentController/requestController');
+const { verifyStudent, submitPassParentApproval, submitPassWardenApproval, saveDraftData, fetchDraft, submitPassSuperiorWardenApproval, getPassDetailsByPassID, EditPassDetails } = require('../../controllers/student_controllers/request_controller');
 
 const router = express.Router();
 

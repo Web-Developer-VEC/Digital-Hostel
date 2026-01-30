@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedWarden } = require('../../middleware/authMiddelware');
-const { getStudentData, markStudentVacate, foodChangeDirect, roomnoChangeDirect } = require('../../controllers/wardenController/studentDataController');
+const { getStudentData, markStudentVacate, foodChangeDirect, roomnoChangeDirect } = require('../../controllers/warden_controllers/studentData_controller');
 
 const router = express.Router();
 

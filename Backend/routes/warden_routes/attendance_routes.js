@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedWarden } = require('../../middleware/authMiddelware');
-const { getFoodCount } = require('../../controllers/wardenController/attendanceController');
+const { getFoodCount } = require('../../controllers/warden_controllers/attendance_controller');
 
 const router = express.Router();
 

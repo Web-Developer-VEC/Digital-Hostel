@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSuperior } = require('../../middleware/authMiddelware');
-const { wardenDoInactive, wardenDoActive, addWarden, updatewarden, fetchDetailsForReallocation, getWardenDetails, fetchWardensLog } = require('../../controllers/superiorController/wardenProfileController');
+const { wardenDoInactive, wardenDoActive, addWarden, updatewarden, fetchDetailsForReallocation, getWardenDetails, fetchWardensLog } = require('../../controllers/superior_controllers/warden_Profile_controller');
 const upload = require('../../middleware/uploadMiddleware');
 
 const router = express.Router();

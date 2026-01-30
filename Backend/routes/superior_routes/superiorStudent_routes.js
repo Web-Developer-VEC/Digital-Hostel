@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSuperior } = require('../../middleware/authMiddelware');
-const { getStudentDetailsSuperior, incrementBatchYear, updateStudentSuperior } = require('../../controllers/superiorController/superiorStudentController');
+const { getStudentDetailsSuperior, incrementBatchYear, updateStudentSuperior } = require('../../controllers/superior_controllers/superior_Student_controller');
 
 const router = express.Router();
 

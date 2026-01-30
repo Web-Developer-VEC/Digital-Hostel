@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSuperior } = require('../../middleware/authMiddelware');
-const { profileChangeRequestSuperior, profileUpdate, fetchPassSuperior, superiorAccept, superiordecline, getOldPassSuperior, getVacateFormRequest, confirmVacate } = require('../../controllers/superiorController/requestController');
+const { profileChangeRequestSuperior, profileUpdate, fetchPassSuperior, superiorAccept, superiordecline, getOldPassSuperior, getVacateFormRequest, confirmVacate } = require('../../controllers/superior_controllers/request_controller');
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { Login, Logout, sendOTP, validateOTP, setNewPassword, DeleteWarden_Student } = require('../controllers/authController');
+const { Login, Logout, sendOTP, validateOTP, setNewPassword, DeleteWarden_Student } = require('../controllers/auth_controller');
 const { ensureAuthenticatedSuperior } = require('../middleware/authMiddelware');
 
 const router = express.Router();
