@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSuperior } = require('../../middleware/authMiddelware');
-const { passMeasureSuperior, analysisSuperior, analysisSuperior_date } = require('../../controllers/superiorController/analysisController');
+const { passMeasureSuperior, analysisSuperior, analysisSuperior_date } = require('../../controllers/superior_controllers/analysis_controller');
 
 const router = express.Router();
 

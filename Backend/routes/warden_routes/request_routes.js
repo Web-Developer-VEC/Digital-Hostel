@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedWarden } = require('../../middleware/authMiddelware');
-const { foodChangeApprove, getFoodRequestChange, fetchOldPassWarden, wardenReject, WardenAccept, fetchPassWarden } = require('../../controllers/wardenController/requestController');
+const { foodChangeApprove, getFoodRequestChange, fetchOldPassWarden, wardenReject, WardenAccept, fetchPassWarden } = require('../../controllers/warden_controllers/request_controller');
 
 const router = express.Router();
 

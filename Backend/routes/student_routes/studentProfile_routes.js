@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedStudent } = require('../../middleware/authMiddelware');
-const { getStudentProfile, changeFoodType, profileChangeRequest } = require('../../controllers/studentController/studentProfileController');
+const { getStudentProfile, changeFoodType, profileChangeRequest } = require('../../controllers/student_controllers/student_Profile_controller');
 
 const router = express.Router();
 

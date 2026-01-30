@@ -1,5 +1,5 @@
 const { getDb } = require('../../config/db');
-const { sendParentReachedSMS } = require('../../services/sendSMS');
+const { sendParentReachedSMS } = require('../../services/sendSMS.service');
 
 async function getPassDetails (req, res) {
     try {

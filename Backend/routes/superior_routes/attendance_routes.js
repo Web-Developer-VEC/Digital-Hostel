@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSuperior } = require('../../middleware/authMiddelware');
-const { getFoodCountSuperior } = require('../../controllers/superiorController/attendanceController');
+const { getFoodCountSuperior } = require('../../controllers/superior_controllers/attendance_controller');
 
 const router = express.Router();
 

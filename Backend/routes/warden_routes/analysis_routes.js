@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedWarden } = require('../../middleware/authMiddelware');
-const { passMeasureWarden, analysisWarden, analysisWarden_date } = require('../../controllers/wardenController/analysisController');
+const { passMeasureWarden, analysisWarden, analysisWarden_date } = require('../../controllers/warden_controllers/analysis_controller');
 
 const router = express.Router();
 

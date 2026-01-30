@@ -2,7 +2,7 @@ const { getDb } = require('../../config/db');
 const { v4: uuidv4 } = require('uuid');
 const { 
     sendParentReachedSMS,
- } = require('../../services/sendSMS');
+ } = require('../../services/sendSMS.service');
 const path = require('path');
  const fs = require('fs');
 const { error } = require('console');

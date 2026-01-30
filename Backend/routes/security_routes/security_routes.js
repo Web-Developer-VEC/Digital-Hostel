@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedSecurity } = require('../../middleware/authMiddelware');
-const { getPassDetails, passAccept, PassDecline } = require('../../controllers/securityController/securityController');
+const { getPassDetails, passAccept, PassDecline } = require('../../controllers/security_controllers/security_controller');
 
 const router = express.Router();
 

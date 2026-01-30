@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticatedStudent } = require('../../middleware/authMiddelware');
-const { submitVacateForm } = require('../../controllers/studentController/vacateController');
+const { submitVacateForm } = require('../../controllers/student_controllers/vacate_controllers/vacate_controller');
 
 const router = express.Router();
 

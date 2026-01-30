@@ -1,6 +1,6 @@
 const { getDb } = require('../config/db');
 const bcrypt = require('bcrypt');
-const { sendOTPForForgetPassword } = require('../services/sendSMS')
+const { sendOTPForForgetPassword } = require('../services/sendSMS.service')
 
 async function Login (req, res) {
     try {

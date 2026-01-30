@@ -1,5 +1,5 @@
 const { getDb } = require('../../config/db');
-const { generateQR } = require('../../services/generateQR')
+const { generateQR } = require('../../services/generateQR.service')
 
 async function profileChangeRequestSuperior (req, res) {
     try {
