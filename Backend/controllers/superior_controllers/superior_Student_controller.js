@@ -41,17 +41,24 @@ async function getStudentDetailsSuperior (req, res) {
             }
             return a.gender === "Male" ? -1 : 1;
         });
-        res.status(200).json({ students: students_with_pass_data });
+        return res.status(200).json({ students: students_with_pass_data });
 
     } catch (error) {
         console.error("❌ Error fetching student details:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 }
 
 async function incrementBatchYear (req, res) {
     try {
         const { batch } = req.body;
+
+         const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
         if (!batch) {
             return res.status(400).json({ error: "Missing batch" });
         }
@@ -69,14 +76,14 @@ async function incrementBatchYear (req, res) {
             { $inc: { year: 1 } }
         );
 
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: "Student years incremented successfully", 
             updated_students: students.length 
         });
 
     } catch (error) {
         console.error("❌ Error Incrementing Student Year:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -86,6 +93,12 @@ async function updateStudentSuperior (req, res) {
         const studentCollection = db.collection("student_database");
 
         const { registration_number, ...updateFields } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
 
         if (!registration_number) {
             return res.status(400).json({ error: "Registration number is required" });
@@ -102,7 +115,7 @@ async function updateStudentSuperior (req, res) {
             return res.status(404).json({ error: "Student not found" });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "Student details updated successfully",
             registration_number: registration_number,
             updated_fields: updateFields
@@ -110,7 +123,7 @@ async function updateStudentSuperior (req, res) {
 
     } catch (error) {
         console.error("❌ Error updating student details:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 

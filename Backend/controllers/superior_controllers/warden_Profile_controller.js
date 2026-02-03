@@ -14,7 +14,7 @@ async function getWardenDetails (req, res) {
             return res.status(404).json({ message: "No assistant wardens found" });
         }
 
-        res.status(200).json({ wardens: warden_details });
+        return res.status(200).json({ wardens: warden_details });
 
     } catch (error) {
         console.error("❌ Error fetching warden details:", error);
@@ -28,6 +28,12 @@ async function wardenDoInactive (req, res) {
         const wardenCollection = db.collection("warden_database");
         const logsCollection = db.collection("warden_logs");
         const { warden_name, inactive_warden_id, year } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
 
         if (!warden_name || !inactive_warden_id || !year) {
             return res.status(400).json({ error: "Missing required fields" });
@@ -64,7 +70,7 @@ async function wardenDoInactive (req, res) {
 
         await logsCollection.insertOne(log_entry);
 
-        res.json({ message: "Warden status updated, year transferred, and log recorded successfully" });
+        return res.json({ message: "Warden status updated, year transferred, and log recorded successfully" });
 
     } catch (error) {
         console.error("❌ Error handling warden status:", error);
@@ -78,6 +84,12 @@ async function wardenDoActive (req, res) {
         const wardenCollection = db.collection("warden_database");
         const logsCollection = db.collection("warden_logs");
         const { warden_id } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
 
         if (!warden_id) {
             return res.status(400).json({ error: "Missing warden_id" });
@@ -122,7 +134,7 @@ async function wardenDoActive (req, res) {
             );
         }
 
-        res.json({ message: "Warden activated, years updated, and logs resolved successfully" });
+        return res.json({ message: "Warden activated, years updated, and logs resolved successfully" });
 
     } catch (error) {
         console.error("❌ Error handling warden status:", error);
@@ -133,6 +145,12 @@ async function wardenDoActive (req, res) {
 async function addWarden (req, res) {
     try {
         const { name, primary_year, phone_number, password, gender, joined_date } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
         
         if (!name || !primary_year || !phone_number || !password || !gender  || !joined_date) {
             return res.status(400).json({ error: "Missing required fields" });
@@ -172,11 +190,11 @@ async function addWarden (req, res) {
 
         await wardenCollection.insertOne(newWarden);
 
-        res.status(201).json({ message: "Warden added successfully", unique_id });
+        return res.status(201).json({ message: "Warden added successfully", unique_id });
 
     } catch (error) {
         console.error("Error Adding New Warden:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -186,6 +204,12 @@ async function updatewarden (req, res) {
         const wardenCollection = db.collection("warden_database");
         
         const { unique_id, ...updateFields } = req.body;
+
+         const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
 
         if (typeof updateFields.secondary_year === 'string') {
             updateFields.primary_year = JSON.parse(updateFields.secondary_year);
@@ -232,7 +256,7 @@ async function updatewarden (req, res) {
             return res.status(404).json({ error: "Warden not found" });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "Warden details updated successfully",
             unique_id: unique_id,
             updated_fields: updateFields
@@ -240,7 +264,7 @@ async function updatewarden (req, res) {
 
     } catch (error) {
         console.error("❌ Error updating warden details:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -249,6 +273,13 @@ async function fetchDetailsForReallocation (req, res) {
         const db = getDb();
         const wardenCollection = db.collection("warden_database");
         const { target_warden_id } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
         if (!target_warden_id) {
             return res.status(400).json({ error: "Missing target_warden_id" });
         }
@@ -276,7 +307,7 @@ async function fetchDetailsForReallocation (req, res) {
         const warden_names = warden_details.map(warden => warden.warden_name);
         warden_names.push(superior_warden_name);
 
-        res.status(200).json({ warden_names, primary_years });
+        return res.status(200).json({ warden_names, primary_years });
 
     } catch (error) {
         console.error("Error fetching warden details:", error);
@@ -290,11 +321,11 @@ async function fetchWardensLog (req, res) {
         const logsCollection = db.collection("warden_logs");
         const logs = await logsCollection.find().sort({ deactivated_date: -1 }).toArray();
 
-        res.json({logs : logs});
+        return res.status(200).json({logs : logs});
 
     } catch (err) {
         console.error("❌ Error fetching logs:", err);
-        res.status(500).json({ error: "Server error" });
+        return res.status(500).json({ error: "Server error" });
     }
 }
 

@@ -3,7 +3,14 @@ const { generateQR } = require('../../services/generateQR.service')
 
 async function profileChangeRequestSuperior (req, res) {
     try {
-        const unique_id = req.session.unique_number;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
+        const unique_id = user.registration_number;
         if (!unique_id) {
             return res.status(400).json({ error: "warden_unique_id is required" });
         }
@@ -21,16 +28,22 @@ async function profileChangeRequestSuperior (req, res) {
         const primary_year = warden.profile_years;
         const requests = await requestsCollection.find({ year: { $in: primary_year } }).toArray();
 
-        res.status(200).json({ requests });
+        return res.status(200).json({ requests });
     } catch (error) {
         console.error('❌ Error fetching requests:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
 async function profileUpdate (req, res) {
-    const unique_id = req.session.unique_number;
     try {
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
+        const unique_id = user.registration_number;
         const { registration_number, action } = req.body;
         const db = getDb();
         const wardenCollection = db.collection('warden_database');
@@ -123,168 +136,7 @@ async function profileUpdate (req, res) {
 
     } catch (err) {
         console.error("❌ Error:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-}
-
-async function fetchPassSuperior (req, res) {
-    try {
-        const db = getDb();
-        const passCollection = db.collection("pass_details");
-
-        const passData = await passCollection.find({
-            request_completed: false,
-            expiry_status: false,
-            qrcode_status: false,
-            wardern_approval: null,
-            superior_wardern_approval: null,
-            notify_superior: true
-        }).toArray();
-
-        res.status(200).json({ passes: passData });
-
-    } catch (error) {
-        console.error("Error fetching passes:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-}
-
-async function superiorAccept (req, res) {
-    try {
-        const superior_unique_id = req.session.unique_number;
-        const { pass_id, medical_status, comment } = req.body;
-
-        if (!pass_id) {
-            return res.status(400).json({ error: "pass_id is required" });
-        }
-        const db = getDb();
-        const passCollection = db.collection('pass_details');
-        const wardenCollection = db.collection('warden_database');
-
-        const superior_data = await wardenCollection.findOne({ unique_id: superior_unique_id });
-        if (!superior_data) {
-            return res.status(404).json({ error: "Superior Warden not found" });
-        }
-        const passData = await passCollection.findOne({ pass_id: pass_id });
-        if (!passData) {
-            return res.status(404).json({ error: "Pass not found" });
-        }
-        if (passData.superior_wardern_approval !== null) {
-            return res.status(400).json({
-                message: `You have already ${passData.superior_wardern_approval ? "approved" : "rejected"} this request. If you haven't approved this request, please contact the warden.`,
-            });
-        }
-        const student_registration_number = passData.registration_number;
-        const qrPath = await generateQR(pass_id, student_registration_number);
-
-        const updateData = {
-            superior_wardern_approval: true,
-            qrcode_path: qrPath,
-            qrcode_status: true,
-            authorised_warden_id: superior_unique_id,
-        };
-
-        if (medical_status === true) {
-            updateData.reason_type = "medical";
-        }
-
-        if (comment && typeof comment === "string") {
-            updateData.comment = comment;
-        }
-
-        await passCollection.updateOne({ pass_id: pass_id }, { $set: updateData });
-
-        res.status(200).json({ message: "Superior Warden approval updated successfully", qrcode_path: qrPath });
-
-    } catch (error) {
-        console.error("❌ Error:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-}
-
-async function superiordecline (req, res) {
-    try {
-        const superior_unique_id = req.session.unique_number;
-        const { pass_id, comment } = req.body;
-
-        if (!pass_id) {
-            return res.status(400).json({ error: "pass_id is required" });
-        }
-        const db = getDb();
-        const passCollection = db.collection('pass_details');
-        const wardenCollection = db.collection('warden_database');
-
-        const superior_data = await wardenCollection.findOne({ unique_id: superior_unique_id });
-        if (!superior_data) {
-            return res.status(404).json({ error: "Superior Warden not found" });
-        }
-        const passData = await passCollection.findOne({ pass_id: pass_id });
-        if (!passData) {
-            return res.status(404).json({ error: "Pass not found" });
-        }
-        if (passData.superior_wardern_approval !== null) {
-            return res.status(400).json({
-                message: `You have already ${passData.superior_wardern_approval ? "approved" : "rejected"} this request. If you haven't approved this request, please contact the warden.`,
-            });
-        }
-
-        const updateData = {
-            superior_wardern_approval: false,
-            qrcode_path: null,
-            qrcode_status: false,
-            authorised_warden_id: superior_unique_id,
-        };
-
-        if (comment && typeof comment === "string") {
-            updateData.comment = comment;
-        }
-
-        await passCollection.updateOne({ pass_id: pass_id }, { $set: updateData });
-
-        res.status(200).json({ message: "Superior Warden rejection updated successfully" });
-
-    } catch (error) {
-        console.error("❌ Error:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-}
-
-async function getOldPassSuperior (req, res) {
-    try {
-        const db = getDb();
-        const wardenCollection = db.collection("warden_database");
-        const passCollection = db.collection("pass_details");
-
-        const superior_id = req.session.unique_number;
-        const { date, warden_id } = req.body;
-        const targetDate = date ? new Date(date) : new Date();
-
-        const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
-        const superior_data = await wardenCollection.findOne({ unique_id: superior_id });
-
-        if (!superior_data) {
-            return res.status(404).json({ error: "Superior Warden not found" });
-        }
-
-        let filterQuery = {
-            request_completed: true,
-            request_time: { $gte: startOfDay, $lte: endOfDay }
-        };
-
-        if (warden_id && warden_id !== "overall") {
-            filterQuery.authorised_warden_id = warden_id;
-        } else {
-            filterQuery.year = { $in: superior_data.profile_years };
-        }
-
-        const pass_data = await passCollection.find(filterQuery).toArray();
-
-        res.status(200).json({ message: "Old passes fetched successfully", data: pass_data });
-
-    } catch (error) {
-        console.error("Error fetching old passes:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal Server error" });
     }
 }
 
@@ -342,10 +194,6 @@ async function confirmVacate (req, res) {
 module.exports = {
     profileChangeRequestSuperior,
     profileUpdate,
-    fetchPassSuperior,
-    superiorAccept,
-    superiordecline,
-    getOldPassSuperior,
     getVacateFormRequest,
     confirmVacate
 }

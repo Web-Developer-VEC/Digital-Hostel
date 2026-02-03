@@ -4,13 +4,20 @@ async function getStudentProfile (req, res) {
     try {
       const db =getDb();
       const profilesCollection = db.collection("student_database");
-      const unique_id = req.session.unique_number;
-      const profile = await profilesCollection.findOne({ registration_number: unique_id });
+       const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
+        const {registration_number} = user;
+
+      const profile = await profilesCollection.findOne({ registration_number });
   
       if (!profile) {
         return res.status(404).json({ message: 'Profile not found' });
       }
-      return res.status(200).json(profile);
+      return res.status(200).json({profile});
     } catch (error) {
       console.error('❌ Error fetching profile:', error);
       return res.status(500).json({ message: 'Server error' });
@@ -19,7 +26,14 @@ async function getStudentProfile (req, res) {
 
 async function changeFoodType (req, res) {
 
-    const registration_number = req.session.unique_number;
+    const { user } = req.session;
+
+    if (!user || !user.registration_number) {
+        return res.status(401).json({ message: "Session expired. Please login again." });
+    }
+
+    const {registration_number} = user;
+
     const db = getDb();
     const studentsCollection = db.collection('student_database');
     const requestsCollection = db.collection('food_change_requests');
@@ -72,10 +86,10 @@ async function changeFoodType (req, res) {
             }
         );        
 
-        res.status(200).json({ message: 'Request submitted for approval', requested_foodtype: newFoodType });
+        return res.status(200).json({ message: 'Request submitted for approval', requested_foodtype: newFoodType });
     } catch (error) {
         console.error('❌ Error processing request:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
@@ -86,7 +100,15 @@ async function profileChangeRequest(req, res) {
         const db = getDb();
         const studentCollection = db.collection('student_database');
         const tempRequestCollection = db.collection('profile_change_requests');
-        const registration_number = req.session.unique_number;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
+        const {registration_number} = user;
+
         const profile = await studentCollection.findOne({ registration_number });
         if (!profile) {
             return res.status(404).json({ error: "Profile not found" });
@@ -130,14 +152,14 @@ async function profileChangeRequest(req, res) {
             }
         );
 
-        res.json({
+        return res.status(200).json({
             message: "Profile update requested. Waiting for approval from wardens.",
             request: updateRequest
         });
 
     } catch (err) {
         console.error("❌ Error:", err);
-        res.status(500).json({ error: "Server error" });
+        return res.status(500).json({ error: "Server error" });
     }
 }
 

@@ -18,11 +18,10 @@ async function generateQR(pass_id, registration_number) {
     const s3Path = `static/digihostel/qrcodes/${filename}`;
 
     const params = {
-      Bucket: process.env.AWS_S3_NAME,
+      Bucket: process.env.AWS_BUCKET_NAME,
       Key: s3Path,
       Body: webpBuffer,
       ContentType: 'image/webp',
-      ACL: 'public-read',
       ContentDisposition: 'attachment', 
     };
 
