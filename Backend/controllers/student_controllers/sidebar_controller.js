@@ -2,6 +2,7 @@ const { getDb } = require('../../config/db');
 
 async function getWardenDetail (req, res) { 
     try {
+
         const db = getDb();
         const wardenCollection = db.collection("warden_database");
          const { user } = req.session;
@@ -10,8 +11,13 @@ async function getWardenDetail (req, res) {
             return res.status(401).json({ message: "Session expired. Please login again." });
         }
 
-        const warden_id = user.registration_number;
-        const warden_data = await wardenCollection.findOne({ unique_id : warden_id });
+        const {registration_number} = user;
+
+        const studentCollection = db.collection(registration_number);
+
+        const warden_gender = studentCollection.gender;
+        const warden_year = [studentCollection.year];
+        const warden_data = await wardenCollection.findOne({ gender:warden_gender,primary_year:{$in:warden_year}});
         return res.status(200).json({
             "name" : warden_data.warden_name,
             "primary year" : warden_data.primary_year,
