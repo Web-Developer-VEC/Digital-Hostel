@@ -20,7 +20,7 @@ app.use(session);
 // Connect to MongoDB
 connectToDatabase();
 
-app.use('/api/backend',hostelroutes);
+app.use('/api',hostelroutes);
 
 
 app.get('/', (req, res) => {

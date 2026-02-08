@@ -7,6 +7,13 @@ async function getPassDetails (req, res) {
         const passCollection = db.collection("pass_details");
 
         const { pass_unique_id } = req.body;
+
+         const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
         if (!pass_unique_id) {
             return res.status(400).json({ message: "Pass ID is required" });
         }
@@ -23,10 +30,10 @@ async function getPassDetails (req, res) {
         if (!pass_data) {
             return res.status(404).json({ message: "No pass details found for the given ID" });
         }
-        return res.status(200).json(pass_data);
+        return res.status(200).json({pass_data});
     } catch (error) {
         console.error('❌ Error fetching pass details:', error);
-        return res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Internal Server error" });
     }
 }
 
@@ -35,6 +42,12 @@ async function passAccept (req, res) {
         const db = getDb();
         const passCollection = db.collection("pass_details");
         const studentCollection = db.collection("student_database");
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
 
         const { pass_id } = req.body;
         if (!pass_id) {
@@ -45,8 +58,7 @@ async function passAccept (req, res) {
             return res.status(404).json({ error: "Pass not found" });
         }
 
-        const security_id = req.session.unique_number;
-        const student_data = await studentCollection.findOne({ registration_number : pass_details.registration_number});
+        const security_id = user.registration_number;
         if (!pass_details.exit_time) {
             const exitTime = new Date();
             await passCollection.updateOne(
@@ -115,7 +127,7 @@ async function passAccept (req, res) {
 
     } catch (error) {
         console.error("❌ Error updating security pass:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -125,6 +137,13 @@ async function PassDecline(req, res) {
         const passCollection = db.collection("pass_details");
 
         const { pass_id } = req.body;
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
         if (!pass_id) {
             return res.status(400).json({ error: "Pass ID is required" });
         }
@@ -134,7 +153,7 @@ async function PassDecline(req, res) {
             return res.status(404).json({ error: "Pass not found" });
         }
 
-        const security_id = req.session.unique_number;
+        const security_id = user.registration_number;
         let updateFields = { 
             authorised_Security_id: security_id,
             request_completed: true
@@ -154,7 +173,7 @@ async function PassDecline(req, res) {
             return res.status(404).json({ error: "Pass not found" });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "Pass request declined successfully",
             pass_id: pass_id,
             authorised_Security_id: security_id
@@ -162,7 +181,7 @@ async function PassDecline(req, res) {
 
     } catch (error) {
         console.error("❌ Error declining pass request:", error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
 

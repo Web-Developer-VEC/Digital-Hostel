@@ -34,28 +34,21 @@ async function Login (req, res) {
         if (!isMatch) {
             return res.status(401).json({ error: "Invalid credentials" });
         }
-        req.session.studentauth = false;
-        req.session.wardenauth = false;
-        req.session.superiorauth = false;
-        if (type === "student") {
-            req.session.studentauth = true;
-        } else if (type === "warden") {
-            req.session.wardenauth = true;
-        } else if (type === "superior") {
-            req.session.superiorauth = true;
-        } else if (type === "security") {
-            req.session.securityauth = true;
-        }
-        req.session.unique_number = registration_number;
+
+        const sessionUser = {
+            type,
+            name: user.name || user.warden_name || user.security_name,
+            registration_number,
+        };
+
+        req.session.user = sessionUser;
+
         res.status(200).json({ 
             message: 'Sign-in successful', 
-            user: {
-                userid: user.userid,
-                name: user.name,
-                type
-            },
+            user:sessionUser,
             redirect:`/hostel/${type}`
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -130,9 +123,15 @@ async function setNewPassword (req, res) {
         }
         const hashedPassword = await bcrypt.hash(new_password, 10);
 
-        await client.connect();
-        const db = client.db(dbName);
-        const warden_id = req.session.unique_number;
+        const db = getDb();
+
+        const { user } = req.session;
+
+        if (!user || !user.registration_number) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
+
+        const warden_id = user.registration_number;
         const wardenCollection = db.collection("warden_database");
         const updateResult = await wardenCollection.updateOne(
             { registration_number: warden_id },
@@ -153,7 +152,14 @@ async function setNewPassword (req, res) {
 }
 
 async function DeleteWarden_Student (req, res) {
+    
     const { registration_number, type } = req.body;
+
+    const { user } = req.session;
+
+    if (!user || !user.registration_number) {
+        return res.status(401).json({ message: "Session expired. Please login again." });
+    }
 
     if (!registration_number) {
         return res.status(400).json({ error: "Registration number is required" });

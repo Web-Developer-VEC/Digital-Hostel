@@ -1,32 +1,32 @@
 const ensureAuthenticatedStudent = (req, res, next) => {
-    if (!req.session || req.session.studentauth !== true) {
+    if (!req.session || req.session.user !== true || req.session.user.type !="student") {
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();
 };
 
 const ensureAuthenticatedWarden = (req, res, next) => {
-    if (!req.session || req.session.wardenauth !== true) {  
+    if (!req.session || req.session.user !== true || req.session.user.type !="warden") {  
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();
 };
 
 const ensureAuthenticatedSuperior = (req, res, next) => {
-    if (!req.session || req.session.superiorauth !== true) {  
+    if (!req.session || req.session.user !== true || req.session.user.type !="superior") {  
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();
 };
 
 const ensureAuthenticatedSecurity = (req, res, next) => {
-    if (!req.session || req.session.securityauth !== true) {  
+    if (!req.session || req.session.user !== true || req.session.user.type !="security") {  
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();
 };
 const ensureAuthenticated = (req, res, next) => {
-    if (!req.session || (!req.session.wardenauth && !req.session.superiorauth)) {  
+    if (!req.session || !req.session.user) {  
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();

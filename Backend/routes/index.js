@@ -10,16 +10,15 @@ const studentPreRequestRoute = require('./student_routes/preRequest_routes');
 const studentProfileRoute = require('./student_routes/studentProfile_routes');
 const studentVacateRoute = require('./student_routes/vacate_routes');
 const securityRoute = require('./security_routes/security_routes');
-const wardenDetailsRoute = require('./warden_routes/sidebar_routes');
-const wardenAttendanceRoute = require('./warden_routes/attendance_routes');
+const wardenDetailsRoute = require('./student_routes/sidebar_routes');
 const wardenRequestRoute = require('./warden_routes/request_routes');
 const wardenStudentRoute = require('./warden_routes/studentData_routes');
-const wardenAnalysisRoute = require('./warden_routes/analysis_routes');
-const superiorAnalysisRoute = require('./superior_routes/analysis_routes');
-const superiorAttendanceRoute = require('./superior_routes/attendance_routes');
 const superiorRequestRoute = require('./superior_routes/request_routes');
 const superiorStudentRoute = require('./superior_routes/superiorStudent_routes');
 const superiorWardensProfileRoute = require('./superior_routes/wardensprofile_routes');
+const generalwardenrequestRoute = require('./general_warden_routes/request_routes');
+const generalwardenattendanceRoute = require('./general_warden_routes/attendance_routes');
+const generalwardenanalysisRoute = require('./general_warden_routes/analysis_routes')
 
 
 // Routes For Hostel Page
@@ -30,15 +29,14 @@ router.use('', studentProfileRoute);
 router.use('', studentVacateRoute);
 router.use('', securityRoute);
 router.use('', wardenDetailsRoute);
-router.use('', wardenAttendanceRoute);
 router.use('', wardenRequestRoute);
 router.use('', wardenStudentRoute);
-router.use('', wardenAnalysisRoute);
-router.use('', superiorAnalysisRoute);
-router.use('', superiorAttendanceRoute);
 router.use('', superiorRequestRoute);
 router.use('', superiorStudentRoute);
 router.use('', superiorWardensProfileRoute);
+router.use('',generalwardenanalysisRoute);
+router.use('',generalwardenattendanceRoute);
+router.use('',generalwardenrequestRoute)
 
 
 module.exports = router;
