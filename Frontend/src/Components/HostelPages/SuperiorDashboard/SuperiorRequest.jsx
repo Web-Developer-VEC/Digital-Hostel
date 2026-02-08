@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, X, FileText } from 'lucide-react';
 import './SuperiorRequest.css';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function SuperiorRequest() {
   const [records, setRecords] = useState([]);
@@ -60,6 +61,12 @@ function SuperiorRequest() {
       }
     } catch (error) {
       console.error("Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch warden details. Please refresh the page.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
 
@@ -69,13 +76,21 @@ function SuperiorRequest() {
       const response = await fetch('/api/fetch_passes_for_superior');
       const data = await response.json();
       console.log("Data", data);
-      if (data.passes) {
+      if (data.passes && data.passes.length > 0) {
         setRecords(data.passes);
         setDepartments([...new Set(data.passes.map(pass => pass.dept))]);
         setPassTypes([...new Set(data.passes.map(pass => pass.passtype))]);
+      } else {
+        setRecords([]);
       }
     } catch (error) {
       console.error("Error fetching passes:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch pending passes. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
     } finally {
       setLoading(false);
     }
@@ -99,11 +114,30 @@ function SuperiorRequest() {
         console.log("✅ Pass accepted successfully:", responseData);
         setRecords(records.filter(record => record.pass_id !== pass_id));
         setSelectedRecord(null);
+        Swal.fire({
+          title: "Success!",
+          text: "✅ Pass request accepted successfully.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2000
+        });
       } else {
         console.error("❌ API Error:", responseData);
+        Swal.fire({
+          title: "Error!",
+          text: `❌ ${responseData.error || 'Failed to accept pass request.'}`,
+          icon: "error",
+          showConfirmButton: true
+        });
       }
     } catch (error) {
       console.error("❌ Network error accepting pass:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ An error occurred while accepting the pass.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
   
@@ -121,11 +155,30 @@ function SuperiorRequest() {
         console.log("✅ Pass declined successfully");
         setRecords(records.filter(record => record.pass_id !== pass_id));
         setSelectedRecord(null);
+        Swal.fire({
+          title: "Success!",
+          text: "✅ Pass request declined successfully.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2000
+        });
       } else {
         console.error("❌ Error declining pass:", response.statusText);
+        Swal.fire({
+          title: "Error!",
+          text: "❌ Failed to decline pass request.",
+          icon: "error",
+          showConfirmButton: true
+        });
       }
     } catch (error) {
       console.error("❌ Network error declining pass:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ An error occurred while declining the pass.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
   
@@ -234,7 +287,9 @@ function SuperiorRequest() {
         </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <p>⏳ Loading pending passes...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="no-records-message">📋 No pending pass requests found.</p>
         ) : (
           <div className='AR-table-container'>
           <table className="AR-table">
@@ -321,7 +376,6 @@ const PairedInfo = ({ left, right }) => (
 function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMedical }) {
   const [showDocument, setShowDocument] = useState(false);
   const [comment,setComment] = useState(null);
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Convert "from" and "to" timestamps into date & time formats
   const fromDateTime = new Date(record.from);
@@ -343,7 +397,21 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
 
   const handleDocumentButtonClick = (e) => {
     e.stopPropagation(); // Prevent click from propagating to overlay
-    setShowDocument(true);
+    Swal.fire({
+      title: "Loading Document...",
+      text: "Please wait while we load the document preview.",
+      icon: "info",
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    setTimeout(() => {
+      setShowDocument(true);
+      Swal.close();
+    }, 1000);
   };
 
   const handleModalClick = (e) => {
@@ -364,23 +432,6 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
     if (lateCount <= 5) return "AR-status-orange"; // Orange
     return "AR-status-red"; // Red
   };
-
-  const ConfirmationModal = ({ onConfirm, onCancel }) => (
-    <div className="AR-confirmation-modal-overlay">
-      <div className="AR-confirmation-modal">
-        <h3>Confirm Acceptance</h3>
-        <p>Are you sure you want to accept this pass request?</p>
-        <div className="AR-confirmation-buttons">
-          <button onClick={onAccept} className="AR-button AR-button-secondary">
-            Cancel
-          </button>
-          <button onClick={onConfirm} className="AR-button AR-button-primary">
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   const passTypeLabels = {
     "od": "OD",
@@ -509,10 +560,46 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
               )}
     
               <div className="AR-modal-footer">
-                <button onClick={() => onDecline(record.pass_id, isMedical)} className="AR-button AR-button-secondary">
+                <button 
+                  onClick={() => {
+                    Swal.fire({
+                      title: "Decline Request?",
+                      text: `Are you sure you want to decline this pass request for ${record.name}?`,
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#dc3545",
+                      cancelButtonColor: "#6c757d",
+                      confirmButtonText: "Yes, Decline",
+                      cancelButtonText: "Cancel"
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        onDecline(record.pass_id, isMedical);
+                      }
+                    });
+                  }} 
+                  className="AR-button AR-button-secondary"
+                >
                   Decline
                 </button>
-                <button onClick={() => setShowConfirmation(true)} className="AR-button AR-button-primary">
+                <button 
+                  onClick={() => {
+                    Swal.fire({
+                      title: "Accept Request?",
+                      text: `Are you sure you want to accept this pass request for ${record.name}?`,
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonColor: "#28a745",
+                      cancelButtonColor: "#6c757d",
+                      confirmButtonText: "Yes, Accept",
+                      cancelButtonText: "Cancel"
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        onAccept(record.pass_id, isMedical, comment);
+                      }
+                    });
+                  }} 
+                  className="AR-button AR-button-primary"
+                >
                   Accept
                 </button>
               </div>
@@ -520,16 +607,6 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
             </div>
           </div>
 
-          {showConfirmation && (
-            <ConfirmationModal
-              onConfirm={() => {
-                onAccept(record.pass_id, isMedical, comment);
-                setShowConfirmation(false);
-              }}
-              onCancel={() => setShowConfirmation(false)}
-            />
-          )}
-    
           {showDocument && (
             <div className="AR-document-modal" onClick={handleOverlayClick}>
               <div className="AR-document-container" onClick={handleModalClick}>

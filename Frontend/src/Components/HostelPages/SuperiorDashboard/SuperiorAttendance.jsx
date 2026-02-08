@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import './SuperiorAttendance.css';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 
 function AttendanceDashboard() {
@@ -24,6 +25,7 @@ function AttendanceDashboard() {
   const [showMismatchModal, setShowMismatchModal] = useState(false);
   const [maledata , setMaleData] = useState(null);
   const [femaledata , setFemaledata] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (showAbsentModal || showMismatchModal || showIframe) {
@@ -40,20 +42,74 @@ function AttendanceDashboard() {
 
   useEffect(()=>{
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get('/api/food_count_superior')
 
         const fetchedData = response.data;
+
+        if (!fetchedData || (!fetchedData.Male && !fetchedData.Female)) {
+          Swal.fire({
+            title: "No Data",
+            text: "📋 No food count data available.",
+            icon: "info",
+            showConfirmButton: true
+          });
+        }
 
         setMaleData(fetchedData.Male);
         setFemaledata(fetchedData.Female);
 
       } catch (error) {
         console.error("error fetched food count data",error);
+        Swal.fire({
+          title: "Error!",
+          text: "❌ Failed to fetch food count data. Please refresh the page.",
+          icon: "error",
+          showConfirmButton: true
+        });
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchData();
   },[]);
+
+  const handleYearChange = (e) => {
+    const newYear = e.target.value;
+    setSelectedYear(newYear);
+    
+    // Check if data exists for the selected filters
+    const data = getCurrentData();
+    if (data.veg_count === 0 && data.non_veg_count === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: `📋 No food count data available for the selected filters.`,
+        icon: "info",
+        showConfirmButton: true,
+        timer: 3000
+      });
+    }
+  };
+
+  const handleGenderChange = (e) => {
+    const newGender = e.target.value;
+    setSelectedGender(newGender);
+    
+    // Check if data exists for the selected filters
+    setTimeout(() => {
+      const data = getCurrentData();
+      if (data.veg_count === 0 && data.non_veg_count === 0) {
+        Swal.fire({
+          title: "No Data",
+          text: `📋 No food count data available for the selected filters.`,
+          icon: "info",
+          showConfirmButton: true,
+          timer: 3000
+        });
+      }
+    }, 100);
+  };
 
   
   const getCurrentData = () => {
@@ -163,6 +219,11 @@ function AttendanceDashboard() {
 
   return (
     <div className="attendance-container">
+      {isLoading ? (
+        <div className="loading-container" style={{ textAlign: 'center', padding: '50px' }}>
+          <p style={{ fontSize: '20px' }}>⏳ Loading food count data...</p>
+        </div>
+      ) : (
       <div className="attendance-main">
         <div className="attendance-filters">
           <div className="attendance-filter-group">
@@ -170,7 +231,7 @@ function AttendanceDashboard() {
             <select 
               className="attendance-filter-select"
               value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
+              onChange={handleYearChange}
             >
               <option value="overall">Overall</option>
               <option value="first">First Year</option>
@@ -189,7 +250,7 @@ function AttendanceDashboard() {
             <select 
               className="attendance-filter-select"
               value={selectedGender}
-              onChange={(e) => setSelectedGender(e.target.value)}
+              onChange={handleGenderChange}
             >
               <option value="overall">Overall</option>
               <option value="boys">Boys</option>
@@ -279,7 +340,9 @@ function AttendanceDashboard() {
                 <h3>Vegetarian</h3>
                 <p className="attendance-food-number">{animatedVeg}</p>
                 <p className="attendance-food-percentage">
-                  {((currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)}%
+                  {(currentData.veg_count + currentData.non_veg_count) > 0 
+                    ? ((currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
+                    : '0.0'}%
                 </p>
               </div>
             </div>
@@ -289,7 +352,9 @@ function AttendanceDashboard() {
                 <h3>Non-Vegetarian</h3>
                 <p className="attendance-food-number">{animatedNonVeg}</p>
                 <p className="attendance-food-percentage">
-                  {((currentData.non_veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)}%
+                  {(currentData.veg_count + currentData.non_veg_count) > 0 
+                    ? ((currentData.non_veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
+                    : '0.0'}%
                 </p>
               </div>
             </div>
@@ -409,8 +474,7 @@ function AttendanceDashboard() {
             </div>
           </div>
         )} */}
-      </div>
-    </div>
+      </div>      )}    </div>
   );
 }
 

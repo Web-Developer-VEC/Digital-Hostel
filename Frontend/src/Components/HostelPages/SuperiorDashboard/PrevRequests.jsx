@@ -4,6 +4,7 @@ import './SuperiorRequest.css';
 import HostelSidebar from '../HostelSidebar';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 function PrevRequest() {
   const [records, setRecords] = useState([]);
@@ -68,6 +69,12 @@ function PrevRequest() {
         setWardens(formattedWardens);
       } catch (err) {
         console.error("Error fetching warden data", err);
+        Swal.fire({
+          title: "Error!",
+          text: "❌ Failed to load warden data. Please refresh the page.",
+          icon: "error",
+          showConfirmButton: true
+        });
       }
     };
 
@@ -92,6 +99,12 @@ function PrevRequest() {
       }
     } catch (error) {
       console.error("Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch warden details. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
 
@@ -109,7 +122,7 @@ function PrevRequest() {
     
         const data = await response.json();
     
-        if (data.data) {
+        if (data.data && data.data.length > 0) {
           setRecords(data.data);
           setDepartments([...new Set(data.data.map(pass => pass.dept))]);
           setPassTypes([...new Set(data.data.map(pass => pass.passtype))]);
@@ -118,6 +131,12 @@ function PrevRequest() {
         }
       } catch (error) {
         console.error("Error fetching passes:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "❌ Failed to fetch passes. Please try again.",
+          icon: "error",
+          showConfirmButton: true
+        });
       } finally {
         setLoading(false);
       }
@@ -153,6 +172,108 @@ function PrevRequest() {
       ))
     );
   });
+
+  const handleApprove = async (record, event) => {
+    event.stopPropagation();
+    
+    Swal.fire({
+      title: "Approve Request?",
+      text: `Are you sure you want to approve the request for ${record.name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Approve",
+      cancelButtonText: "Cancel"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.post('/api/approve_pass_request', {
+            pass_id: record.pass_id,
+            approval_status: true
+          });
+
+          if (response.status === 200) {
+            Swal.fire({
+              title: "Success!",
+              text: "✅ Pass request approved successfully.",
+              icon: "success",
+              showConfirmButton: false,
+              timer: 2000
+            });
+            // Refresh the table data
+            setSelectedDate(new Date().toISOString().split('T')[0]);
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "❌ Failed to approve request. Please try again.",
+              icon: "error",
+              showConfirmButton: true
+            });
+          }
+        } catch (error) {
+          console.error("Error approving request:", error);
+          Swal.fire({
+            title: "Error!",
+            text: "❌ An error occurred while approving the request.",
+            icon: "error",
+            showConfirmButton: true
+          });
+        }
+      }
+    });
+  };
+
+  const handleReject = async (record, event) => {
+    event.stopPropagation();
+    
+    Swal.fire({
+      title: "Reject Request?",
+      text: `Are you sure you want to reject the request for ${record.name}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Reject",
+      cancelButtonText: "Cancel"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.post('/api/reject_pass_request', {
+            pass_id: record.pass_id,
+            approval_status: false
+          });
+
+          if (response.status === 200) {
+            Swal.fire({
+              title: "Success!",
+              text: "✅ Pass request rejected successfully.",
+              icon: "success",
+              showConfirmButton: false,
+              timer: 2000
+            });
+            // Refresh the table data
+            setSelectedDate(new Date().toISOString().split('T')[0]);
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "❌ Failed to reject request. Please try again.",
+              icon: "error",
+              showConfirmButton: true
+            });
+          }
+        } catch (error) {
+          console.error("Error rejecting request:", error);
+          Swal.fire({
+            title: "Error!",
+            text: "❌ An error occurred while rejecting the request.",
+            icon: "error",
+            showConfirmButton: true
+          });
+        }
+      }
+    });
+  };
 
   return (
     <div className="AR-app">
@@ -256,7 +377,9 @@ function PrevRequest() {
         </div>
 
         {loading ? (
-          <p>No passes for selected Date</p>
+          <p>⏳ Loading passes for selected date...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="no-records-message">📋 No passes found for the selected date and filters.</p>
         ) : (
           <div className='AR-table-container'>
           <table className="AR-table">
@@ -270,6 +393,7 @@ function PrevRequest() {
                 <th>from Date</th>
                 <th>Warden Approval</th>
                 <th>Parent Approval</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -302,6 +426,49 @@ function PrevRequest() {
                         <span className={`AR-status-circle ${getStatusClass(record.parent_approval)}`}>
                           {record.parent_approval === null ? "Pending" : record.parent_approval ? "Accepted" : "Declined"}
                         </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                          {record.wardern_approval === null && record.superior_wardern_approval === null && (
+                            <>
+                              <button 
+                                onClick={(e) => handleApprove(record, e)}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: '#28a745',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold'
+                                }}
+                                title="Approve request"
+                              >
+                                ✓ Approve
+                              </button>
+                              <button 
+                                onClick={(e) => handleReject(record, e)}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: '#dc3545',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold'
+                                }}
+                                title="Reject request"
+                              >
+                                ✕ Reject
+                              </button>
+                            </>
+                          )}
+                          {(record.wardern_approval !== null || record.superior_wardern_approval !== null) && (
+                            <span style={{ color: '#999', fontSize: '12px' }}>Already Processed</span>
+                          )}
+                        </div>
                       </td>
                   </tr>
                 );
@@ -367,7 +534,21 @@ function DetailModal({ record, onClose }) {
   
   const handleDocumentButtonClick = (e) => {
     e.stopPropagation(); // Prevent click from propagating to overlay
-    setShowDocument(true);
+    Swal.fire({
+      title: "Loading Document...",
+      text: "Please wait while we load the document preview.",
+      icon: "info",
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    setTimeout(() => {
+      setShowDocument(true);
+      Swal.close();
+    }, 1000);
   };
 
   const handleModalClick = (e) => {

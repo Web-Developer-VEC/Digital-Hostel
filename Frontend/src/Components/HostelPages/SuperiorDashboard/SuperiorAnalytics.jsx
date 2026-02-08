@@ -5,6 +5,7 @@ import "react-calendar/dist/Calendar.css"; // Import the calendar styles
 import "./SuperiorAnalytics.css";
 import axios from "axios";
 import { format } from "date-fns";
+import Swal from 'sweetalert2';
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for the donut chart
 
@@ -72,6 +73,12 @@ const Dashboard1 = () => {
           });
         } catch (err) {
           console.error("Error Fetching data", err);
+          Swal.fire({
+            title: "Error!",
+            text: "❌ Failed to fetch analytics data. Please refresh the page.",
+            icon: "error",
+            showConfirmButton: true
+          });
         }
       };
     
@@ -169,6 +176,15 @@ const Dashboard1 = () => {
 
   const handleCardClick = (card) => {
     if (card.title === "Waiting" || card.title === "Overtime") {
+      if (!card.names?.names || card.names.names.length === 0) {
+        Swal.fire({
+          title: "No Data",
+          text: `No students in ${card.title} category.`,
+          icon: "info",
+          showConfirmButton: true
+        });
+        return;
+      }
       setSelectedCard(card);
       setShowNames(true);
     } else {
@@ -191,7 +207,16 @@ const Dashboard1 = () => {
   };
 
   const handlePieClick = async (data) => {
-    if (!data || !data.value) return;
+    if (!data || !data.value) {
+      Swal.fire({
+        title: "No Data",
+        text: "No data available for this section.",
+        icon: "info",
+        showConfirmButton: true
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
   
@@ -231,6 +256,12 @@ const Dashboard1 = () => {
     } catch (error) {
       console.error("Error fetching pass analysis data:", error);
       setError(error.message || "Failed to fetch data. Please try again.");
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch pass analysis data. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
     } finally {
       setIsLoading(false);
     }
@@ -276,6 +307,12 @@ const Dashboard1 = () => {
     } catch (error) {
       console.error("Error fetching pass analysis data:", error);
       setError(error.message || "Failed to fetch data. Please try again.");
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch data for selected date. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
     } finally {
       setIsLoading(false);
     }
@@ -288,18 +325,45 @@ const Dashboard1 = () => {
 
   const handleTotalClick = () => {
     const names = fetchedPassAnalysis?.activePasses?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: "No active passes found.",
+        icon: "info",
+        showConfirmButton: true
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
   
   const handleReturningClick = () => {
     const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: "No returning students found.",
+        icon: "info",
+        showConfirmButton: true
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
   
   const handleOvertimeClick = () => {
     const names = fetchedPassAnalysis?.overduePasses?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: "No overtime students found.",
+        icon: "info",
+        showConfirmButton: true
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
@@ -462,8 +526,8 @@ const Dashboard1 = () => {
             />
           )}
 
-          {isLoading && <p>Loading...</p>}
-          {error && <p className="pl-warden-error">{error}</p>}
+          {isLoading && <p>⏳ Loading data...</p>}
+          {error && <p className="pl-warden-error">❌ {error}</p>}
 
           {!isLoading && !error && (
             <>

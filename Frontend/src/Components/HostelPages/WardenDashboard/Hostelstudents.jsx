@@ -88,6 +88,12 @@ function Hostelstudents() {
         }
       } catch (err) {
         console.error("Error fetching data", err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch student details. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     };
     fetchData();
@@ -105,6 +111,32 @@ function Hostelstudents() {
         return;
     }
 
+    // Confirmation dialog
+    const result = await Swal.fire({
+      title: "Mark as Vacate?",
+      text: `Are you sure you want to mark ${student.name} as vacated?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Mark Vacate",
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
+    }
+
+    // Show loading state
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Marking student as vacated...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
         const response = await axios.post(
             "/api/mark_student_vacate",
@@ -113,22 +145,24 @@ function Hostelstudents() {
         );
 
         if (response.status === 200) {
-            // showSweetAlert("Vacate Status", response.data.message, "success");
             Swal.fire({
-              title: "Vacate Status",
-              text: `response.data.message`,
+              title: "Success! ✅",
+              text: response.data.message || "Student marked as vacated successfully.",
               icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-              willClose: () => {
-                Swal.close(); // Close the alert
-                window.location.reload(); // Reload the page
-              },
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.reload();
             });
         }
     } catch (error) {
         console.error("Error Fetching Data:", error);
-        showSweetAlert("Vacate Status", "Student not marked for vacating", "error");
+        Swal.fire({
+          title: "Error ❌",
+          text: error.response?.data?.message || "Failed to mark student as vacated. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
     }
 };
 
@@ -143,6 +177,12 @@ function Hostelstudents() {
         }
         catch (err) {
           console.error("Failed to fetch",err);
+          Swal.fire({
+            title: "Error ❌",
+            text: "Failed to fetch year data. Some filters may not work properly.",
+            icon: "error",
+            confirmButtonText: "OK"
+          });
         }
       }
       fetchData();
@@ -197,11 +237,33 @@ function Hostelstudents() {
     const student = studentsData?.find(s => s.id === studentId);
     if (!student) return;
   
-    const isConfirmed = window.confirm("Are you sure you want to change the food type?");
-    if (!isConfirmed) {
-      alert("Food type change was canceled by the user.");
-      return;
+    // Confirmation dialog
+    const result = await Swal.fire({
+      title: "Change Food Type?",
+      html: `Are you sure you want to change the food type for <strong>${student.name}</strong>?<br/><br/>
+             <span style="color: ${student.foodType === 'Vegetarian' ? '#10b981' : '#ef4444'}">${student.foodType}</span> → 
+             <span style="color: ${newFoodType === 'Vegetarian' ? '#10b981' : '#ef4444'}">${newFoodType}</span>`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Change",
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
     }
+
+    // Show loading state
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Updating food type...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const response = await axios.post('/api/warden_change_foodtype', 
@@ -209,21 +271,32 @@ function Hostelstudents() {
         { withCredentials: true } 
       );
   
-      setStudentData(prev => prev?.map(student => 
-        student.id === studentId
-          ? { ...student, foodType: newFoodType }
-          : student
-      ));
-      
-      setEditingStates(prev => ({ ...prev, [studentId]: false }));
-      setTempFoodTypes(prev => ({ ...prev, [studentId]: null }));
-
-      window.location.reload();
+      Swal.fire({
+        title: "Success! ✅",
+        text: "Food type updated successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        setStudentData(prev => prev?.map(student => 
+          student.id === studentId
+            ? { ...student, foodType: newFoodType }
+            : student
+        ));
+        
+        setEditingStates(prev => ({ ...prev, [studentId]: false }));
+        setTempFoodTypes(prev => ({ ...prev, [studentId]: null }));
+        window.location.reload();
+      });
   
     } catch (error) {
-      // Handle error and notify user
       console.error("Error updating food type:", error);
-      alert("Failed to update food type. Please try again later.");
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "Failed to update food type. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 
@@ -242,16 +315,46 @@ function Hostelstudents() {
   
   const saveRoomNumber = async (studentId) => {
     const newRoomNumber = tempRoomNumbers[studentId];
-    if (!newRoomNumber) return;
+    if (!newRoomNumber) {
+      Swal.fire({
+        title: "Invalid Input",
+        text: "Please enter a valid room number.",
+        icon: "warning",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
     
     const student = studentsData?.find(s => s.id === studentId);
     if (!student) return;
   
-    const isConfirmed = window.confirm("Are you sure you want to change the room number?");
-    if (!isConfirmed) {
-      alert("Room number change was canceled by the user.");
-      return;
+    // Confirmation dialog
+    const result = await Swal.fire({
+      title: "Change Room Number?",
+      html: `Are you sure you want to change the room number for <strong>${student.name}</strong>?<br/><br/>
+             <span style="font-weight: bold">${student.roomNumber}</span> → 
+             <span style="font-weight: bold">${newRoomNumber}</span>`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Change",
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
     }
+
+    // Show loading state
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Updating room number...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const response = await axios.post('/api/edit_student_room_number', 
@@ -262,25 +365,31 @@ function Hostelstudents() {
         { withCredentials: true } 
       );
   
-      // if (response.ok) {
+      Swal.fire({
+        title: "Success! ✅",
+        text: "Room number updated successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
         setStudentData(prev => prev?.map(student => 
           student.id === studentId
             ? { ...student, roomNumber: newRoomNumber }
             : student
         ));
         
-        // Reset editing states
         setEditingRoomStates(prev => ({ ...prev, [studentId]: false }));
         setTempRoomNumbers(prev => ({ ...prev, [studentId]: null }));
-  
-        alert("Room number updated successfully!");
         window.location.reload();
-      // } else {
-        // throw new Error(response.data.error || "Failed to update room number");
-      // }
+      });
     } catch (error) {
       console.error("Error updating room number:", error);
-      alert(error.message || "Failed to update room number. Please try again later.");
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "Failed to update room number. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
   

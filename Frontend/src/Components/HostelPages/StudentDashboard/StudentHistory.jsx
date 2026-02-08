@@ -3,6 +3,7 @@ import './StudentHistory.css';
 import { X, History, Download, Calendar, MapPin, FileText, LogOut, LogIn, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const StudentHistory = () => {
   const [history, setHistory] = useState([]);
@@ -57,7 +58,15 @@ const StudentHistory = () => {
         setHistory(formattedHistory);
         setLoading(false);
       } catch (error) {
-        // setError("Failed to fetch student passes.");
+        console.error("Error fetching passes:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to fetch student passes. Please try again.",
+          icon: "error",
+          showConfirmButton: true,
+          timer: 4000
+        });
+        setError("Failed to fetch student passes.");
         setLoading(false);
       }
     };
@@ -81,17 +90,47 @@ const StudentHistory = () => {
 
   const handleEditClick = (passid, event) => {
     event.stopPropagation();
-    navigate('/hostel/student/request', { state: { passid } })
+    Swal.fire({
+      title: "Edit Pass Request?",
+      text: "You are about to edit this pass request. Continue?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Edit",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        navigate('/hostel/student/request', { state: { passid } });
+      }
+    });
   }
 
   const downloadImage = (imageUrl, fileName) => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.setAttribute('download', fileName);
-    link.setAttribute('target', '_blank');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.setAttribute('download', fileName);
+      link.setAttribute('target', '_blank');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      Swal.fire({
+        title: "Success!",
+        text: "✅ QR Code downloaded successfully.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 2000
+      });
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to download QR Code. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
+    }
   };
 
   const formatDate = (dateString) => {
@@ -142,11 +181,11 @@ const StudentHistory = () => {
       </div>
 
       {loading ? (
-        <p className="loading-message">Loading student passes...</p>
+        <p className="loading-message">⏳ Loading student passes...</p>
       ) : error ? (
-        <p className="error-message">{error}</p>
+        <p className="error-message">❌ {error}</p>
       ) : history.length === 0 ? (
-        <p className="no-data-message">No passes found. Create a new pass request to get started.</p>
+        <p className="no-data-message">📋 No passes found. Create a new pass request to get started.</p>
       ) : (
         <div className="student-history-cards">
           {filteredHistory.map((val) => (

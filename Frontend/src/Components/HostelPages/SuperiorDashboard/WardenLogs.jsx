@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./WardenLogs.css";
+import Swal from 'sweetalert2';
 
 const WardenLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -18,12 +19,24 @@ const WardenLogs = () => {
     const fetchLogs = async () => {
       try {
         const response = await fetch("/api/fetch_logs");
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch logs");
+        }
+        
         const data = await response.json();
         setLogs(data.logs);
         setLoading(false);
       } catch (err) {
+        console.error("Error fetching logs:", err);
         setError("Failed to fetch logs");
         setLoading(false);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch warden logs. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     };
     fetchLogs();
@@ -96,8 +109,8 @@ const WardenLogs = () => {
     }, {});
   }, [searchQuery, deactivatedDateFilter, selectedFilter, groupedData, currentMonthYear]);
 
-  if (loading) return <p>Loading logs...</p>;
-  if (error) return <p className="error">{error}</p>;
+  if (loading) return <div className="HOS-W-warden-logs-container"><p className="HOS-W-loading-message">⏳ Loading warden logs...</p></div>;
+  if (error) return <div className="HOS-W-warden-logs-container"><p className="error">❌ {error}</p></div>;
 
   return (
     <div className="HOS-W-warden-logs-container">
@@ -132,7 +145,7 @@ const WardenLogs = () => {
 
       {/* Display Logs */}
       {Object.keys(filteredData).length === 0 ? (
-        <p>No logs found for this filter/search.</p>
+        <p className="HOS-W-no-logs-message">📋 No logs found for the selected filters. Try adjusting your search or filter criteria.</p>
       ) : (
         Object.keys(filteredData).map((monthYear) => (
           <div key={monthYear} className="HOS-W-month-section">

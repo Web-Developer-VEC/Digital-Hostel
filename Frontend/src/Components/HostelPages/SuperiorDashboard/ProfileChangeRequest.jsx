@@ -24,6 +24,12 @@ function SuperiorRequest() {
       }
     } catch (error) {
       console.error("❌ Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to fetch warden details. Please refresh the page.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
 
@@ -33,12 +39,20 @@ function SuperiorRequest() {
     try {
       const response = await fetch('/api/profile_request_changes');
       const data = await response.json();
-      if (data.requests) {
+      if (data.requests && data.requests.length > 0) {
         setRecords(data.requests);
         setDepartments([...new Set(data.requests.map(req => req.department))]);
+      } else {
+        setRecords([]);
       }
     } catch (error) {
-      console.error("❌ Error fetching food requests:", error);
+      console.error("❌ Error fetching profile change requests:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ Failed to load profile change requests. Please try again.",
+        icon: "error",
+        showConfirmButton: true
+      });
     } finally {
       setLoading(false);
     }
@@ -66,8 +80,8 @@ function SuperiorRequest() {
       if (response.ok) {
         setRecords(records.filter(record => record.registration_number !== registration_number));
         Swal.fire({
-          title: "Updated Successful",
-          text: "Profile request Updated ",
+          title: "Success!",
+          text: `✅ Profile request ${action === 'approve' ? 'approved' : 'declined'} successfully.`,
           icon: "success",
           timer: 2000,
           showConfirmButton: false,
@@ -76,9 +90,22 @@ function SuperiorRequest() {
           },
         });
         setSelectedRecord(null);
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: `❌ Failed to ${action} the request. Please try again.`,
+          icon: "error",
+          showConfirmButton: true
+        });
       }
     } catch (error) {
       console.error(`❌ Error processing ${action} request:`, error);
+      Swal.fire({
+        title: "Error!",
+        text: "❌ An error occurred while processing the request.",
+        icon: "error",
+        showConfirmButton: true
+      });
     }
   };
 
@@ -153,7 +180,9 @@ function SuperiorRequest() {
 
         {/* Table */}
         {loading ? (
-          <p>Loading...</p>
+          <p className="loading-message">⏳ Loading profile change requests...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="no-records-message">📋 No profile change requests found.</p>
         ) : (
           <table className="VR-table">
             <thead>
@@ -285,10 +314,46 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
 
           {/* Action Buttons */}
           <div className="SR-modal-footer">
-            <button onClick={onDecline} className="SR-button SR-button-secondary">
+            <button 
+              onClick={() => {
+                Swal.fire({
+                  title: "Decline Request?",
+                  text: `Are you sure you want to decline this profile change request for ${record.from_data.name}?`,
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#dc3545",
+                  cancelButtonColor: "#6c757d",
+                  confirmButtonText: "Yes, Decline",
+                  cancelButtonText: "Cancel"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    onDecline();
+                  }
+                });
+              }} 
+              className="SR-button SR-button-secondary"
+            >
               Decline
             </button>
-            <button onClick={onAccept} className="SR-button SR-button-primary">
+            <button 
+              onClick={() => {
+                Swal.fire({
+                  title: "Accept Request?",
+                  text: `Are you sure you want to accept this profile change request for ${record.from_data.name}?`,
+                  icon: "question",
+                  showCancelButton: true,
+                  confirmButtonColor: "#28a745",
+                  cancelButtonColor: "#6c757d",
+                  confirmButtonText: "Yes, Accept",
+                  cancelButtonText: "Cancel"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    onAccept();
+                  }
+                });
+              }} 
+              className="SR-button SR-button-primary"
+            >
               Accept
             </button>
           </div>

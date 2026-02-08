@@ -3,6 +3,7 @@ import { Search, X, FileText } from 'lucide-react';
 import './WardenRequest.css';
 import HostelSidebar from '../HostelSidebar';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function WardenRequest() {
   const [records, setRecords] = useState([]);
@@ -53,6 +54,12 @@ function WardenRequest() {
       }
     } catch (error) {
       console.error("Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch warden details. Some filters may not work properly.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 
@@ -68,6 +75,12 @@ function WardenRequest() {
       }
     } catch (error) {
       console.error("Error fetching passes:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch pending passes. Please refresh the page.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
@@ -75,6 +88,16 @@ function WardenRequest() {
 
   const handleAccept = async (pass_id, medical_status, comment) => {
     console.log("🔵 Sending Accept request for pass_id:", pass_id, "Medical:", medical_status , "comment:",comment);
+
+    // Show loading alert
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Accepting pass request...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const token = localStorage.getItem("authToken");
@@ -95,21 +118,50 @@ function WardenRequest() {
   
       if (response.ok) {
         console.log("✅ Pass accepted successfully:", responseData);
-        setRecords(records.filter(record => record.pass_id !== pass_id)); 
-        setSelectedRecord(null); // Close the modal
+        Swal.fire({
+          title: "Success! ✅",
+          text: "Pass request accepted successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setRecords(records.filter(record => record.pass_id !== pass_id)); 
+          setSelectedRecord(null); // Close the modal
+        });
       } else {
         console.error("❌ API Error:", responseData);
-        alert(responseData.error || "Failed to accept pass."); // Show error message to the user
+        Swal.fire({
+          title: "Error ❌",
+          text: responseData.error || "Failed to accept pass request.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error) {
       console.error("❌ Network error accepting pass:", error);
-      alert("An error occurred while accepting the pass."); // Show generic error message
+      Swal.fire({
+        title: "Error ❌",
+        text: "An error occurred while accepting the pass. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
   
   
   const handleDecline = async (pass_id, medical_status) => {
     console.log("🔴 Decline button clicked for pass_id:", pass_id, "Medical:", medical_status);
+
+    // Show loading alert
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Declining pass request...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await fetch('/api/warden_not_accept', {
         method: 'POST',
@@ -119,13 +171,34 @@ function WardenRequest() {
   
       if (response.ok) {
         console.log("✅ Pass declined successfully");
-        setRecords(records.filter(record => record.pass_id !== pass_id));
-        setSelectedRecord(null);
+        Swal.fire({
+          title: "Declined ✅",
+          text: "Pass request declined successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setRecords(records.filter(record => record.pass_id !== pass_id));
+          setSelectedRecord(null);
+        });
       } else {
+        const errorData = await response.json();
         console.error("❌ Error declining pass:", response.statusText);
+        Swal.fire({
+          title: "Error ❌",
+          text: errorData.message || "Failed to decline pass request.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error) {
       console.error("❌ Network error declining pass:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "An error occurred while declining the pass. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
   
@@ -216,7 +289,9 @@ function WardenRequest() {
         </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <p className="AR-loading-message">⏳ Loading pending pass requests...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="AR-no-data-message">📋 No pending pass requests found.</p>
         ) : (
           <div className='AR-table-container'>
 
@@ -334,7 +409,30 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
 
   const handleDocumentButtonClick = (e) => {
     e.stopPropagation(); // Prevent click from propagating to overlay
-    setShowDocument(true);
+    
+    if (!record.file_path) {
+      Swal.fire({
+        title: "No Document",
+        text: "No document is attached to this request.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    
+    // Show loading message
+    Swal.fire({
+      title: "Loading Document ⏳",
+      text: "Please wait...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      timer: 1000,
+      showConfirmButton: false
+    }).then(() => {
+      setShowDocument(true);
+    });
   };
 
   const handleModalClick = (e) => {

@@ -45,10 +45,10 @@ function HostelPass() {
 
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-                Swal.fire({
+        Swal.fire({
           title: "Error",
           text: "❌ File size exceed 10mb limit",
-          icon: "Error",
+          icon: "error",
           showConfirmButton: false,
           timer: 1500, // Auto-close in 1.5 sec
           didClose: () => {
@@ -130,7 +130,7 @@ function HostelPass() {
       //  return;
     }
     else if ((selectedFromDate !== outPasstoDate) && passType==="outpass" ) {
-      alert("Date should match the 'From' date");
+      showSweetAlert("Alert!", "Date should match the 'From' date", "warning");
       setSelectedFromDateTime("")
       // return;
     }else if (passType !== "outpass"){
@@ -142,7 +142,7 @@ function HostelPass() {
     
     
       if (passType === "staypass" && (toDate < fromDate)) {
-        alert("End date & time must be greater than start date & time.");
+        showSweetAlert("Alert!", "End date & time must be greater than start date & time.", "warning");
         setFrom("");
         setTo("");
       }
@@ -226,7 +226,7 @@ function HostelPass() {
 // Handle update pass
 const handleUpdatePass = async () => {
   if (!phone_number_student) {
-    alert("Please verify your mobile number first.");
+    showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
     return;
   }
 
@@ -297,7 +297,7 @@ const handleUpdatePass = async () => {
   //verify details from mobile number
   const handleVerify = async () => {
     if (!phone_number_student) {
-      alert("Please enter a mobile number.");
+      showSweetAlert("Alert!", "Please enter a mobile number.", "warning");
       return;
     }
   
@@ -323,14 +323,14 @@ const handleUpdatePass = async () => {
       }
     } catch (error) {
       console.error("❌ Error fetching data:", error);
-      alert("Error verifying student. Try again.");
+      showSweetAlert("Error!", "Error verifying student. Please try again.", "error");
     }
   };
 
   //send data for parent request
   const handleParentApproval = async () => {
     if (!phone_number_student) {
-      alert("Please verify your mobile number first.");
+      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       return;
     }
   
@@ -389,7 +389,7 @@ const handleUpdatePass = async () => {
   //Warden approval
   const handleWardenApproval = async () => {
     if (!phone_number_student) {
-      alert("Please verify your mobile number first.");
+      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       
     
       return;
@@ -457,7 +457,7 @@ const handleUpdatePass = async () => {
   //superior warden approval
   const handleSuperiorWardenApproval = async () => {
     if (!phone_number_student) {
-      alert("Please verify your mobile number first.");
+      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       return;
     }
   
@@ -522,7 +522,7 @@ const handleUpdatePass = async () => {
   //save draft
   const handleSaveDraft = async () => {
     if (!phone_number_student) {
-      alert("Please verify your mobile number first.");
+      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       return;
     }
   

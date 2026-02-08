@@ -5,6 +5,7 @@ import "react-calendar/dist/Calendar.css"; // Import the calendar styles
 import { format } from "date-fns";
 import "./WardenAnalytics.css";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for the donut chart
 
@@ -86,6 +87,12 @@ const Dashboard = () => {
         setFetchData(fetchedData?.data);
       } catch (err) {
         console.error("Error Fetching data",err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch pass analytics data. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     }
     fetchData();
@@ -149,13 +156,31 @@ const Dashboard = () => {
   };
 
   const handlePieClick = async (data) => {
-    if (!data || !data.value) return;
+    if (!data || !data.value) {
+      Swal.fire({
+        title: "No Data 📋",
+        text: "No data available for this pass type.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
 
     console.log("Type",data.name.trim().toLowerCase().replace(/\s+/g, ''));
     console.log("year",selectedYear);
-    
+
+    // Show loading alert
+    Swal.fire({
+      title: "Loading ⏳",
+      text: "Fetching pass analysis data...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
     
   
     try {
@@ -165,6 +190,7 @@ const Dashboard = () => {
       }, { withCredentials: true });
   
       if (response.status === 200) {
+        Swal.close(); // Close loading alert
         const fetchedData = response.data;
         setFetchedPassAnalysis(fetchedData);
   
@@ -188,6 +214,12 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching pass analysis data:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "Failed to fetch pass analysis data. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
       setError(error.message || "Failed to fetch data. Please try again.");
     } finally {
       setIsLoading(false);
@@ -202,6 +234,16 @@ const Dashboard = () => {
   
     setIsLoading(true);
     setError(null);
+
+    // Show loading alert
+    Swal.fire({
+      title: "Loading ⏳",
+      text: "Fetching data for selected date...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const response = await axios.post('/api/pass_analysis_by_date_warden', {
@@ -211,6 +253,7 @@ const Dashboard = () => {
       }, { withCredentials: true });
   
       if (response.status === 200) {
+        Swal.close(); // Close loading alert
         const fetchedData = response.data;
         
         setFetchedPassAnalysis(fetchedData);
@@ -231,6 +274,12 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching pass analysis data:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "Failed to fetch data for the selected date. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
       setError(error.message || "Failed to fetch data. Please try again.");
     } finally {
       setIsLoading(false);
@@ -244,18 +293,45 @@ const Dashboard = () => {
 
   const handleTotalClick = () => {
     const names = fetchedPassAnalysis?.activePasses?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data 📋",
+        text: "No students found in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
   
   const handleReturningClick = () => {
     const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data 📋",
+        text: "No students found in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
   
   const handleOvertimeClick = () => {
     const names = fetchedPassAnalysis?.overduePasses?.names || [];
+    if (names.length === 0) {
+      Swal.fire({
+        title: "No Data 📋",
+        text: "No students found in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
     setNameListData(names);
     setShowNameList(true);
   };
