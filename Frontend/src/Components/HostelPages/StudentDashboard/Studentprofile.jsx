@@ -279,28 +279,25 @@ function Studentprofile() {
           </div>
 
           {isWaitingApproval && pendingChanges && pendingChanges.length > 0 && (
-          <div className="student-pending-changes">
-            <h3>Pending Changes</h3>
-            <div className="pending-changes-grid">
-              {pendingChanges.map((change, index) => {
-                // Splitting based on ": " to extract field name and new value
-                const [field, value] = change.split(/:\s(.+)/); 
+            <div className="student-pending-changes">
+              <h3>Pending Changes</h3>
+              <div className="pending-changes-grid">
+                {pendingChanges.map((change, index) => {
+                  // Splitting based on ": " to extract field name and new value
+                  const [field, value] = change.split(/:\s(.+)/); 
 
-                return (
-                  <div key={index} className="pending-change-item">
-                    <div className="pending-field">{field?.replace(/_/g, " ") || "Unknown Field"}</div>
-                    <div className="pending-new-value">{value || "No Value"}</div>
-                  </div>
-                );
-              })}
-    </div>
-  </div>
-)}
-
-
-
-
-<div className="student-actions">
+                  return (
+                    <div key={index} className="pending-change-item">
+                      <div className="pending-field">{field?.replace(/_/g, " ") || "Unknown Field"}</div>
+                      <div className="pending-new-value">{value || "No Value"}</div>
+                    </div>
+                  );
+                })}
+                </div>
+              </div>
+            )}
+          
+          <div className="student-actions">
             {isEditing ? (
               <button
                 onClick={handleRequestChange}

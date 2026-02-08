@@ -564,15 +564,15 @@ export default function SecurityCheckout() {
                   handlePassAction("accept");
                   setShowPopup(false);
                 }}>
-                  Re Entry Confirmed
+                  Check In
                 </button>
               ) : (
                 <>
-                <button className="reject-button" onClick={() => handlePassAction("decline")}>
+                {/* <button className="reject-button" onClick={() => handlePassAction("decline")}>
                   Reject
-                </button>
+                </button> */}
                 <button className="accept-button" onClick={() => handlePassAction("accept")}>
-                  Accept
+                  Check Out
                 </button>
                 <button className="print-button" onClick={handlePrint}>
                   <Printer size={16} />

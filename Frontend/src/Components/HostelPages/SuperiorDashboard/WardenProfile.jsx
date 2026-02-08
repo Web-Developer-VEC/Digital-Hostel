@@ -79,6 +79,12 @@ const WardenProfile = () => {
         
       } catch (err) {
         console.error("Error fetching warden data", err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch warden details. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     };
 
@@ -91,30 +97,51 @@ const WardenProfile = () => {
 
     if (!warden) return;
   
-    const newStatus = warden.isActive; 
+    const newStatus = warden.isActive;
+
+    // Show loading alert
+    Swal.fire({
+      title: "Processing ⏳",
+      text: `${newStatus ? 'Deactivating' : 'Activating'} warden...`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
     
-    if (newStatus) {
-      for (const year of primaryYears) {
-        try {
+    try {
+      if (newStatus) {
+        for (const year of primaryYears) {
           await axios.post("/api/warden_inactive_status_handling", {
             warden_name: selectedReallocations[year],
             inactive_warden_id: id,
             year: parseInt(year),
           });
-        } catch (error) {
-          console.error(`Failed to update status for year ${year}:`, error);
         }
-      }
-    } else {
-      try {
+      } else {
         await axios.post('/api/warden_active_status_handling', {
           warden_id: id
-        })
-      } catch (error) {
-        console.error("Error activating the warden",error);
+        });
       }
+      
+      Swal.fire({
+        title: "Success! ✅",
+        text: `Warden ${newStatus ? 'deactivated' : 'activated'} successfully.`,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Error updating warden status:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to update warden status. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
-    window.location.reload();
   };
 
   // Handle image change
@@ -175,6 +202,27 @@ const WardenProfile = () => {
   const handleAddWardenSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
+    if (!newWarden.name || !newWarden.phone_number || !newWarden.password || !newWarden.joinedDate) {
+      Swal.fire({
+        title: "Missing Information",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+
+    if (newWarden.primaryWarden.length === 0) {
+      Swal.fire({
+        title: "Missing Information",
+        text: "Please select at least one year for the warden.",
+        icon: "warning",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+
     const primaryYearArray = newWarden.primaryWarden.map(year => parseInt(year, 10));
 
     const formData = new FormData();
@@ -190,6 +238,16 @@ const WardenProfile = () => {
         formData.append("wardenImage", newWarden.file);
     }
 
+    // Show loading alert
+    Swal.fire({
+      title: "Adding Warden ⏳",
+      text: "Please wait...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
         const token = localStorage.getItem("authToken");
         const response = await axios.post("/api/add_warden", formData, {
@@ -201,15 +259,12 @@ const WardenProfile = () => {
 
         if (response.status === 201) {
           Swal.fire({
-            title: "Successful",
-            text: "Warden Added Successfully",
+            title: "Success! ✅",
+            text: "Warden added successfully.",
             icon: "success",
             timer: 2000,
-            showConfirmButton: false,
-            willClose: () => {
-              Swal.close();
-            },
-          });
+            showConfirmButton: false
+          }).then(() => {
             setIsAddModalOpen(false);
             setNewWarden({
                 name: "",
@@ -220,20 +275,40 @@ const WardenProfile = () => {
                 password: "",
                 joinedDate: "",
             });
-            // Optionally, refresh the warden list
             window.location.reload();
+          });
         } else {
-            alert("Failed to add warden.");
+          Swal.fire({
+            title: "Error ❌",
+            text: "Failed to add warden. Please try again.",
+            icon: "error",
+            confirmButtonText: "OK"
+          });
         }
     } catch (error) {
         console.error("Error adding warden", error);
-        alert("An error occurred while adding the warden.");
+        Swal.fire({
+          title: "Error ❌",
+          text: error.response?.data?.message || "An error occurred while adding the warden.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
     }
 };
 
   // delete a warden
   const handleDelete = async (registration_number) => {
     console.log(pendingToggleId);
+
+    // Show loading alert
+    Swal.fire({
+      title: "Deleting Warden ⏳",
+      text: "Please wait...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
     
     try {
       const response = await fetch("/api/delete_student", {
@@ -246,16 +321,22 @@ const WardenProfile = () => {
       });
   
       if (response.ok) {
-        showSweetAlert("Success!", "Warden data deleted successfully.", "success");
+        Swal.fire({
+          title: "Success! ✅",
+          text: "Warden data deleted successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.reload();
+        });
       } else {
-        showSweetAlert("Error","Error Deleting The Warden try Again Later",'error');
-
+        showSweetAlert("Error","Failed to delete warden. Please try again later.",'error');
       }
     } catch (error) {
       console.error("❌ Error deleting warden:", error);
-      alert("Error deleting warden. Try again.");
+      showSweetAlert("Error","Error deleting warden. Please try again.",'error');
     }
-    window.location.reload();
   };
 
   // Save edited warden details
@@ -284,9 +365,24 @@ const WardenProfile = () => {
     }
   
     if (Object.keys(updateFields).length === 0) {
-      alert("No changes detected.");
+      Swal.fire({
+        title: "No Changes",
+        text: "No changes detected to save.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
       return;
     }
+
+    // Show loading alert
+    Swal.fire({
+      title: "Saving Changes ⏳",
+      text: "Updating warden profile...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const formData = new FormData();
@@ -312,16 +408,31 @@ const WardenProfile = () => {
       });
   
       if (response.status === 200) {
-        // alert("Warden details updated successfully!");
-        showSweetAlert("Success","Warden Details Updated Successfully","success");
-        window.location.reload(); // Refresh to show updated details
+        Swal.fire({
+          title: "Success! ✅",
+          text: "Warden details updated successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.reload();
+        });
       } else {
-        // alert("Failed to update warden details.");
-        showSweetAlert("Error","Failed to Update The warden Profile","error")
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to update warden details.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error) {
       console.error("Error updating warden details", error);
-      showSweetAlert('Error','An error occurred while updating the warden details.','error');
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "An error occurred while updating the warden details.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   
     setIsEditing(false);
@@ -337,6 +448,12 @@ const WardenProfile = () => {
       setPrimaryYears(response.data.primary_years);
     } catch (error) {
       console.error("Error fetching reallocation wardens", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch reallocation options. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   }
 

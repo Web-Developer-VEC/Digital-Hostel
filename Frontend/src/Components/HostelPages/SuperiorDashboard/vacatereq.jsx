@@ -3,6 +3,7 @@ import { Search, X } from 'lucide-react';
 import './SuperiorRequest.css';
 import HostelSidebar from '../HostelSidebar';
 import showSweetAlert from '../Alert';
+import Swal from 'sweetalert2';
 
 function VacateReq() {
   const [records, setRecords] = useState([]);
@@ -41,6 +42,12 @@ function VacateReq() {
         }
       } catch (error) {
         console.error('Error fetching vacate forms:', error);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch vacate forms. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       } finally {
         setLoading(false);
       }
@@ -126,7 +133,9 @@ function VacateReq() {
 
         {/* Table Section */}
         {loading ? (
-          <p>Loading...</p>
+          <p className="AR-loading-message">⏳ Loading vacate forms...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="AR-no-data-message">📋 No vacate form requests found.</p>
         ) : (
           <div className='AR-table-container'>
           <table className="AR-table">
@@ -174,6 +183,33 @@ function VacateReq() {
 function DetailModal({ record, onClose }) {
 
   const handleAction = async (action) => {
+    // Confirmation dialog before action
+    const actionText = action === 'approve' ? 'approve' : 'decline';
+    const result = await Swal.fire({
+      title: `${action === 'approve' ? 'Approve' : 'Decline'} Vacate Request?`,
+      text: `Are you sure you want to ${actionText} the vacate request for ${record.name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: action === 'approve' ? "#28a745" : "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: `Yes, ${action === 'approve' ? 'Approve' : 'Decline'}`,
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
+    }
+
+    // Show loading state
+    Swal.fire({
+      title: "Processing ⏳",
+      text: `${action === 'approve' ? 'Approving' : 'Declining'} vacate request...`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await fetch('/api/archive_student', {
         method: 'POST',
@@ -181,10 +217,34 @@ function DetailModal({ record, onClose }) {
         body: JSON.stringify({ student_id: record.registration_number, action: action }),
       });
       const data = await response.json();
-      showSweetAlert("Success",`${data.message}`,'success');
       
+      if (response.ok) {
+        Swal.fire({
+          title: "Success! ✅",
+          text: data.message || `Vacate request ${action === 'approve' ? 'approved' : 'declined'} successfully.`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          onClose();
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          title: "Error ❌",
+          text: data.message || `Failed to ${actionText} vacate request.`,
+          icon: "error",
+          confirmButtonText: "OK"
+        });
+      }
     } catch (error) {
       console.error("Error handling request:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to process vacate request. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 

@@ -144,7 +144,7 @@ function LoginForm() {
         if (data.error === "User Not Found") {
           Swal.fire({
             title: "User Not Found",
-            text: "The provided username or ID does not exist in our system.",
+            text: "The provided Registration Number or ID does not exist in our system.",
             icon: "warning",
             confirmButtonText: "Try Again",
           });
@@ -208,12 +208,12 @@ function LoginForm() {
         </motion.div>
 
         <motion.div className="HL-form-group" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-          <label htmlFor="username" className="HL-form-label">Username or ID</label>
+          <label htmlFor="username" className="HL-form-label">{type === 'student' ? 'Registration Number' : 'ID'}</label>
           <input
             id="username"
             type="text"
             name="registration_number"
-            placeholder="Enter your username or ID"
+            placeholder="Enter your registration number or ID"
             value={registration_number}
             onChange={(e) => setRegistrationNumber(e.target.value)}
             required

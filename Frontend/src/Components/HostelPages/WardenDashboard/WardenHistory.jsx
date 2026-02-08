@@ -3,6 +3,7 @@ import { Search, X, FileText, Filter } from 'lucide-react';
 import './WardenRequest.css';
 import HostelSidebar from '../HostelSidebar';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function WardenHistory() {
   const [records, setRecords] = useState([]);
@@ -65,6 +66,12 @@ function WardenHistory() {
       }
     } catch (error) {
       console.error("Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch warden details. Some filters may not work properly.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 
@@ -92,6 +99,12 @@ function WardenHistory() {
         }
       } catch (error) {
         console.error("Error fetching passes:", error);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch pass history. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       } finally {
         setLoading(false);
       }
@@ -202,7 +215,9 @@ function WardenHistory() {
         </div>
 
         {loading ? (
-          <p>No passes for selected Date</p>
+          <p className="AR-loading-message">⏳ Loading pass history...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="AR-no-data-message">📋 No pass requests found for the selected date and filters.</p>
         ) : (
           <div className='AR-table-container'>
           <table className="AR-table">
@@ -318,7 +333,30 @@ function DetailModal({ record, onClose }) {
   
   const handleDocumentButtonClick = (e) => {
     e.stopPropagation(); // Prevent click from propagating to overlay
-    setShowDocument(true);
+    
+    if (!record.file_path) {
+      Swal.fire({
+        title: "No Document",
+        text: "No document is attached to this request.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    
+    // Show loading message
+    Swal.fire({
+      title: "Loading Document ⏳",
+      text: "Please wait...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      timer: 1000,
+      showConfirmButton: false
+    }).then(() => {
+      setShowDocument(true);
+    });
   };
 
   const handleModalClick = (e) => {

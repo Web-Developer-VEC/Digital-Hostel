@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./forget-password.css";
+import Swal from 'sweetalert2';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -17,6 +18,16 @@ export default function ForgotPassword() {
     setError("");
     setIsSubmitting(true);
 
+      // Show loading state
+      Swal.fire({
+        title: "Sending OTP ⏳",
+        text: "Please wait while we send the OTP...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
     try {
       const response = await fetch("/api/send_otp", {
         method: "POST",
@@ -29,17 +40,31 @@ export default function ForgotPassword() {
 
       if (!response.ok) {
         console.log("error",response.error);
-        throw new Error("Failed to send OTP. Please try again.");
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to send OTP. Please try again.");
         
       }
 
       const data = await response.json();
-      setSuccessMessage(data.message);
       console.log(data.message);
-      
-      setStep(2); // Move to OTP validation step
+
+        // Close loading and show success
+        Swal.fire({
+          title: "OTP Sent! ✅",
+          text: data.message || "OTP has been sent to your registered phone number.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setStep(2); // Move to OTP validation step
+        });
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+        Swal.fire({
+          title: "Error! ❌",
+          text: err.message || "Something went wrong. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
     } finally {
       setIsSubmitting(false);
     }
@@ -49,6 +74,16 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
+
+      // Show loading state
+      Swal.fire({
+        title: "Validating OTP ⏳",
+        text: "Please wait while we verify your OTP...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
     try {
       const response = await fetch("/api/otp_validation", {
@@ -61,14 +96,29 @@ export default function ForgotPassword() {
       });
 
       if (!response.ok) {
-        throw new Error("Invalid OTP or OTP expired.");
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Invalid OTP or OTP expired.");
       }
 
       const data = await response.json();
-      setSuccessMessage(data.message);
-      setStep(3); // Move to set new password step
+      
+        // Close loading and show success
+        Swal.fire({
+          title: "OTP Verified! ✅",
+          text: data.message || "OTP verified successfully. You can now set a new password.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setStep(3); // Move to set new password step
+        });
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+        Swal.fire({
+          title: "Error! ❌",
+          text: err.message || "Something went wrong. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
     } finally {
       setIsSubmitting(false);
     }
@@ -79,11 +129,26 @@ export default function ForgotPassword() {
     setError("");
 
     if (!newPassword || newPassword.length < 4) {
-      setError("Password must be at least 4 characters long.");
+        Swal.fire({
+          title: "Invalid Password! ⚠️",
+          text: "Password must be at least 4 characters long.",
+          icon: "warning",
+          confirmButtonText: "OK"
+        });
       return;
     }
 
     setIsSubmitting(true);
+
+      // Show loading state
+      Swal.fire({
+        title: "Updating Password ⏳",
+        text: "Please wait while we update your password...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
     try {
       const response = await fetch("/api/set_new_password", {
@@ -96,14 +161,33 @@ export default function ForgotPassword() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update password. Please try again.");
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update password. Please try again.");
       }
 
       const data = await response.json();
-      setSuccessMessage(data.message);
-      setStep(4); // Move to success step
+      
+        // Close loading and show success
+        Swal.fire({
+          title: "Password Updated! ✅",
+          text: data.message || "Your password has been updated successfully. You can now login with your new password.",
+          icon: "success",
+          timer: 3000,
+          showConfirmButton: false
+        }).then(() => {
+          setStep(4); // Move to success step
+          // Optionally redirect to login after showing success
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1500);
+        });
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+        Swal.fire({
+          title: "Error! ❌",
+          text: err.message || "Something went wrong. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
     } finally {
       setIsSubmitting(false);
     }

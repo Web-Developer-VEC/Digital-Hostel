@@ -12,6 +12,7 @@ import {
 import './AttendanceDashboard.css';
 import HostelSidebar from '../HostelSidebar';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 // const yearData = {
 //   1: {
@@ -176,6 +177,12 @@ function AttendanceDashboard() {
         setFoodCount(fetchedData);
       } catch (err) { 
         console.error("Failed to fetch data", err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch food count data. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     };
     fetchData();
@@ -184,6 +191,18 @@ function AttendanceDashboard() {
   const vegCount = foodCount?.[selectedYear]?.veg_count || 0; 
   const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
   const totalStudents = vegCount + nonVegCount;
+
+  // Show alert if no data available for selected year
+  useEffect(() => {
+    if (selectedYear && foodCount && totalStudents === 0) {
+      Swal.fire({
+        title: "No Data 📋",
+        text: `No food count data available for ${yearToAlphabet[selectedYear]}.`,
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+    }
+  }, [selectedYear, totalStudents]);
   
   
   return (
@@ -285,7 +304,7 @@ function AttendanceDashboard() {
                 <h3>Vegetarian</h3>
                 <p className="attendance-food-number">{animatedVeg}</p>
                 <p className="attendance-food-percentage">
-                  {((vegCount / totalStudents) * 100).toFixed(1)}%
+                  {totalStudents > 0 ? ((vegCount / totalStudents) * 100).toFixed(1) : 0}%
                 </p>
               </div>
             </div>
@@ -295,7 +314,7 @@ function AttendanceDashboard() {
                 <h3>Non-Vegetarian</h3>
                 <p className="attendance-food-number">{animatedNonVeg}</p>
                 <p className="attendance-food-percentage">
-                  {((nonVegCount / totalStudents) * 100).toFixed(1)}%
+                  {totalStudents > 0 ? ((nonVegCount / totalStudents) * 100).toFixed(1) : 0}%
                 </p>
               </div>
             </div>
@@ -305,11 +324,11 @@ function AttendanceDashboard() {
             <div
               className="attendance-pie"
               style={{
-                background: `conic-gradient(
+                background: totalStudents > 0 ? `conic-gradient(
                   #10b981 0% ${(vegCount / totalStudents) * 100}%,
                   #10b981 ${(vegCount / totalStudents) * 100}% ${(vegCount / totalStudents) * 100}%,
                   #ef4444 ${(vegCount / totalStudents) * 100}% 100%
-                )`
+                )` : '#e5e7eb'
               }}
             />
             <div className="attendance-pie-legend">

@@ -162,7 +162,7 @@ function StudentTile({ student, onSave ,onDelete, format}) {
         {isExpanded && (
           isEditing ? (
             <>
-              <button onClick={onDelete} className="superior-delete-button">
+              <button onClick={() => onDelete(student.name)} className="superior-delete-button">
                 <Trash2 className="superior-icon" /> Delete
               </button>
 
@@ -250,13 +250,35 @@ function SuperiorStudent() {
   
       } catch (err) {
         console.error('Error fetching data', err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch student details. Please refresh the page.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     };
   
     fetchData();
   }, []);
 
-  const handleDelete = async (registration_number) => {
+  const handleDelete = async (registration_number, studentName) => {
+    // Confirmation dialog before deleting
+    const result = await Swal.fire({
+      title: "Delete Student?",
+      text: `Are you sure you want to delete ${studentName}? This action cannot be undone.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
+    }
+
     try {
       const response = await fetch("/api/delete_student", {
         method: "POST",
@@ -269,23 +291,20 @@ function SuperiorStudent() {
   
       if (response.ok) {
         Swal.fire({
-          title: "Success!",
+          title: "Deleted! ✅",
           text: "Student data deleted successfully.",
           icon: "success",
           timer: 2000,
-          showConfirmButton: false,
-          willClose: () => {
-            Swal.close();
-          },
+          showConfirmButton: false
+        }).then(() => {
+          window.location.reload();
         });
       } else {
-        // alert("Failed to delete student.");
-        showSweetAlert("Error","Error Deleting The Student try Again Later",'error');
+        showSweetAlert("Error","Failed to delete student. Please try again later.",'error');
       }
     } catch (error) {
       console.error("❌ Error deleting student:", error);
-      // alert("Error deleting student. Try again.");
-      showSweetAlert("Error","Error Deleting The Student try Again Later",'error');
+      showSweetAlert("Error","Error deleting student. Please try again.",'error');
     }
   };
 
@@ -304,10 +323,18 @@ function SuperiorStudent() {
   };
   
   const confirmYearChange = async () => {
-    // setSelectedYear(tempYear); 
-    setIsModalOpen(false); // Update state with selected year
+    setIsModalOpen(false);
     console.log("temp Year",tempYear);
-    
+
+    // Show loading alert
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Incrementing student year...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     // API Call to Backend
     try {
@@ -321,8 +348,32 @@ function SuperiorStudent() {
 
       const data = await response.json();
       console.log("Response from backend:", data);
+
+      if (response.ok) {
+        Swal.fire({
+          title: "Success! ✅",
+          text: `Student year for batch ${tempYear} has been incremented successfully.`,
+          icon: "success",
+          confirmButtonText: "OK"
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          title: "Error ❌",
+          text: data.message || "Failed to increment student year.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
+      }
     } catch (error) {
       console.error("Error updating year:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to increment student year. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
   
@@ -420,9 +471,24 @@ function SuperiorStudent() {
     }
   
     if (Object.keys(updateFields).length === 0) {
-      alert("No changes detected.");
+      Swal.fire({
+        title: "No Changes",
+        text: "No changes detected to save.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
       return;
     }
+
+    // Show loading alert
+    Swal.fire({
+      title: "Saving ⏳",
+      text: "Updating student profile...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
   
     try {
       const response = await axios.post('/api/update_student_by_warden', {
@@ -431,22 +497,38 @@ function SuperiorStudent() {
       });
   
       if (response.status === 200) {
-        // alert("Sucessfully Updated");
-        showSweetAlert("Success","Student Profile Updated Successfully",'error');
-        setStudents((prevStudents) =>
-          prevStudents?.[selectedGender]?.map((student) =>
-            student.id === originalStudent.id ? { ...student, ...updateFields } : student
-          )
-        );
+        Swal.fire({
+          title: "Success! ✅",
+          text: "Student profile updated successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setStudents((prevStudents) =>
+            prevStudents?.[selectedGender]?.map((student) =>
+              student.id === originalStudent.id ? { ...student, ...updateFields } : student
+            )
+          );
+          window.location.reload();
+        });
       } else {
         console.error("failed to update");
-        
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to update student profile.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error) {
       console.error('Error updating student:', error);
-      alert('Failed to update student.');
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to update student. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
-    window.location.reload();
   };
 
   const formatDateTime = (dateTime) => {
@@ -612,7 +694,7 @@ function SuperiorStudent() {
               key={student.id}
               student={student}
               onSave={(editedStudent) => handleSaveStudent(editedStudent, student)}
-              onDelete={() => handleDelete(student.registration_number)}
+              onDelete={() => handleDelete(student.registrationNumber, student.name)}
               format={formatDateTime}
             />
           ))}

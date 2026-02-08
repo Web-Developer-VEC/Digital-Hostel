@@ -3,6 +3,7 @@ import { Search, X, ArrowRight } from 'lucide-react';
 import './FoodTypeRequest.css';
 import HostelSidebar from '../HostelSidebar';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function FoodTypeRequest() {
   const [records, setRecords] = useState([]);
@@ -23,6 +24,12 @@ function FoodTypeRequest() {
       }
     } catch (error) {
       console.error("❌ Error fetching warden details:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch warden details. Some filters may not work properly.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 
@@ -38,6 +45,12 @@ function FoodTypeRequest() {
       }
     } catch (error) {
       console.error("❌ Error fetching food requests:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to fetch food type requests. Please refresh the page.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
@@ -49,8 +62,38 @@ function FoodTypeRequest() {
   }, []);
 
   // Accept/Decline Handlers
-  const handleAction = async (registration_number, name, action) => {
+  const handleAction = async (registration_number, name, action, oldFood, newFood) => {
     console.log(`🔵 Sending ${action.toUpperCase()} request for ${registration_number}`);
+
+    // Confirmation dialog
+    const actionText = action === 'approve' ? 'accept' : 'decline';
+    const result = await Swal.fire({
+      title: `${action === 'approve' ? 'Accept' : 'Decline'} Request?`,
+      html: `Are you sure you want to ${actionText} the food type change for <strong>${name}</strong>?<br/><br/>
+             <span style="color: ${oldFood === 'Veg' ? '#10b981' : '#ef4444'}">${oldFood}</span> → 
+             <span style="color: ${newFood === 'Veg' ? '#10b981' : '#ef4444'}">${newFood}</span>`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: action === 'approve' ? "#28a745" : "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: `Yes, ${action === 'approve' ? 'Accept' : 'Decline'}`,
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) {
+      return; // User cancelled
+    }
+
+    // Show loading state
+    Swal.fire({
+      title: "Processing ⏳",
+      text: `${action === 'approve' ? 'Accepting' : 'Declining'} food type request...`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await fetch('/api/approve_food_change', {
         method: 'POST',
@@ -59,11 +102,33 @@ function FoodTypeRequest() {
       });
 
       if (response.ok) {
-        setRecords(records.filter(record => record.registration_number !== registration_number));
-        setSelectedRecord(null);
+        Swal.fire({
+          title: "Success! ✅",
+          text: `Food type request ${action === 'approve' ? 'accepted' : 'declined'} successfully.`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setRecords(records.filter(record => record.registration_number !== registration_number));
+          setSelectedRecord(null);
+        });
+      } else {
+        const errorData = await response.json();
+        Swal.fire({
+          title: "Error ❌",
+          text: errorData.message || `Failed to ${actionText} request. Please try again.`,
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error) {
       console.error(`❌ Error processing ${action} request:`, error);
+      Swal.fire({
+        title: "Error ❌",
+        text: "Failed to process request. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
 
@@ -125,7 +190,9 @@ function FoodTypeRequest() {
 
         {/* Table */}
         {loading ? (
-          <p>Loading...</p>
+          <p className="VR-loading-message">⏳ Loading food type requests...</p>
+        ) : filteredRecords.length === 0 ? (
+          <p className="VR-no-data-message">📋 No food type requests found.</p>
         ) : (
           <div className='SR-table-container'>
 
@@ -171,8 +238,20 @@ function FoodTypeRequest() {
           <DetailModal
             record={selectedRecord}
             onClose={() => setSelectedRecord(null)}
-            onAccept={() => handleAction(selectedRecord.registration_number, selectedRecord.name, "approve")}
-            onDecline={() => handleAction(selectedRecord.registration_number, selectedRecord.name, "decline")}
+            onAccept={() => handleAction(
+              selectedRecord.registration_number, 
+              selectedRecord.name, 
+              "approve",
+              selectedRecord.previous_foodtype,
+              selectedRecord.requested_foodtype
+            )}
+            onDecline={() => handleAction(
+              selectedRecord.registration_number, 
+              selectedRecord.name, 
+              "decline",
+              selectedRecord.previous_foodtype,
+              selectedRecord.requested_foodtype
+            )}
           />
         )}
       </div>

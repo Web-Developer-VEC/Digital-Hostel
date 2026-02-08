@@ -22,7 +22,7 @@ function Vacate() {
   // Verify details from mobile number
   const handleVerify = async () => {
     if (!phone_number_student) {
-      alert("Please enter a mobile number.");
+      showSweetAlert("Alert!", "Please enter a mobile number.", "warning");
       return;
     }
 
@@ -47,11 +47,16 @@ function Vacate() {
       }
     } catch (error) {
       console.error("❌ Error fetching data:", error);
-      alert("Error verifying student. Try again.");
+      showSweetAlert("Error!", "Error verifying student. Please try again.", "error");
     }
   };
 
   const handleSuperiorRequest = async () => {
+    // Validate required fields
+    if (!vacateData.date_time || !vacateData.Address || !vacateData.Reason) {
+      showSweetAlert("Validation Error!", "Please fill in all required fields (Date, Address, Reason).", "warning");
+      return;
+    }
 
     try {
       const response = await axios.post('/api/submit_vacate_form',
@@ -67,28 +72,29 @@ function Vacate() {
 
       if (response.status == 200) {
         setVacateCount(data.count);
-        showSweetAlert("Submitted Successfully","Vacate Form Submitted.Superior Warden Notified","success");
+        showSweetAlert("Submitted Successfully!", "✅ Vacate Form Submitted. Superior Warden Notified.", "success");
+        setTimeout(() => {
+          setIsApproved(true);
+        }, 2000);
       } else {
-        showSweetAlert("Failed To Submite","Try again later","error");
+        showSweetAlert("Failed To Submit!", "❌ Try again later.", "error");
       }
 
     } catch (error) {
-      console.error("Error updating data");
-      
+      console.error("Error updating data:", error);
+      showSweetAlert("Error!", "❌ An error occurred while submitting the form. Please try again.", "error");
     }
-    // alert("Superior approval requested. Waiting for approval...");
-    setTimeout(() => {
-      setIsApproved(true);
-    }, 2000);
   };
 
   const handlePrint = () => {
+    showSweetAlert("Printing...", "Preparing document for print.", "info");
     setIsPrinting(true);
     setTimeout(() => {
       window.print();
     }, 500);
     setTimeout(() => {
       setIsPrinting(false);
+      showSweetAlert("Success!", "✅ Document sent to printer.", "success");
     }, 1000);
   };
 
