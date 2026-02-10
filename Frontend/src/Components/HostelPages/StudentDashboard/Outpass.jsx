@@ -4,6 +4,7 @@ import './Outpass.css';
 import showSweetAlert from "../Alert";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { createFormDataRequest, createJsonRequest } from '../../../api/axios';
 
 function HostelPass() {
   const [verified, setVerified] = useState(false);
@@ -21,11 +22,6 @@ function HostelPass() {
   const [existingFilePath, setExistingFilePath] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [parentApproval, setParentApproval] = useState(true)
-  const [selectedFromDateTime,setSelectedFromDateTime]= useState('')
-  const [selectedFromDate,setSelectedFromDate]=useState('')
-  const [selectedFromTime,setSelectedFromTime]= useState("")
-  const [selectedToDate,setSelectedToDate]=useState('')
-  const [selectedToTime,setSelectedToTime]=useState("")
 
   const location = useLocation();
   let passid  = location.state?.passid
@@ -36,6 +32,24 @@ function HostelPass() {
 
   const UrlParser = (path) => {
       return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
+  };
+
+  // Handle 401 authentication errors
+  const handle401Error = (error) => {
+    if (error.response?.status === 401) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Session Expired',
+        text: error.response.data.message || 'Your session has expired. Please login again.',
+        confirmButtonText: 'Login',
+        allowOutsideClick: false
+      }).then(() => {
+        // Redirect to login page
+        navigate('/');
+      });
+      return true;
+    }
+    return false;
   };
 
   const ReasonTypeMapping =  { od : [ 'Internship','Symposium','Hackathon','Sports','Others'], leave : ['Function','Medical','Exams','Emergency','Ohers'], outpass :['Shopping','Classes','Internship','Medical','Others'], staypass: ['Holiday','Weekend Holiday','Semester Holiday','Festival Holiday','Others']}
@@ -67,99 +81,135 @@ function HostelPass() {
     setPassType(type);
     setShowDocUpload(type === 'od' || type === 'leave');
 
-  setFrom('');              
-  setTo('');        
-  // setFirstTime('')         
-  // setSecondTime('');
-  // setSelectedFromDate('');
-  // setSelectedToDateTime('');
-  // setOutpassFromDate('');
-  setPlace("");
-  setReason(null);
-  setReasonType('');
-  setSelectedFile(null);
-  // setPreviewURL(null);
-  setExistingFilePath('');
+    setFrom('');              
+    setTo('');        
+    // setFirstTime('')         
+    // setSecondTime('');
+    // setSelectedFromDate('');
+    // setSelectedToDateTime('');
+    // setOutpassFromDate('');
+    setPlace("");
+    setReason(null);
+    setReasonType('');
+    setSelectedFile(null);
+    // setPreviewURL(null);
+    setExistingFilePath('');
   };
 
-  const validateTime = (dateTime , gender) => {
+  // Get current datetime in local format for min attribute
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Get max datetime for "To" field when outpass is selected (same day as from)
+  const getMaxToDateTime = () => {
+    if (passType === 'outpass' && from) {
+      const fromDate = from.split('T')[0];
+      return `${fromDate}T23:59`;
+    }
+    return undefined;
+  };
+
+  const showTimeAlert = (message, inputElement) => {
+    if (inputElement?.blur) {
+      inputElement.blur();
+    }
+    showSweetAlert("Alert!", message, "error", { position: "top" });
+  };
+
+  const validateFromTime = (dateTime, gender, inputElement) => {
+    // Only validate for outpass type
+    if (passType !== 'outpass') return true;
     
     const selectedTime = new Date(dateTime);
     const selectedHour = selectedTime.getHours();
     const selectedMinutes = selectedTime.getMinutes();
+    const totalMinutes = selectedHour * 60 + selectedMinutes;
     
-    if (gender === "Female" && (selectedHour > 18 || (selectedHour === 18 && selectedMinutes > 0)) && passType === 'outpass') {
-      showSweetAlert("Alert!", "Girls are not allowed to select a time after 6:00 PM.", "error" )
-      return false;
-    } else if (gender === "Male" && (selectedHour > 21 || (selectedHour === 21 && selectedMinutes > 0)) && passType === 'outpass') {
-      showSweetAlert("Alert!", "Boys are not allowed to select a time after 9:00 PM.", "error" )
+    const minTimeLimit = 5 * 60; // 5:00 AM
+    const maxTimeLimit = gender === "Female" ? 18 * 60 : 21 * 60; // 6:00 PM for girls, 9:00 PM for boys
+    
+    if (totalMinutes < minTimeLimit) {
+      showTimeAlert("From time cannot be before 5:00 AM for outpass.", inputElement);
       return false;
     }
+
+    if (totalMinutes > maxTimeLimit) {
+      const limitMessage = gender === "Female"
+        ? "From time cannot be after 6:00 PM for outpass."
+        : "From time cannot be after 9:00 PM for outpass.";
+      showTimeAlert(limitMessage, inputElement);
+      return false;
+    }
+    
+    return true;
+  };
+
+  const validateToTime = (dateTime, gender, inputElement) => {
+    // Only validate for outpass type
+    if (passType !== 'outpass') return true;
+    
+    const selectedTime = new Date(dateTime);
+    const selectedHour = selectedTime.getHours();
+    const selectedMinutes = selectedTime.getMinutes();
+    const totalMinutes = selectedHour * 60 + selectedMinutes;
+    
+    const maleTimeLimit = 21 * 60; // 9:00 PM
+    const femaleTimeLimit = 18 * 60; // 6:00 PM
+    
+    if (gender === "Female" && totalMinutes > femaleTimeLimit) {
+      showTimeAlert("Girls are not allowed to select a time after 6:00 PM for outpass.", inputElement);
+      return false;
+    } else if (gender === "Male" && totalMinutes > maleTimeLimit) {
+      showTimeAlert("Boys are not allowed to select a time after 9:00 PM for outpass.", inputElement);
+      return false;
+    }
+    
     return true;
   };
 
   const handleFromChange = (e) => {
-    const  fromDateTime = e.target.value;
+    const fromDateTime = e.target.value;
     
-    const outPassFromDate = fromDateTime.split("T")[0]
-    const outPassFromTime = fromDateTime.split('T')[1]
-    setSelectedFromDate(outPassFromDate)
-    setSelectedFromTime(outPassFromTime)
+    if (!fromDateTime) {
+      setFrom('');
+      return;
+    }
   
-    
-    if (validateTime(fromDateTime, studentData?.gender)) {
-      // console.log("handlefrom");
-      
-      setFrom(fromDateTime)
+    // Validate from time (check if after 5:00 AM for outpass)
+    if (validateFromTime(fromDateTime, studentData?.gender, e.target)) {
+      setFrom(fromDateTime);
+    } else {
+      setFrom('');
+      return;
     }
   };
 
   const handleToChange = (e) => {
+    const toDateTime = e.target.value;
 
-
-  const toDateTime = e.target.value;
-    // console.log("Handle time",toDateTime);
-
-    const outPasstoDate = toDateTime.split("T")[0];
-    const outPassToTime = toDateTime.split("T")[1];
-    const toCorrectedDateTime = (`${selectedFromDate} T ${outPassToTime}`);
-    setSelectedToDate(outPasstoDate)
-    setSelectedToTime(outPassToTime)
-    if ((selectedFromDate === outPasstoDate) && passType==="outpass"){
-      setTo(toDateTime);  
-      //  return;
+    if (!toDateTime) {
+      setTo('');
+      return;
     }
-    else if ((selectedFromDate !== outPasstoDate) && passType==="outpass" ) {
-      showSweetAlert("Alert!", "Date should match the 'From' date", "warning");
-      setSelectedFromDateTime("")
-      // return;
-    }else if (passType !== "outpass"){
-      setTo(toDateTime)
-      // return;
-    }
-    const fromDate=Date(from)
-    const toDate = Date(to)
     
-    
-      if (passType === "staypass" && (toDate < fromDate)) {
-        showSweetAlert("Alert!", "End date & time must be greater than start date & time.", "warning");
-        setFrom("");
-        setTo("");
+    // For outpass: ensure same day selection
+    if (passType === "outpass") {
+      // Validate time constraints (before 9 PM for boys, before 6 PM for girls)
+      if (validateToTime(toDateTime, studentData?.gender, e.target)) {
+        setTo(toDateTime);
+      } else {
+        setTo('');
       }
-
-  // setSecondTime(selectedToDateTime); 
-
-  if (validateTime(toDateTime, studentData?.gender)) {
-    console.log("HandleTo");
-    
-    return;
-  } else {
-   setTo("")
-  }
-
-
-
-};
+      return;
+    }
+  };
 
   // Fetch pass details if passid is present
   useEffect(() => {
@@ -172,18 +222,13 @@ function HostelPass() {
   // Fetch pass details
   const fetchPassDetails = async () => {
     try {
-      const response = await fetch("/api/get_student_pass_by_passid", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ pass_id: passid }),
+      const response = await createJsonRequest("/api/get_student_pass_by_passid", { 
+        pass_id: passid 
       });
 
-      const data = await response.json();
+      const data = response.data.pass_details;
 
-      if (response.ok) {
+      if (response.status === 200) {
         // Update form state with fetched data
         setPassType(data.passtype);
         setShowDocUpload(data.passtype === "od" || data.passtype === "leave");
@@ -197,29 +242,32 @@ function HostelPass() {
         setParentApproval(data.parent_approval === null ? true : false);
 
         // Fetch student data for verification
-        const studentResponse = await fetch("/api/verify_student", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ phone_number_student: data.mobile_number }),
+        const studentResponse = await createJsonRequest("/api/verify_student", { 
+          phone_number_student: data.mobile_number 
         });
 
-        const studentData = await studentResponse.json();
+        const studentData = studentResponse.data;
 
-        if (studentResponse.ok) {
+        if (studentResponse.status === 200) {
           setStudentData(studentData);
           setVerified(true);
         } else {
           showSweetAlert("Error!", "Student not found. Please check the mobile number", "error");
         }
       } else {
-        showSweetAlert("Error!", data.error || "Failed to fetch pass details", "error");
+        showSweetAlert("Error!", response.data.error || "Failed to fetch pass details", "error");
       }
     } catch (error) {
       console.error("Error fetching pass details:", error);
-      showSweetAlert("Error!", "Something went wrong. Please try again.", "error");
+      
+      // Handle 401 authentication error
+      if (handle401Error(error)) return;
+      
+      if (error.response?.data?.error) {
+        showSweetAlert("Error!", error.response.data.error, "error");
+      } else if (error.response?.data?.message) {
+        showSweetAlert("Error!", error.response.data.message, "error");
+      }
     }
   };
 
@@ -244,15 +292,11 @@ const handleUpdatePass = async () => {
   }
 
   try {
-    const response = await fetch("/api/edit_student_pass", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    });
+    const response = await createFormDataRequest("/api/edit_student_pass", formData);
 
-    const data = await response.json();
+    const data = response.data;
 
-    if (response.ok) {
+    if (response.status === 200) {
       setPassType("");
       setShowDocUpload(false);
       setReasonType("");
@@ -290,7 +334,15 @@ const handleUpdatePass = async () => {
     }
   } catch (error) {
     console.error("Error updating pass:", error);
-    showSweetAlert("Error!", "Something went wrong. Please try again.", "error");
+    
+    // Handle 401 authentication error
+    if (handle401Error(error)) return;
+    
+    if (error.response?.data?.error) {
+      showSweetAlert("Error!", error.response.data.error, "error");
+    } else if (error.response?.data?.message) {
+      showSweetAlert("Error!", error.response.data.message, "error");
+    }
   }
 };
 
@@ -302,18 +354,13 @@ const handleUpdatePass = async () => {
     }
   
     try {
-      const response = await fetch("/api/verify_student", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", 
-        body: JSON.stringify({ phone_number_student }), 
+      const response = await createJsonRequest("/api/verify_student", { 
+        phone_number_student 
       });
   
-      const data = await response.json();
+      const data = response.data;
   
-      if (response.ok) {
+      if (response.status === 200) {
         setStudentData(data);
         setVerified(true);
         showSweetAlert("Success!", "Student verified successfully.", "success");
@@ -323,12 +370,22 @@ const handleUpdatePass = async () => {
       }
     } catch (error) {
       console.error("❌ Error fetching data:", error);
-      showSweetAlert("Error!", "Error verifying student. Please try again.", "error");
+      
+      // Handle 401 authentication error
+      if (handle401Error(error)) return;
+      
+      if (error.response?.data?.error) {
+        showSweetAlert("Error!", error.response.data.error, "error");
+      } else if (error.response?.data?.message) {
+        showSweetAlert("Error!", error.response.data.message, "error");
+      } else {
+        showSweetAlert("Error!", "Error verifying student. Please try again.", "error");
+      }
     }
   };
 
-  //send data for parent request
-  const handleParentApproval = async () => {
+  //Unified function to submit pass with different modes
+  const submitPassRequest = async (mode) => {
     if (!phone_number_student) {
       showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       return;
@@ -348,30 +405,33 @@ const handleUpdatePass = async () => {
     formData.append("place_to_visit", place);
     formData.append("reason_type", reasonType);
     formData.append("reason_for_visit", reason || "");
+    formData.append("mode", mode);
   
     if (selectedFile) {
-      formData.append("file", selectedFile);  // Attach the file
+      formData.append("file", selectedFile);
     } else if (existingFilePath) {
-      // Include the existing file path in the form data
       formData.append("existingFilePath", existingFilePath);
     }
   
     try {
-      const response = await fetch("/api/submit_pass_parent_approval", {
-        method: "POST",
-        credentials: "include", 
-        body: formData
-      });
+      const response = await createFormDataRequest("/api/submit_pass", formData);
   
-      const data = await response.json();
+      const data = response.data;
   
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
+        const successMessages = {
+          parent: "✅ Pass request submitted. Parent notified!",
+          warden: "✅ Pass request submitted. Warden notified!",
+          superior: "✅ Pass request submitted. Chief Warden notified!",
+          draft: "✅ Pass saved as draft"
+        };
+
         Swal.fire({
           title: "Success",
-          text: "✅ Pass request submitted. Warden notified!.",
+          text: successMessages[mode] || "✅ Pass request submitted successfully!",
           icon: "success",
           showConfirmButton: false,
-          timer: 1500, // Auto-close in 1.5 sec
+          timer: 1500,
           didClose: () => {
             Swal.close();
             window.location.reload();
@@ -381,209 +441,29 @@ const handleUpdatePass = async () => {
         showSweetAlert("Error!", `${data.error}`, "error");
       }
     } catch (error) {
-      showSweetAlert("Error!", `Something went wrong! Please try again.`, "error");
-    }
-
-  };
-
-  //Warden approval
-  const handleWardenApproval = async () => {
-    if (!phone_number_student) {
-      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
+      console.error("Error submitting pass:", error);
       
-    
-      return;
-    }
-  
-    const formData = new FormData();
-  
-    // Prepare the pass data
-    formData.append("mobile_number", phone_number_student);
-    formData.append("name", studentData?.name);
-    formData.append("department_name", studentData?.department);
-    formData.append("year", studentData?.year);
-    formData.append("room_no", studentData?.room_number);
-    formData.append("registration_number", studentData?.registration_number);
-    formData.append("block_name", studentData?.block_name);
-    formData.append("pass_type", passType);
-    formData.append("from", from);
-    formData.append("to", to);
-    formData.append("place_to_visit", place);
-    formData.append("reason_type", reasonType);
-    formData.append("reason_for_visit", reason || "");  // Ensure reason is never undefined
-    formData.append("notify_superior", false);
-  
-    // Append the file if it's selected
-    if (selectedFile) {
-      formData.append("file", selectedFile);
-    }
-
-    else if (existingFilePath) {
-      // Include the existing file path in the form data
-      formData.append("existingFilePath", existingFilePath);
-    }
-
-  
-    try {
-      const response = await fetch("/api/submit_pass_warden_approval", {
-        method: "POST",
-        credentials: "include",
-        body: formData,  // Send the FormData directly
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        Swal.fire({
-          title: "Success",
-          text: "✅ Pass request submitted. Warden notified!.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500, // Auto-close in 1.5 sec
-          didClose: () => {
-            Swal.close();
-            window.location.reload();
-          },
-        });
+      // Handle 401 authentication error
+      if (handle401Error(error)) return;
+      
+      if (error.response?.data?.error) {
+        showSweetAlert("Error!", error.response.data.error, "error");
+      } else if (error.response?.data?.message) {
+        showSweetAlert("Error!", error.response.data.message, "error");
       } else {
-        showSweetAlert("❌ Error:", `❌ Error: ${data.error}`, "error");
+        showSweetAlert("Error!", "Something went wrong! Please try again.", "error");
       }
-    } catch (error) {
-      showSweetAlert("Error!", `Something went wrong! Please try again.`, "error");
     }
-    
-  };
-
-  //superior warden approval
-  const handleSuperiorWardenApproval = async () => {
-    if (!phone_number_student) {
-      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
-      return;
-    }
-  
-    const formData = new FormData();
-  
-    // Prepare the pass data
-    formData.append("mobile_number", phone_number_student);
-    formData.append("name", studentData?.name);
-    formData.append("department_name", studentData?.department);
-    formData.append("year", studentData?.year);
-    formData.append("room_no", studentData?.room_number);
-    formData.append("registration_number", studentData?.registration_number);
-    formData.append("block_name", studentData?.block_name);
-    formData.append("pass_type", passType);
-    formData.append("from", from);
-    formData.append("to", to);
-    formData.append("place_to_visit", place);
-    formData.append("reason_type", reasonType);
-    formData.append("reason_for_visit", reason || "");  // Ensure reason is never undefined
-    formData.append("notify_superior", true); 
-  
-    // Append the file if it's selected
-    if (selectedFile) {
-      formData.append("file", selectedFile);
-    }
-
-    else if (existingFilePath) {
-      // Include the existing file path in the form data
-      formData.append("existingFilePath", existingFilePath);
-    }
-
-  
-    try {
-      const response = await fetch("/api/submit_pass_warden_approval_superior", {
-        method: "POST",
-        credentials: "include",
-        body: formData,  // Send the FormData directly
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        Swal.fire({
-          title: "Success",
-          text: "✅ Pass request submitted. Warden notified!.",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 1500, // Auto-close in 1.5 sec
-          didClose: () => {
-            Swal.close();
-            window.location.reload();
-          },
-        });
-      } else {
-        showSweetAlert("❌ Error:", `❌ Error: ${data.error}`, "error");
-      }
-    } catch (error) {
-      showSweetAlert("Error!", `Something went wrong! Please try again.`, "error");
-    }
-  };
-  
-  //save draft
-  const handleSaveDraft = async () => {
-    if (!phone_number_student) {
-      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
-      return;
-    }
-  
-    const formData = new FormData();
-  
-    // Prepare the pass data
-    formData.append("mobile_number", phone_number_student);
-    formData.append("name", studentData?.name);
-    formData.append("department_name", studentData?.department);
-    formData.append("year", studentData?.year);
-    formData.append("room_no", studentData?.room_number);
-    formData.append("registration_number", studentData?.registration_number);
-    formData.append("block_name", studentData?.block_name);
-    formData.append("pass_type", passType);
-    formData.append("from", from);
-    formData.append("to", to);
-    formData.append("place_to_visit", place);
-    formData.append("reason_type", reasonType);
-    formData.append("reason_for_visit", reason || "");  // Ensure reason is never undefined
-  
-    // Append the file if it's selected
-    if (selectedFile) {
-      formData.append("file", selectedFile);
-    }
-
-    else if (existingFilePath) {
-      // Include the existing file path in the form data
-      formData.append("existingFilePath", existingFilePath);
-    }
-
-    try {
-      const response = await fetch("/api/save_draft", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        showSweetAlert('Success', "✅ Pass Saved as Draft", 'success');
-      } else {
-        showSweetAlert("Error!",`❌ Error: ${data.error}`,"error")
-      }
-    } catch (error) {
-      showSweetAlert("Error!", `Something went wrong! Please try again.`, "error");
-    }
-    window.location.reload();
   };
 
   //fetch Draft data
   const fetchDrafts = async () => {
     try {
-      const response = await fetch("/api/fetch_drafts", {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await createJsonRequest("/api/fetch_drafts", {});
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok && data.drafts.length > 0) {
+      if (response.status === 200 && data.drafts?.length > 0) {
         const firstDraft = data.drafts[0];
 
         setPassType(firstDraft.passtype);
@@ -617,14 +497,23 @@ const handleUpdatePass = async () => {
         showSweetAlert("Oops..!","No drafts found.", "info");
       }
     } catch (error) {
-      showSweetAlert("Error","❌ Error fetching drafts:","error");
+      console.error("Error fetching drafts:", error);
+      
+      // Handle 401 authentication error
+      if (handle401Error(error)) return;
+      
+      if (error.response?.data?.message) {
+        showSweetAlert("Info", error.response.data.message, "info");
+      } else if (error.response?.data?.error) {
+        showSweetAlert("Error!", error.response.data.error, "error");
+      } else {
+        showSweetAlert("Error!", "Error fetching drafts. Please try again.", "error");
+      }
     }
-setFrom("")
-setTo("")
+    setFrom("")
+    setTo("")
   };
 
-
-   
   return (
     <div className="HS-container">
       <div className="HS-main">
@@ -740,9 +629,11 @@ setTo("")
                     required
                   />
 
-                  <label htmlFor="document-upload" className="HS-upload-label">
-                    Click to upload or drag and drop
-                  </label>
+                  {!selectedFile && !existingFilePath && (
+                    <label htmlFor="document-upload" className="HS-upload-label">
+                      Click to upload or drag and drop
+                    </label>
+                  )}
                   <br />
                   {existingFilePath && !selectedFile ? (
                     <a
@@ -787,8 +678,9 @@ setTo("")
                       id='fromDateTime' 
                       value={from} 
                       onChange={handleFromChange}
-                     onKeyDown={(e) => e.preventDefault()} 
-                     onPaste={(e) => e.preventDefault()}
+                      onKeyDown={(e) => e.preventDefault()} 
+                      onPaste={(e) => e.preventDefault()}
+                      min={getCurrentDateTime()}
                       required
                     />
                   </div>
@@ -803,8 +695,10 @@ setTo("")
                       onChange={handleToChange}
                       onKeyDown={(e) => e.preventDefault()} 
                       onPaste={(e) => e.preventDefault()} 
-                      min={from}
+                      min={passType === 'outpass' && from ? from.split('T')[0] + 'T00:00' : from || getCurrentDateTime()}
+                      max={getMaxToDateTime()}
                       required
+                      disabled={!from}
                     />
                   </div>
                   <div className="HS-input-group">
@@ -844,23 +738,23 @@ setTo("")
                       Update Pass
                     </button>
                     {parentApproval && (
-                      <button className="HS-button HS-button-parent" onClick={handleParentApproval}> 
+                      <button className="HS-button HS-button-parent" onClick={() => submitPassRequest('parent')}> 
                           Parent Approval
                       </button>
                     )}
                   </>
                 ) : (
                   <>
-                    {/* <button className="HS-button HS-button-parent" onClick={handleParentApproval}> 
+                    {/* <button className="HS-button HS-button-parent" onClick={() => submitPassRequest('parent')}> 
                       Parent Approval
                     </button> */}
-                    <button className="HS-button HS-button-warden" onClick={handleWardenApproval}>
+                    <button className="HS-button HS-button-warden" onClick={() => submitPassRequest('warden')}>
                       Warden Approval
                     </button>
-                    <button className="HS-button HS-button-chief" onClick={handleSuperiorWardenApproval}>
+                    <button className="HS-button HS-button-chief" onClick={() => submitPassRequest('superior')}>
                       Chief Warden Approval
                     </button>
-                    <button className="HS-button HS-button-save" onClick={handleSaveDraft}>
+                    <button className="HS-button HS-button-save" onClick={() => submitPassRequest('draft')}>
                       Save
                     </button>
                   </>

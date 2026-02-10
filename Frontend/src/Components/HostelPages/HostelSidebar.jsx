@@ -57,7 +57,6 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const navigate = useNavigate();
 
   const handleLogout = async ()=>{
-
     try {
       const response = await fetch("/api/logout", {
         method: "GET",
@@ -77,7 +76,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           showConfirmButton: false,
           willClose: () => {
             Swal.close();
-            navigate(data.redirect);
+            navigate("/");
           },
         });
       } else {
@@ -101,113 +100,112 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
         1: "I", 2: "II", 3: "III", 4: "IV"
     };
     return romanMap[num] || num; 
-};
+  };
 
-const primaryYearArray = Array.isArray(wardenSlidebar?.["primary year"]) ? wardenSlidebar["primary year"] : [];
-const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
+  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary year"]) ? wardenSlidebar["primary year"] : [];
+  const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
 
 
-const yearLabel = primaryYearArray.length === 1 ? "year" : "years";
+  const yearLabel = primaryYearArray.length === 1 ? "year" : "years";
 
   return (
     <>
       {/* Mobile Navbar */}
       {isMobile ? (
-  <nav className={`Hostel-mobile-nav ${role === "superior" ? "scrollable" : ""}`} >
-    {/* Navigation Buttons */}
-    {items.map((item) => (
-      <NavLink
-        key={item.path}
-        to={item.path}
-        className={`Hostel-mobile-nav-button ${
-          location.pathname.startsWith(item.path) ? "active" : ""
-        }`}
-        // onClick={() => setActiveNav(item.path)}
-      >
-        {item.icon}
-        <span className="Hostel-mobile-nav-label">{item.label}</span>
-      </NavLink>
-    ))}
-
-    {/* Logout Button in Mobile Navbar */}
-    {role !== 'warden' && (
-      <button className="Hostel-mobile-nav-button" onClick={handleLogout}>
-        <CiLogout size={19} className="Hostel-mobile-nav-icon" />
-        <span className="Hostel-mobile-nav-label">Logout</span>
-      </button>
-    )}
-
-    {/* Profile Button in Mobile Navbar */}
-    {role === "warden" && (
-      <div className="Hostel-mobile-nav-profile">
-        <button
-          className="Hostel-mobile-nav-button"
-          onClick={() => setShowProfile(!showProfile)}
-        >
-          <User className="Hostel-mobile-nav-icon" />
-          <span className="Hostel-mobile-nav-label">Profile</span>
-        </button>
-      </div>
-    )}
-  </nav>
-) : (
-  <div className={`Hostel-sidebar ${sidebarOpen ? "open" : ""}`}>
-    {/* Desktop Sidebar Content */}
-    {role === "warden" && (
-      <div className="warden-sidebar-top">
-        <div className="warden-photo-container">
-          <img
-            src={wardenSlidebar?.image_path}
-            alt={wardenSlidebar?.name}
-            className="warden-photo"
-            style={{ color: "white" }}
-          />
-        </div>
-        <div className="warden-sidebar-info">
-          <h3 className="sidebar-warden-name">{wardenSlidebar?.name}</h3>
-          <p className="warden-years">Handling: <span className="text-white">{primaryYears} {yearLabel}</span></p>
-        </div>
-      </div>
-    )}
-
-    {role === "warden" && (
-      <div className="warden-contact">
-        <p className="warden-mobile">
-          <Phone size={16} /> <a href={`tel:${wardenSlidebar?.["Phone number"]}`} className="no-underline text-white">{wardenSlidebar?.["Phone number"]}</a>
-        </p>
-        <p className="text-white">
-          Status: <span className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}>{wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}</span>
-        </p>
-      </div>
-    )}
-
-    {/* Sidebar Navigation */}
-    <div className="Hostel-sidebar-content">
-      <div className="Hostel-sidebar-menu">
-        <nav>
+        <nav className={`Hostel-mobile-nav ${role === "superior" ? "scrollable" : ""}`} >
+          {/* Navigation Buttons */}
           {items.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
-              className={`Hostel-nav-button ${
-                location.pathname.startsWith(item.path) ? "Hostel-nav-active" : ""
+              className={`Hostel-mobile-nav-button ${
+                location.pathname.startsWith(item.path) ? "active" : ""
               }`}
+              // onClick={() => setActiveNav(item.path)}
             >
-              {item.icon} {item.label}
+              {item.icon}
+              <span className="Hostel-mobile-nav-label">{item.label}</span>
             </NavLink>
           ))}
-        </nav>
-      </div>
-      <div className="Logout-container">
-        <CiLogout className="Hostel-icon" />
-        <button className="Logout-button" onClick={handleLogout}>Logout</button>
-      </div>
-    </div>
-  </div>
-)}
 
-{/* Warden Profile Popup */}
-{showProfile && (
+          {/* Logout Button in Mobile Navbar */}
+          {role !== 'warden' && (
+            <button className="Hostel-mobile-nav-button" onClick={handleLogout}>
+              <CiLogout size={19} className="Hostel-mobile-nav-icon" />
+              <span className="Hostel-mobile-nav-label">Logout</span>
+            </button>
+          )}
+
+          {/* Profile Button in Mobile Navbar */}
+          {role === "student" && (
+            <div className="Hostel-mobile-nav-profile">
+              <button
+                className="Hostel-mobile-nav-button"
+                onClick={() => setShowProfile(!showProfile)}
+              >
+                <User className="Hostel-mobile-nav-icon" />
+                <span className="Hostel-mobile-nav-label">Warden</span>
+              </button>
+            </div>
+          )}
+        </nav>
+      ) : (
+        <div className={`Hostel-sidebar ${sidebarOpen ? "open" : ""}`}>
+          {/* Desktop Sidebar Content */}
+          {role === "student" && (
+            <>
+              <div className="warden-sidebar-top m-2">
+                <div className="warden-photo-container">
+                  <img
+                    src={wardenSlidebar?.image_path}
+                    alt={wardenSlidebar?.name}
+                    className="warden-photo"
+                    style={{ color: "white" }}
+                  />
+                </div>
+                <div className="warden-sidebar-info">
+                  <h3 className="sidebar-warden-name">{wardenSlidebar?.name}</h3>
+                  <p className="warden-years">Handling: <span className="text-white">{primaryYears} {yearLabel}</span></p>
+                </div>
+              </div>
+              <div className="warden-contact">
+                <p className="warden-mobile">
+                  <Phone size={16} /> <a href={`tel:${wardenSlidebar?.["Phone number"]}`} className="no-underline text-white">{wardenSlidebar?.["Phone number"]}</a>
+                </p>
+                <p className="text-white">
+                  Status: <span className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}>{wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}</span>
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Sidebar Navigation */}
+          <div className="Hostel-sidebar-content">
+            <div className="Hostel-sidebar-menu">
+              <nav>
+                {items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={`Hostel-nav-button ${
+                      location.pathname.startsWith(item.path) ? "Hostel-nav-active" : ""
+                    }`}
+                  >
+                    {item.icon} {item.label}
+                  </NavLink>
+                ))}
+              </nav>
+            </div>
+            <div className="Logout-container">
+              <CiLogout className="Hostel-icon" />
+              <button className="Logout-button" onClick={handleLogout}>Logout</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+        {/* Warden Profile Popup */}
+        {showProfile && (
           <div className="warden-profile-popup">
             <div className="warden-profile-header">
               <img
