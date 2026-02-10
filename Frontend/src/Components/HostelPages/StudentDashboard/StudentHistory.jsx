@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './StudentHistory.css';
-import { X, History, Download, Calendar, MapPin, FileText, LogOut, LogIn, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import { X, History, Download, Calendar, MapPin, FileText, LogOut, LogIn, CheckCircle, Clock, AlertCircle, LoaderIcon, Clipboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import axiosInstance from '../../../api/axios';
 
 const StudentHistory = () => {
   const [history, setHistory] = useState([]);
@@ -21,10 +21,27 @@ const StudentHistory = () => {
 
   const navigate = useNavigate();
 
+  // Handle 401 authentication errors
+  const handle401Error = (error) => {
+    if (error.response?.status === 401) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Session Expired',
+        text: error.response.data.message || 'Your session has expired. Please login again.',
+        confirmButtonText: 'Login',
+        allowOutsideClick: false
+      }).then(() => {
+        navigate('/hostel/login');
+      });
+      return true;
+    }
+    return false;
+  };
+
   useEffect(() => {
     const fetchStudentPasses = async () => {
       try {
-        const response = await axios.get('/api/get_student_pass', { withCredentials: true });
+        const response = await axiosInstance.get('/api/get_student_pass');
         const passes = response.data.passes;
 
         if (passes.length === 0) {
@@ -59,14 +76,41 @@ const StudentHistory = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching passes:", error);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to fetch student passes. Please try again.",
-          icon: "error",
-          showConfirmButton: true,
-          timer: 4000
-        });
-        setError("Failed to fetch student passes.");
+        
+        // Handle 401 authentication error
+        if (handle401Error(error)) {
+          setLoading(false);
+          return;
+        }
+        
+        if (error.response?.data?.error) {
+          setError(error.response.data.error);
+          Swal.fire({
+            title: "Error!",
+            text: error.response.data.error,
+            icon: "error",
+            showConfirmButton: true,
+            timer: 4000
+          });
+        } else if (error.response?.data?.message) {
+          setError(error.response.data.message);
+          Swal.fire({
+            title: "Error!",
+            text: error.response.data.message,
+            icon: "error",
+            showConfirmButton: true,
+            timer: 4000
+          });
+        } else {
+          setError("Failed to fetch student passes.");
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to fetch student passes. Please try again.",
+            icon: "error",
+            showConfirmButton: true,
+            timer: 4000
+          });
+        }
         setLoading(false);
       }
     };
@@ -164,7 +208,7 @@ const StudentHistory = () => {
     <div className="student-history-container">
       <div className="mb-8 flex justify-between items-center">
         <h2 className="student-history-header flex items-center gap-2">
-          <History className="history-icon" /> 
+          <History className="" size={42} /> 
           Student History
         </h2>
         <select
@@ -181,17 +225,17 @@ const StudentHistory = () => {
       </div>
 
       {loading ? (
-        <p className="loading-message">⏳ Loading student passes...</p>
+        <p className="loading-message"><LoaderIcon /> Loading student passes...</p>
       ) : error ? (
-        <p className="error-message">❌ {error}</p>
+        <p className="error-message"><X /> {error}</p>
       ) : history.length === 0 ? (
-        <p className="no-data-message">📋 No passes found. Create a new pass request to get started.</p>
+        <p className="no-data-message"><Clipboard /> No passes found. Create a new pass request to get started.</p>
       ) : (
         <div className="student-history-cards">
           {filteredHistory.map((val) => (
-            <div key={val.year} className="mb-8">
+            <div key={val.year} className="mb-8 flex flex-col gap-4">
               <h3 className="header">{val.year}</h3>
-              <div className="space-y-4">
+              <div className="space-y-4 w-full">
                 {val.data.map((info, index) => (
                   <div
                     key={index}
@@ -236,22 +280,26 @@ const StudentHistory = () => {
                         <p className="text-secondary">
                           <strong className="text">Parent Status:</strong> {getStatusBadge(info.parent_approval, 'parent')}
                         </p>
-                        {info.wardern_approval !== null ? (
-                          <p className="text-secondary">
-                            <strong className="text">Warden Status:</strong> {getStatusBadge(info.wardern_approval, 'warden')}
-                          </p>
-                        ) : info.superior_wardern_approval !== null ? (
+                        {info.notify_superior ? (
                           <p className="text-secondary">
                             <strong className="text">Superior Warden Status:</strong> {getStatusBadge(info.superior_wardern_approval, 'superior')}
                           </p>
                         ) : (
-                          <div className="stu-edit-container">
-                            <button className='stu-edit-button' onClick={(e) => handleEditClick(info.pass_id, e)}>
-                              <span>Edit Request</span>
-                            </button>
-                          </div>
+                          <p className="text-secondary">
+                            <strong className="text">Warden Status:</strong> {getStatusBadge(info.wardern_approval, 'warden')}
+                          </p>
                         )}
                     </div>
+                    </div>
+                    <div className="card-action-buttons">
+                      <button className='view-details-button' onClick={() => handleCardClick(info, val.year)}>
+                        <span>View Details</span>
+                      </button>
+                      {!info.wardern_approval && !info.superior_wardern_approval && (
+                        <button className='stu-edit-button' onClick={(e) => handleEditClick(info.pass_id, e)}>
+                          <span>Edit Request</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

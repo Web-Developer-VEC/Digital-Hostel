@@ -6,6 +6,7 @@ import { Plane } from '@react-three/drei';
 import "./Hostel_Login.css"
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { createJsonRequest } from '../../api/axios';
 
 function SkyBox() {
   const mesh = useRef(null);
@@ -108,25 +109,18 @@ function LoginForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page refresh
+    e.preventDefault();
   
     try {
-      console.log("Reached try block");
-      
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Needed for session authentication
-        body: JSON.stringify({ registration_number, password, type }),
+      const response = await createJsonRequest("/api/login", { 
+        registration_number, 
+        password, 
+        type 
       });
   
-      const data = await response.json();
+      const data = response.data;
   
-      if (response.ok) {
-        console.log("Response ok");
-        
+      if (response.status === 200) {
         setMessage(`Success: ${data.message}`);
         Swal.fire({
           title: "Login Successful",
@@ -139,23 +133,29 @@ function LoginForm() {
             navigate(data.redirect);
           },
         });
-      } else {
-        // Custom alerts based on error response
-        if (data.error === "User Not Found") {
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      
+      // Handle specific error responses from server
+      if (error.response?.data) {
+        const { error: errorMsg } = error.response.data;
+        
+        if (errorMsg === "User Not Found") {
           Swal.fire({
             title: "User Not Found",
             text: "The provided Registration Number or ID does not exist in our system.",
             icon: "warning",
             confirmButtonText: "Try Again",
           });
-        } else if (data.error === "Invalid credentials") {
+        } else if (errorMsg === "Invalid credentials") {
           Swal.fire({
             title: "Incorrect Password",
             text: "The password you entered is incorrect. Please try again.",
             icon: "error",
             confirmButtonText: "Retry",
           });
-        } else if (data.error === "Invalid user type") {
+        } else if (errorMsg === "Invalid user type") {
           Swal.fire({
             title: "Invalid User Type",
             text: "Please select the correct login type before signing in.",
@@ -165,21 +165,16 @@ function LoginForm() {
         } else {
           Swal.fire({
             title: "Login Failed",
-            text: data.error || "An unknown error occurred. Please try again later.",
+            text: errorMsg || "An unknown error occurred. Please try again later.",
             icon: "error",
             confirmButtonText: "Close",
           });
         }
+        setMessage(`Error: ${errorMsg}`);
+      } else {
+        // Network error or other issues (already handled by axios interceptor)
+        setMessage("Error connecting to the server");
       }
-    } catch (error) {
-      setMessage("Error connecting to the server");
-      Swal.fire({
-        title: "Server Error",
-        text: "Could not connect to the server. Please check your internet connection or try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      console.error("Login Error:", error);
     }
   };  
 

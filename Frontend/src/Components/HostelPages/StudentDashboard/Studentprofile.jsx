@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Info, Check } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
 import './Studentprofile.css';
 
 function Studentprofile() {
@@ -22,24 +23,23 @@ function Studentprofile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/fetch_student_profile');
-        const data = await response.json();
+        const response = await axiosInstance.get('/api/fetch_student_profile');
+        const data = response.data.profile;
         
-        if (response.ok) {
-          setFormData(data);
-          setInitialFormData(data);
+        console.log(data);
+        
+        
+        setFormData(data);
+        setInitialFormData(data);
 
-          if (data.edit_status === null) {  // ✅ "Pending" (case-sensitive fix)
-            setIsWaitingApproval(true);
-            setPendingChanges(data.changes || []); // ✅ Directly store the pending changes
-          } else {
-            setIsWaitingApproval(false);
-            setPendingChanges([]);
-          }
-          
+        if (data.edit_status === null) {  // ✅ "Pending" (case-sensitive fix)
+          setIsWaitingApproval(true);
+          setPendingChanges(data.changes || []); // ✅ Directly store the pending changes
         } else {
-          console.error('Failed to fetch profile:', data.message);
+          setIsWaitingApproval(false);
+          setPendingChanges([]);
         }
+          
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
@@ -80,46 +80,28 @@ function Studentprofile() {
     try {
       // Send request for food type change
       if (foodTypeChanged) {
-        const foodTypeResponse = await fetch("/api/change_food_type", {
-          method: "POST",
-          credentials: "include", // Needed for session authentication
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            admissionNumber: formData.admin_number, // Assuming this is required
+        try {
+          await axiosInstance.post("/api/change_food_type", {
+            admissionNumber: formData.admin_number,
             foodType: formData.foodtype,
-          }),
-        });
-  
-        if (!foodTypeResponse.ok) {
-          const errorData = await foodTypeResponse.json();
-          console.error("Food change request failed:", errorData.message);
-        } else {
+          });
           console.log("Food change request successful.");
+        } catch (error) {
+          console.error("Food change request failed:", error.response?.data?.message || error.message);
         }
       }
   
       // Send request for other profile updates
       if (profileChanged) {
-        const profileResponse = await fetch("/api/request_profile_update", {
-          method: "POST",
-          credentials: "include", // Needed for session authentication
-          headers: {
-            "Content-Type": "application/json", 
-          },
-          body: JSON.stringify({
+        try {
+          await axiosInstance.post("/api/request_profile_update", {
             phone_number_student: formData.phone_number_student,
             phone_number_parent: formData.phone_number_parent,
             name: formData.name,
-          }),
-        });
-  
-        if (!profileResponse.ok) {
-          const errorData = await profileResponse.json();
-          console.error("Profile update request failed:", errorData.message);
-        } else {
+          });
           console.log("Profile update request successful.");
+        } catch (error) {
+          console.error("Profile update request failed:", error.response?.data?.message || error.message);
         }
       }
    
