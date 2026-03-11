@@ -112,13 +112,16 @@ function LoginForm() {
     e.preventDefault();
   
     try {
+      console.log(process.env.REACT_APP_BASE_URL)
       const response = await createJsonRequest("/api/login", { 
         registration_number, 
         password, 
         type 
       });
+      console.log(response)
   
       const data = response.data;
+      console.log(data)
   
       if (response.status === 200) {
         setMessage(`Success: ${data.message}`);
