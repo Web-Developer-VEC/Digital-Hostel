@@ -166,7 +166,13 @@ export default function SecurityCheckout() {
 
   const handlePassAction = async (action) => {
     if (!passDetails) return;
-    const endpoint = action === "accept" ? "/api/security_accept" : "/api/security_decline";
+
+    let endpoint;
+    
+    if(action === "accept"){
+       endpoint = "/api/security_accept"
+    }
+    //  const endpoint = action === "accept" ? "/api/security_accept" : "/api/security_decline";
 
     try {
       setLoading(true);
