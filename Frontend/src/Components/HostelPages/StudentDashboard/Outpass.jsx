@@ -395,6 +395,7 @@ const handleUpdatePass = async () => {
     formData.append("mobile_number", phone_number_student);
     formData.append("name", studentData?.name);
     formData.append("department_name", studentData?.department);
+    formData.append("batch", studentData?.batch);
     formData.append("year", studentData?.year);
     formData.append("room_no", studentData?.room_number);
     formData.append("registration_number", studentData?.registration_number);
@@ -561,6 +562,10 @@ const handleUpdatePass = async () => {
                 <div className="HS-input-group">
                   <label className="HS-label">Department Name</label>
                   <input type="text" className="HS-input" value={studentData?.department} />
+                </div>
+                <div className="HS-input-group">
+                  <label className="HS-label">Batch</label>
+                  <input type="text" className="HS-input" value={studentData?.batch} />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Year</label>

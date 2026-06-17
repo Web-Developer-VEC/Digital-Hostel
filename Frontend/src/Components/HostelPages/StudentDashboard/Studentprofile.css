@@ -204,8 +204,19 @@
 
 /* Food Type Section */
 .student-food-type {
-  margin-top: 1rem;
+  margin-bottom: 1rem;
   grid-column: span 1;
+}
+
+.student-food-type label{
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  
 }
 
 /* Pending Changes Section */

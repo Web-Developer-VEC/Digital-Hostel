@@ -13,8 +13,9 @@ async function Login(req, res) {
         error: "All fields (registration_number, password, type) are required",
       });
     }
-
+   
     let collectionName;
+    let query;
 
     if (type === "student") {
       collectionName = "student_database";
@@ -75,7 +76,7 @@ function Logout(req, res) {
       res.clearCookie("connect.sid");
       return res.json({
         message: "Logged out successfully",
-        redirect: "/hostel/login",
+        redirect: "/",
       });
     });
   } else {
