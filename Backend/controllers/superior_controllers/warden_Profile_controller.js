@@ -269,7 +269,7 @@ async function updatewarden(req, res) {
         const oldKey = older_file_path;
         await s3
           .deleteObject({
-            Bucket: process.env.AWS_S3_NAME,
+            Bucket: process.env.AWS_BUCKET_NAME,
             Key: oldKey,
           })
           .promise();

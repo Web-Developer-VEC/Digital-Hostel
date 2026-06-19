@@ -16,20 +16,20 @@ export default function SecurityCheckout() {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef(null);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  
+  const BASE_URL = process.env.REACT_APP_QR_URL;
+
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
   const navigate = useNavigate();
 
-  const handleLogout = async ()=>{
+  const handleLogout = async () => {
 
     try {
       const response = await fetch("/api/logout", {
         method: "GET",
-        credentials: "include", 
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -40,7 +40,7 @@ export default function SecurityCheckout() {
           title: "Log out",
           text: data.message,
           icon: "success",
-          timer: 2000, 
+          timer: 2000,
           showConfirmButton: false,
           willClose: () => {
             Swal.close();
@@ -48,7 +48,7 @@ export default function SecurityCheckout() {
           },
         });
       } else {
-          console.error("Error During Logout");
+        console.error("Error During Logout");
       }
     } catch (error) {
       console.error("Logout Error:", error);
@@ -56,7 +56,7 @@ export default function SecurityCheckout() {
   }
 
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -85,7 +85,7 @@ export default function SecurityCheckout() {
 
     try {
       console.log("I am in");
-      
+
       const permissionStatus = await navigator.permissions.query({ name: "camera" });
 
       if (permissionStatus.state === "denied") {
@@ -168,9 +168,9 @@ export default function SecurityCheckout() {
     if (!passDetails) return;
 
     let endpoint;
-    
-    if(action === "accept"){
-       endpoint = "/api/security_accept"
+
+    if (action === "accept") {
+      endpoint = "/api/security_accept"
     }
     //  const endpoint = action === "accept" ? "/api/security_accept" : "/api/security_decline";
 
@@ -204,16 +204,16 @@ export default function SecurityCheckout() {
   // Handle print action
   const handlePrint = () => {
     if (!modalRef.current) return;
-  
+
     // Clone the modal content
     const printContents = modalRef.current.cloneNode(true);
-  
+
     // Remove action buttons
     const actionButtons = printContents.querySelector('.action-buttons');
     if (actionButtons) {
       actionButtons.remove();
     }
-  
+
     // Remove remarks textarea if it has no content
     const remarksTextarea = printContents.querySelector('.remarks-section textarea');
     if (remarksTextarea && !remarksTextarea.value.trim()) {
@@ -222,7 +222,7 @@ export default function SecurityCheckout() {
         remarksSection.remove();
       }
     }
-  
+
     // Create a hidden iframe
     const printIframe = document.createElement('iframe');
     printIframe.style.position = 'absolute';
@@ -230,10 +230,10 @@ export default function SecurityCheckout() {
     printIframe.style.height = '0';
     printIframe.style.border = 'none';
     document.body.appendChild(printIframe);
-  
+
     // Inject the cloned content into the iframe
     printIframe.contentDocument.body.appendChild(printContents);
-  
+
     // Add print-specific styles to the iframe
     const printStyles = `
       @media print {
@@ -373,14 +373,14 @@ export default function SecurityCheckout() {
         }
       }
     `;
-  
+
     const styleElement = document.createElement('style');
     styleElement.innerHTML = printStyles;
     printIframe.contentDocument.head.appendChild(styleElement);
-  
+
     // Trigger the print dialog
     printIframe.contentWindow.print();
-  
+
     // Clean up the iframe after printing
     setTimeout(() => {
       document.body.removeChild(printIframe);
@@ -393,11 +393,11 @@ export default function SecurityCheckout() {
         setShowPopup(false);
       }
     };
-  
+
     if (showPopup) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-  
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -405,15 +405,15 @@ export default function SecurityCheckout() {
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return { date: "N/A", time: "N/A" }; // Handle missing values
-  
+
     const dateObj = new Date(dateTime);
-    
+
     return {
       date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }), // Example: "21 February 2025"
       time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) // Example: "09:00 AM"
     };
   };
-  
+
 
   return (
     <>
@@ -467,130 +467,130 @@ export default function SecurityCheckout() {
             </button>
           </>
         )}
-      {showPopup && <div className="security-login-overlay"></div>}
+        {showPopup && <div className="security-login-overlay"></div>}
 
         {/* Popup Card */}
         {/* Popup Card */}
         {showPopup && passDetails && (
-      <div className="modal-overlay">
-        <div className="modal-card" ref={modalRef}>
-          <button
-            onClick={() => setShowPopup(false)}  // Close popup when clicked
-            className="close-button"
-          >
-            <X size={20} />
-          </button>
+          <div className="modal-overlay">
+            <div className="modal-card" ref={modalRef}>
+              <button
+                onClick={() => setShowPopup(false)}  // Close popup when clicked
+                className="close-button"
+              >
+                <X size={20} />
+              </button>
 
-          {/* Header with compact profile */}
-          <div className="profile-header">
-            <img
-              src={UrlParser(passDetails.profile_image)}
-              alt="Profile"
-              className="profile-image"
-            />
-            <div className="profile-info">
-              <h2>{passDetails.name}</h2>
-              <p>{passDetails.dept} • {yearToAlphabet[passDetails.year]}</p>
-            </div>
-          </div>
-
-          {/* Quick Info */}
-          <div className="quick-info">
-            <div className="info-item">
-              <MapPin size={16} />
-              <span>{passDetails.room_no}</span>
-            </div>
-            <div className="info-item">
-              <Phone size={16} />
-              <span><a href={`tel:${passDetails.mobile_number}`} className="no-underline">{passDetails.mobile_number}</a></span>
-            </div>
-          </div>
-
-          {/* Pass Details */}
-          <div className="pass-details">
-            <div className="time-details">
-              <div>
-                <p className="label">From</p>
-                <p className="value">{formatDateTime(passDetails.from).date} at {formatDateTime(passDetails.from).time}</p>
-              </div>
-              <div> 
-                <p className="label">To</p>
-                <p className="value">{formatDateTime(passDetails.to).date} at {formatDateTime(passDetails.to).time}</p>
-              </div>
-            </div>
-
-            <div className="reason-details">
-              <p className="label">Pass Type</p>
-              <p className="value">{passTypeParse[passDetails.passtype]}</p>
-            </div>
-
-            <div className="reason-details">
-              <p className="label">Place & Reason</p>
-              <p className="value">{passDetails.place_to_visit} / {passDetails.reason_type}</p><br></br>
-              {passDetails.reason_for_visit !== "" && (
-                <>
-                  <p className="label">Description</p>
-                  <p>{passDetails.reason_for_visit}</p>
-                </>
-              )}
-            </div>
-
-            {/* Status Badges */}
-            <div className="status-badges">
-              <div className={`status-badge ${passDetails.parent_approval ? "approved" : "pending"}`}>
-                <p className="badge-label">Parent Approval</p>
-                <p className="badge-value">{passDetails.parent_approval ? "Accepted" : "Pending"}</p>
-              </div>
-              {passDetails.superior_wardern_approval === null ? (
-                <div className={`status-badge ${passDetails.wardern_approval ? "approved" : "pending"}`}>
-                  <p className="badge-label">Warden Approval</p>
-                  <p className="badge-value">{passDetails.wardern_approval ? "Approved" : "Pending"}</p>
+              {/* Header with compact profile */}
+              <div className="profile-header">
+                <img
+                  src={UrlParser(passDetails.profile_image)}
+                  alt="Profile"
+                  className="profile-image"
+                />
+                <div className="profile-info">
+                  <h2>{passDetails.name}</h2>
+                  <p>{passDetails.dept} • {yearToAlphabet[passDetails.year]}</p>
                 </div>
-              ) : (
-                <div className={`status-badge ${passDetails.superior_wardern_approval ? "approved" : "pending"}`}>
-                  <p className="badge-label">Superior Warden Approval</p>
-                  <p className="badge-value">{passDetails.superior_wardern_approval ? "Approved" : "Pending"}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Remarks */}
-            {passDetails.comment !== null && (
-              <div className="remarks-section">
-                <label>Warden Notes</label>
-                {/* <textarea rows={2} placeholder="Add your remarks here..." /> */}
-                <p>{passDetails.comment}</p>
               </div>
-            )}
 
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              {passDetails.exit_time !== null ? (
-                <button className="accept-button" onClick={() => {
-                  handlePassAction("accept");
-                  setShowPopup(false);
-                }}>
-                  Check In
-                </button>
-              ) : (
-                <>
-                {/* <button className="reject-button" onClick={() => handlePassAction("decline")}>
+              {/* Quick Info */}
+              <div className="quick-info">
+                <div className="info-item">
+                  <MapPin size={16} />
+                  <span>{passDetails.room_no}</span>
+                </div>
+                <div className="info-item">
+                  <Phone size={16} />
+                  <span><a href={`tel:${passDetails.mobile_number}`} className="no-underline">{passDetails.mobile_number}</a></span>
+                </div>
+              </div>
+
+              {/* Pass Details */}
+              <div className="pass-details">
+                <div className="time-details">
+                  <div>
+                    <p className="label">From</p>
+                    <p className="value">{formatDateTime(passDetails.from).date} at {formatDateTime(passDetails.from).time}</p>
+                  </div>
+                  <div>
+                    <p className="label">To</p>
+                    <p className="value">{formatDateTime(passDetails.to).date} at {formatDateTime(passDetails.to).time}</p>
+                  </div>
+                </div>
+
+                <div className="reason-details">
+                  <p className="label">Pass Type</p>
+                  <p className="value">{passTypeParse[passDetails.passtype]}</p>
+                </div>
+
+                <div className="reason-details">
+                  <p className="label">Place & Reason</p>
+                  <p className="value">{passDetails.place_to_visit} / {passDetails.reason_type}</p><br></br>
+                  {passDetails.reason_for_visit !== "" && (
+                    <>
+                      <p className="label">Description</p>
+                      <p>{passDetails.reason_for_visit}</p>
+                    </>
+                  )}
+                </div>
+
+                {/* Status Badges */}
+                <div className="status-badges">
+                  <div className={`status-badge ${passDetails.parent_approval ? "approved" : "pending"}`}>
+                    <p className="badge-label">Parent Approval</p>
+                    <p className="badge-value">{passDetails.parent_approval ? "Accepted" : "Pending"}</p>
+                  </div>
+                  {passDetails.superior_wardern_approval === null ? (
+                    <div className={`status-badge ${passDetails.wardern_approval ? "approved" : "pending"}`}>
+                      <p className="badge-label">Warden Approval</p>
+                      <p className="badge-value">{passDetails.wardern_approval ? "Approved" : "Pending"}</p>
+                    </div>
+                  ) : (
+                    <div className={`status-badge ${passDetails.superior_wardern_approval ? "approved" : "pending"}`}>
+                      <p className="badge-label">Superior Warden Approval</p>
+                      <p className="badge-value">{passDetails.superior_wardern_approval ? "Approved" : "Pending"}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Remarks */}
+                {passDetails.comment !== null && (
+                  <div className="remarks-section">
+                    <label>Warden Notes</label>
+                    {/* <textarea rows={2} placeholder="Add your remarks here..." /> */}
+                    <p>{passDetails.comment}</p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="action-buttons">
+                  {passDetails.exit_time !== null ? (
+                    <button className="accept-button" onClick={() => {
+                      handlePassAction("accept");
+                      setShowPopup(false);
+                    }}>
+                      Check In
+                    </button>
+                  ) : (
+                    <>
+                      {/* <button className="reject-button" onClick={() => handlePassAction("decline")}>
                   Reject
                 </button> */}
-                <button className="accept-button" onClick={() => handlePassAction("accept")}>
-                  Check Out
-                </button>
-                <button className="print-button" onClick={handlePrint}>
-                  <Printer size={16} />
-                </button>           
-                </>
-              )}
+                      <button className="accept-button" onClick={() => handlePassAction("accept")}>
+                        Check Out
+                      </button>
+                      <button className="print-button" onClick={handlePrint}>
+                        <Printer size={16} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
-    )}
-      </div>
-    </>   
+    </>
   );
 }

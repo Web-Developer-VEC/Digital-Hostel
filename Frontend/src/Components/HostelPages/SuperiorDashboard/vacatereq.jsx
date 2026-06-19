@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
+import { ArrowLeft, Search, X } from 'lucide-react';
 import './SuperiorRequest.css';
-import HostelSidebar from '../HostelSidebar';
-import showSweetAlert from '../Alert';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 function VacateReq() {
   const [records, setRecords] = useState([]);
@@ -13,17 +13,15 @@ function VacateReq() {
   const [filters, setFilters] = useState({ search: '', department: '', year: '' });
   const [departments, setDepartments] = useState([]);
   const [years, setYears] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVacateForms = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/get_all_vacate_forms', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const response = await axiosInstance.get('/api/get_all_vacate_forms');
 
-        const data = await response.json();
+        const data = response.data;
         if (data.vacate_forms) {
           setRecords(data.vacate_forms);
 
@@ -71,9 +69,11 @@ function VacateReq() {
 
   return (
     <div className="AR-app">
-      <HostelSidebar role="superior" />
       <div className="AR-main">
-        <h1 className="AR-page-title">Vacate Form Requests</h1>
+        <div className='flex items-center justify-start gap-2'>
+          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}><ArrowLeft className='w-5' />Back</button>
+          <h1 className="AR-page-title">Vacate Form Requests</h1>
+        </div>
 
         {/* Filters Section */}
         <div className="AR-filter-bar">
@@ -137,37 +137,93 @@ function VacateReq() {
         ) : filteredRecords.length === 0 ? (
           <p className="AR-no-data-message">📋 No vacate form requests found.</p>
         ) : (
-          <div className='AR-table-container'>
-          <table className="AR-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Registration Number</th>
-                <th>Department</th>
-                <th>Year</th>
-                <th>Gender</th>
-                <th>Reason for Leave</th>
-                <th>Address</th>
-                <th>Date & Time</th>
-                <th>Vacate Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record._id} onClick={() => setSelectedRecord(record)}>
-                  <td>{record.name}</td>
-                  <td>{record.registration_number}</td>
-                  <td>{record.dept}</td>
-                  <td>{record.year}</td>
-                  <td>{record.gender}</td>
-                  <td>{record.reason_for_leave}</td>
-                  <td>{record.Address}</td>
-                  <td>{new Date(record.date_time).toLocaleString()}</td>
-                  <td>{new Date(record.vacate_date).toLocaleString()}</td>
+          <div className="w-full overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+            <table className="w-[100px]">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 min-w-[50px]">
+                    S.No
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 min-w-[150px]">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    Registration Number
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    Department
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    Batch
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    Gender
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 min-w-[350px]">
+                    Reason
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 min-w-[250px]">
+                    Address
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    Date & Time
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    Vacate Date
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {filteredRecords.map((record, index) => (
+                  <tr
+                    key={record._id}
+                    onClick={() => setSelectedRecord(record)}
+                    className="border-t border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-800">
+                      {index + 1}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800">
+                      {record.name}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 whitespace-nowrap">
+                      {record.registration_number}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800">
+                      {record.dept}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 whitespace-nowrap">
+                      {record.batch}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800">
+                      {record.gender}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 break-words max-w-[350px]">
+                      {record.Reason}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 break-words max-w-[250px]">
+                      {record.Address}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 whitespace-nowrap">
+                      {new Date(record.date_time).toLocaleString()}
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-gray-800 whitespace-nowrap">
+                      {new Date(record.vacate_date).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -211,14 +267,13 @@ function DetailModal({ record, onClose }) {
     });
 
     try {
-      const response = await fetch('/api/archive_student', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_id: record.registration_number, action: action }),
+      const response = await axiosInstance.post('/api/archive_student', {
+        student_id: record.registration_number,
+        action: action
       });
-      const data = await response.json();
-      
-      if (response.ok) {
+      const data = response.data;
+
+      if (response.status === 200) {
         Swal.fire({
           title: "Success! ✅",
           text: data.message || `Vacate request ${action === 'approve' ? 'approved' : 'declined'} successfully.`,

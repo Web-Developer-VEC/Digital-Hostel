@@ -13,43 +13,36 @@ function Studentprofile() {
   const [initialFormData, setInitialFormData] = useState(formData);
   const [changedFields, setChangedFields] = useState({});
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
+  const BASE_URL = process.env.REACT_APP_QR_URL;
 
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
+  const fetchProfile = async () => {
+    try {
+      const response = await axiosInstance.get('/api/fetch_student_profile');
+      const data = response.data.profile;
+
+      setFormData(data);
+      setInitialFormData(data);
+
+      const hasPendingChanges = data.changes && data.changes.length > 0;
+      setIsWaitingApproval(hasPendingChanges);
+      setPendingChanges(data.changes || []);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
   // Fetch profile data from the backend when component mounts
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosInstance.get('/api/fetch_student_profile');
-        const data = response.data.profile;
-        
-        console.log(data);
-        
-        
-        setFormData(data);
-        setInitialFormData(data);
-
-        if (data.edit_status === null) {  // ✅ "Pending" (case-sensitive fix)
-          setIsWaitingApproval(true);
-          setPendingChanges(data.changes || []); // ✅ Directly store the pending changes
-        } else {
-          setIsWaitingApproval(false);
-          setPendingChanges([]);
-        }
-          
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
     fetchProfile();
   }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
-    setInitialFormData(formData); //Not in GPT
+    setInitialFormData(formData);
     setHasChanges(false);
     setChangedFields({});
   };
@@ -58,39 +51,39 @@ function Studentprofile() {
     let changes = {};
     let foodTypeChanged = false;
     let profileChanged = false;
-  
+
     // Identify what has changed
     Object.keys(formData).forEach((key) => {
       if (formData[key] !== initialFormData[key]) {
         changes[key] = formData[key];
-  
-        if (key === "foodType") {
+
+        if (key === "foodtype") {
           foodTypeChanged = true; // Food type changed
         } else {
           profileChanged = true; // Other profile fields changed
         }
       }
     });
-  
+
     setChangedFields(changes);
     setIsWaitingApproval(true);
     setIsEditing(false);
     setFormData(initialFormData);
-  
+
     try {
       // Send request for food type change
       if (foodTypeChanged) {
         try {
           await axiosInstance.post("/api/change_food_type", {
             admissionNumber: formData.admin_number,
-            foodType: formData.foodtype,
+            foodtype: formData.foodtype,
           });
           console.log("Food change request successful.");
         } catch (error) {
           console.error("Food change request failed:", error.response?.data?.message || error.message);
         }
       }
-  
+
       // Send request for other profile updates
       if (profileChanged) {
         try {
@@ -104,19 +97,19 @@ function Studentprofile() {
           console.error("Profile update request failed:", error.response?.data?.message || error.message);
         }
       }
-   
+
       if (foodTypeChanged || profileChanged) {
         setIsApproved(true);
         setIsWaitingApproval(true);
+        await fetchProfile();
       }
     } catch (error) {
       console.error("Error requesting change:", error);
     }
-    window.location.reload();
   };
-  
-  
-  
+
+
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const newFormData = {
@@ -149,7 +142,7 @@ function Studentprofile() {
                 <input
                   type="text"
                   name="name"
-                  value={formData?.name}
+                  value={formData?.name || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing || isWaitingApproval}
                   className="student-input"
@@ -161,7 +154,7 @@ function Studentprofile() {
                 <input
                   type="text"
                   name="room_number"
-                  value={formData?.room_number}
+                  value={formData?.room_number || ""}
                   onChange={handleInputChange}
                   disabled={true}
                   className="student-input"
@@ -173,7 +166,7 @@ function Studentprofile() {
                 <input
                   type="text"
                   name="department"
-                  value={formData?.department}
+                  value={formData?.department || ""}
                   onChange={handleInputChange}
                   disabled={true}
                   className="student-input"
@@ -188,7 +181,7 @@ function Studentprofile() {
               <input
                 type="text"
                 name="year"
-                value={formData?.year}
+                value={formData?.year || ""}
                 onChange={handleInputChange}
                 disabled={true}
                 className="student-input"
@@ -200,7 +193,7 @@ function Studentprofile() {
               <input
                 type="text"
                 name="admissionNumber"
-                value={formData?.admin_number}
+                value={formData?.admin_number || ""}
                 onChange={handleInputChange}
                 disabled={true}
                 className="student-input"
@@ -212,7 +205,7 @@ function Studentprofile() {
               <input
                 type="text"
                 name="city"
-                value={formData?.city}
+                value={formData?.city || ""}
                 onChange={handleInputChange}
                 disabled={true}
                 className="student-input"
@@ -225,7 +218,7 @@ function Studentprofile() {
                 <input
                   type="tel"
                   name="phone_number_student"
-                  value={formData?.phone_number_student}
+                  value={formData?.phone_number_student || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing || isWaitingApproval}
                   className="student-input"
@@ -237,7 +230,7 @@ function Studentprofile() {
                 <input
                   type="tel"
                   name="phone_number_parent"
-                  value={formData?.phone_number_parent}
+                  value={formData?.phone_number_parent || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing || isWaitingApproval}
                   className="student-input"
@@ -248,14 +241,14 @@ function Studentprofile() {
             <div className="student-food-type">
               <label>Food Type</label>
               <select
-                name="foodType"
-                // value={formData?.foodtype}
+                name="foodtype"
+                value={formData?.foodtype || ""}
                 onChange={handleInputChange}
                 disabled={!isEditing || isWaitingApproval}
                 className="student-input"
               >
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Non-Vegetarian">Non-Vegetarian</option>
+                <option value="Veg">Vegetarian</option>
+                <option value="Non-Veg">Non-Vegetarian</option>
               </select>
             </div>
           </div>
@@ -266,7 +259,7 @@ function Studentprofile() {
               <div className="pending-changes-grid">
                 {pendingChanges.map((change, index) => {
                   // Splitting based on ": " to extract field name and new value
-                  const [field, value] = change.split(/:\s(.+)/); 
+                  const [field, value] = change.split(/:\s(.+)/);
 
                   return (
                     <div key={index} className="pending-change-item">
@@ -275,10 +268,10 @@ function Studentprofile() {
                     </div>
                   );
                 })}
-                </div>
               </div>
-            )}
-          
+            </div>
+          )}
+
           <div className="student-actions">
             {isEditing ? (
               <button

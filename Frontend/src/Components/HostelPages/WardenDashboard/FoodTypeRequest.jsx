@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, Home, ArrowLeft } from 'lucide-react';
 import './FoodTypeRequest.css';
-import HostelSidebar from '../HostelSidebar';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import axiosInstance from '../../../api/axios';
 
 function FoodTypeRequest() {
   const [records, setRecords] = useState([]);
@@ -17,10 +17,11 @@ function FoodTypeRequest() {
   // Fetch warden years
   const fetchWardenDetails = async () => {
     try {
-      const response = await fetch('/api/sidebar_warden');
-      const data = await response.json();
-      if (data["primary year"]) {
-        setWardenYears([...data["primary year"]]);
+      const response = await axiosInstance.get('/api/sidebar_warden');
+      const data = response.data;
+      const years = data["primary batch"] || data["primary year"];
+      if (years) {
+        setWardenYears([...years]);
       }
     } catch (error) {
       console.error("❌ Error fetching warden details:", error);
@@ -37,8 +38,8 @@ function FoodTypeRequest() {
   const fetchFoodRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/food_requests_changes');
-      const data = await response.json();
+      const response = await axiosInstance.get('/api/food_requests_changes');
+      const data = response.data;
       if (data.requests) {
         setRecords(data.requests);
         setDepartments([...new Set(data.requests.map(req => req.department))]);
@@ -95,13 +96,13 @@ function FoodTypeRequest() {
     });
 
     try {
-      const response = await fetch('/api/approve_food_change', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registration_number, name, action })
+      const response = await axiosInstance.post('/api/approve_food_change', {
+        registration_number,
+        name,
+        action
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         Swal.fire({
           title: "Success! ✅",
           text: `Food type request ${action === 'approve' ? 'accepted' : 'declined'} successfully.`,
@@ -109,26 +110,12 @@ function FoodTypeRequest() {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          setRecords(records.filter(record => record.registration_number !== registration_number));
+          setRecords((prev) => prev.filter(record => record.registration_number !== registration_number));
           setSelectedRecord(null);
-        });
-      } else {
-        const errorData = await response.json();
-        Swal.fire({
-          title: "Error ❌",
-          text: errorData.message || `Failed to ${actionText} request. Please try again.`,
-          icon: "error",
-          confirmButtonText: "OK"
         });
       }
     } catch (error) {
       console.error(`❌ Error processing ${action} request:`, error);
-      Swal.fire({
-        title: "Error ❌",
-        text: "Failed to process request. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK"
-      });
     }
   };
 
@@ -149,9 +136,11 @@ function FoodTypeRequest() {
 
   return (
     <div className="VR-app">
-      <HostelSidebar role="warden" />
       <div className="VR-main">
-        <h1 className="VR-page-title">Food Type Requests</h1>
+        <div className='flex gap-3 items-center'>
+          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}><ArrowLeft className='w-5' />Back</button>
+          <h1 className="VR-page-title">Food Type Requests</h1>
+        </div>
 
         {/* Filter Bar */}
         <div className="VR-filter-bar">
@@ -171,9 +160,9 @@ function FoodTypeRequest() {
               {wardenYears.map(year => (
                 <option key={year} value={year}>
                   {year === 1 ? "First Year" :
-                   year === 2 ? "Second Year" :
-                   year === 3 ? "Third Year" :
-                   year === 4 ? "Fourth Year" : `Year ${year}`}
+                    year === 2 ? "Second Year" :
+                      year === 3 ? "Third Year" :
+                        year === 4 ? "Fourth Year" : `Year ${year}`}
                 </option>
               ))}
             </select>
@@ -196,40 +185,40 @@ function FoodTypeRequest() {
         ) : (
           <div className='SR-table-container'>
 
-          <table className="VR-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Year</th>
-                <th>Room</th>
-                <th>Food Type</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record.registration_number} onClick={() => setSelectedRecord(record)}>
-                  <td>{record.name}</td>
-                  <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
-                  <td>{record.room_number}</td>
-                  <td className="VR-food-cell">
-                    <span className={`VR-food-old ${record.previous_foodtype === 'Veg' ? 'food-veg' : 'food-nonveg'}`}>
-                      {record.previous_foodtype}
-                    </span>
-                    <ArrowRight size={16} className="VR-food-arrow" />
-                    <span className={`VR-food-new ${record.requested_foodtype === 'Veg' ? 'food-veg' : 'food-nonveg'}`}>
-                      {record.requested_foodtype}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`VR-status ${record.status === null ? "VR-status-warning" : record.status ? "VR-status-success" : "VR-status-danger"}`}>
-                      {record.status === null ? "Pending" : record.status ? "Accepted" : "Declined"}
-                    </span>
-                  </td>
+            <table className="VR-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Year</th>
+                  <th>Room</th>
+                  <th>Food Type</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredRecords.map((record) => (
+                  <tr key={record.registration_number} onClick={() => setSelectedRecord(record)}>
+                    <td>{record.name}</td>
+                    <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
+                    <td>{record.room_number}</td>
+                    <td className="VR-food-cell">
+                      <span className={`VR-food-old ${record.previous_foodtype === 'Veg' ? 'food-veg' : 'food-nonveg'}`}>
+                        {record.previous_foodtype}
+                      </span>
+                      <ArrowRight size={16} className="VR-food-arrow" />
+                      <span className={`VR-food-new ${record.requested_foodtype === 'Veg' ? 'food-veg' : 'food-nonveg'}`}>
+                        {record.requested_foodtype}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`VR-status ${record.status === null ? "VR-status-warning" : record.status ? "VR-status-success" : "VR-status-danger"}`}>
+                        {record.status === null ? "Pending" : record.status ? "Accepted" : "Declined"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -239,15 +228,15 @@ function FoodTypeRequest() {
             record={selectedRecord}
             onClose={() => setSelectedRecord(null)}
             onAccept={() => handleAction(
-              selectedRecord.registration_number, 
-              selectedRecord.name, 
+              selectedRecord.registration_number,
+              selectedRecord.name,
               "approve",
               selectedRecord.previous_foodtype,
               selectedRecord.requested_foodtype
             )}
             onDecline={() => handleAction(
-              selectedRecord.registration_number, 
-              selectedRecord.name, 
+              selectedRecord.registration_number,
+              selectedRecord.name,
               "decline",
               selectedRecord.previous_foodtype,
               selectedRecord.requested_foodtype

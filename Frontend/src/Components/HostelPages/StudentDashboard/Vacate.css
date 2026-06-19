@@ -135,6 +135,7 @@
         opacity: 0;
         transform: scaleY(0);
     }
+
     to {
         opacity: 1;
         transform: scaleY(1);
@@ -161,11 +162,11 @@
         height: 45px;
     }
 
-    .v-input-group{
+    .v-input-group {
         width: 100%;
     }
 
-    .print{
+    .print {
         display: flex;
         /* flex-direction: column; */
         justify-content: center;
@@ -185,96 +186,128 @@
         height: 45px;
     }
 
-    .v-actions-centered{
+    .v-actions-centered {
         margin-bottom: 100px;
 
     }
-    
+
 }
 
 @media print {
-  body * {
-    visibility: hidden;
-  }
+    @page {
+        margin: 0;
+    }
 
-  .v-container, .v-container * {
-    visibility: visible;
-  }
+    body {
+        margin: 1cm !important;
+        background: #fff;
+    }
 
-  .v-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
+    body * {
+        visibility: hidden;
+    }
 
-  .v-actions-centered {
-    display: none;
-  }
+    .print-form,
+    .print-form * {
+        visibility: visible !important;
+    }
 
-  .print-only {
-    display: block !important;
-  }
+    .print-form {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        height: 90vh !important;
+        min-height: 90vh !important;
+        border: 2px solid #000 !important;
+        margin: 0 !important;
+        padding: 40px !important;
+        box-sizing: border-box !important;
+    }
 
-  .print-form {
-    page-break-before: always;
-    height: 100vh;
-  }
-  .signatures {
-    position: absolute;
-    bottom: 30px;
-    width: 60%;
-  }
+    .signatures {
+        position: absolute !important;
+        bottom: 50px !important;
+        left: 40px !important;
+        right: 40px !important;
+        width: auto !important;
+        display: flex !important;
+        justify-content: space-between !important;
+    }
+
+    .form-count {
+        position: absolute !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
 }
 
-.form-count{
+.form-count {
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
     left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
 }
 
 .print-form {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
+    display: none;
+    width: 85%;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 40px;
     font-family: "Times New Roman", Times, serif;
     color: black;
-    padding: 30px;
-  }
-  
-  .print-form h2, .print-form h3 {
+    border: 2px solid #000;
+    position: relative;
+    min-height: 800px;
+    box-sizing: border-box;
+}
+
+.print-form h2,
+.print-form h3 {
     text-align: center;
     margin-bottom: 10px;
-  }
-  
-  .print-form table {
+}
+
+.print-form table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 40px;
-  }
-  
-  .print-form td {
-    padding: 10px;
-  }
-  
-  .print-form td:first-child {
+}
+
+.print-form td {
+    padding: 12px 10px;
+    font-size: 16px;
+}
+
+.print-form td:first-child {
     width: 40%;
     font-weight: bold;
     text-align: left;
-  }
-  
-  .print-form td:first-child::after {
+}
+
+.print-form td:first-child::after {
     content: " :";
     float: right;
-  }
-  
-  .signatures {
+}
+
+.signatures {
     position: absolute;
-    bottom: 10%;
-    width: 80%;
+    bottom: 60px;
+    left: 40px;
+    right: 40px;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
     font-weight: bold;
-  }
-  
+    font-size: 16px;
+}

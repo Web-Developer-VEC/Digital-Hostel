@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, ArrowLeft } from 'lucide-react';
 import './ProfileChangeRequest.css';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import axiosInstance from '../../../api/axios';
 
 function SuperiorRequest() {
   const [records, setRecords] = useState([]);
@@ -14,31 +15,29 @@ function SuperiorRequest() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch warden years
+  // Fetch warden details
   const fetchWardenDetails = async () => {
     try {
-      const response = await fetch('/api/sidebar_warden');
-      const data = await response.json();
-      if (data["primary year"]) {
-        setWardenYears([...data["primary year"]]);
+      const response = await axiosInstance.get('/api/sidebar_warden');
+      const data = response.data;
+      // const years = data["primary batch"] || data["primary year"];
+      const years = [1, 2, 3, 4];
+      if (years) {
+        setWardenYears([...years]);
       }
     } catch (error) {
       console.error("❌ Error fetching warden details:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "❌ Failed to fetch warden details. Please refresh the page.",
-        icon: "error",
-        showConfirmButton: true
-      });
     }
   };
 
-  // Fetch food type requests
+  // Fetch profile change requests
   const fetchFoodRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/profile_request_changes');
-      const data = await response.json();
+      const response = await axiosInstance.get('/api/profile_request_changes');
+      const data = response.data;
+      console.log("dada", data);
+
       if (data.requests && data.requests.length > 0) {
         setRecords(data.requests);
         setDepartments([...new Set(data.requests.map(req => req.department))]);
@@ -47,12 +46,6 @@ function SuperiorRequest() {
       }
     } catch (error) {
       console.error("❌ Error fetching profile change requests:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "❌ Failed to load profile change requests. Please try again.",
-        icon: "error",
-        showConfirmButton: true
-      });
     } finally {
       setLoading(false);
     }
@@ -71,41 +64,25 @@ function SuperiorRequest() {
   // Accept/Decline Handlers
   const handleAction = async (registration_number, action) => {
     try {
-      const response = await fetch('/api/handle_request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registration_number, action })
+      const response = await axiosInstance.post('/api/handle_request', {
+        registration_number,
+        action
       });
 
-      if (response.ok) {
-        setRecords(records.filter(record => record.registration_number !== registration_number));
-        Swal.fire({
-          title: "Success!",
-          text: `✅ Profile request ${action === 'approve' ? 'approved' : 'declined'} successfully.`,
-          icon: "success",
-          timer: 2000,
-          showConfirmButton: false,
-          willClose: () => {
-            Swal.close();
-          },
-        });
-        setSelectedRecord(null);
-      } else {
-        Swal.fire({
-          title: "Error!",
-          text: `❌ Failed to ${action} the request. Please try again.`,
-          icon: "error",
-          showConfirmButton: true
-        });
-      }
+      setRecords(records.filter(record => record.registration_number !== registration_number));
+      Swal.fire({
+        title: "Success!",
+        text: `✅ Profile request ${action === 'approve' ? 'approved' : 'declined'} successfully.`,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        willClose: () => {
+          Swal.close();
+        },
+      });
+      setSelectedRecord(null);
     } catch (error) {
       console.error(`❌ Error processing ${action} request:`, error);
-      Swal.fire({
-        title: "Error!",
-        text: "❌ An error occurred while processing the request.",
-        icon: "error",
-        showConfirmButton: true
-      });
     }
   };
 
@@ -127,7 +104,10 @@ function SuperiorRequest() {
   return (
     <div className="VR-app">
       <div className="VR-main">
-        <h1 className="VR-page-title">Profile Change Requests</h1>
+        <div className='flex items-center justify-start gap-2'>
+          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}><ArrowLeft className='w-5' />Back</button>
+          <h1 className="VR-page-title">Profile Change Requests</h1>
+        </div>
 
         {/* Filter Bar */}
         <div className="VR-filter-bar">
@@ -141,29 +121,29 @@ function SuperiorRequest() {
             />
           </div>
           <div className="VR-filters">
-          <div className="SR-gender-buttons">
-          <button
-            className={`SR-gender-button ${activeGender === 'Male' ? 'SR-gender-button-active' : ''}`}
-            onClick={() => handleGenderFilter(activeGender === 'Male' ? '' : 'Male')}
-          >
-            Boys
-          </button>
-          <button
-            className={`SR-gender-button ${activeGender === 'Female' ? 'SR-gender-button-active' : ''}`}
-            onClick={() => handleGenderFilter(activeGender === 'Female' ? '' : 'Female')}
-          >
-            Girls
-          </button>
-        </div>
+            <div className="SR-gender-buttons">
+              <button
+                className={`SR-gender-button ${activeGender === 'Male' ? 'SR-gender-button-active' : ''}`}
+                onClick={() => handleGenderFilter(activeGender === 'Male' ? '' : 'Male')}
+              >
+                Boys
+              </button>
+              <button
+                className={`SR-gender-button ${activeGender === 'Female' ? 'SR-gender-button-active' : ''}`}
+                onClick={() => handleGenderFilter(activeGender === 'Female' ? '' : 'Female')}
+              >
+                Girls
+              </button>
+            </div>
             {/* Year Filter */}
             <select className="VR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}>
               <option value="">All Years</option>
               {wardenYears.map(year => (
                 <option key={year} value={year}>
                   {year === 1 ? "First Year" :
-                   year === 2 ? "Second Year" :
-                   year === 3 ? "Third Year" :
-                   year === 4 ? "Fourth Year" : `Year ${year}`}
+                    year === 2 ? "Second Year" :
+                      year === 3 ? "Third Year" :
+                        year === 4 ? "Fourth Year" : `Year ${year}`}
                 </option>
               ))}
             </select>
@@ -188,7 +168,8 @@ function SuperiorRequest() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Year</th>
+                <th>Department</th>
+                {/* <th>Year</th> */}
                 <th>Room</th>
                 <th>Status</th>
               </tr>
@@ -197,7 +178,8 @@ function SuperiorRequest() {
               {filteredRecords.map((record) => (
                 <tr key={record.registration_number} onClick={() => setSelectedRecord(record)}>
                   <td>{record.from_data.name}</td>
-                  <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
+                  <td>{record.department}</td>
+                  {/* <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td> */}
                   <td>{record.room_number}</td>
                   <td>
                     <span className={`VR-status ${record.edit_status === null ? "VR-status-warning" : record.edit_status ? "VR-status-success" : "VR-status-danger"}`}>
@@ -314,7 +296,7 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
 
           {/* Action Buttons */}
           <div className="SR-modal-footer">
-            <button 
+            <button
               onClick={() => {
                 Swal.fire({
                   title: "Decline Request?",
@@ -330,12 +312,12 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                     onDecline();
                   }
                 });
-              }} 
+              }}
               className="SR-button SR-button-secondary"
             >
               Decline
             </button>
-            <button 
+            <button
               onClick={() => {
                 Swal.fire({
                   title: "Accept Request?",
@@ -351,7 +333,7 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                     onAccept();
                   }
                 });
-              }} 
+              }}
               className="SR-button SR-button-primary"
             >
               Accept

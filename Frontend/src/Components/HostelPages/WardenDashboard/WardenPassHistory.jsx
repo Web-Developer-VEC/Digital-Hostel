@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, FileText, Filter } from 'lucide-react';
-import './WardenRequest.css';
-import HostelSidebar from '../HostelSidebar';
-import { useNavigate } from 'react-router-dom';
+import { Search, X, FileText, Filter, ArrowLeft } from 'lucide-react';
 import Swal from 'sweetalert2';
+import axiosInstance from '../../../api/axios';
+import { useNavigate } from 'react-router-dom';
 
-function WardenHistory() {
+function WardenPassHistory() {
   const [records, setRecords] = useState([]);
   const [wardenYears, setWardenYears] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [passTypes, setPassTypes] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [isMedical, setIsMedical] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [filters, setFilters] = useState({ year: '', department: '', passType: '', search: '', date: '', status: '' });
-  console.log(selectedDate);
-  
-
   const navigate = useNavigate();
 
   // Mapping Department Codes to Full Names
@@ -44,7 +39,7 @@ function WardenHistory() {
   };
 
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -59,10 +54,11 @@ function WardenHistory() {
 
   const fetchWardenDetails = async () => {
     try {
-      const response = await fetch('/api/sidebar_warden');
-      const data = await response.json();
-      if (data["primary year"] && Array.isArray(data["primary year"])) {
-        setWardenYears([...data["primary year"]]);
+      const response = await axiosInstance.get('/api/sidebar_warden');
+      const data = response.data;
+      const years = data["primary batch"] || data["primary year"];
+      if (years && Array.isArray(years)) {
+        setWardenYears([...years]);
       }
     } catch (error) {
       console.error("Error fetching warden details:", error);
@@ -76,20 +72,16 @@ function WardenHistory() {
   };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchPendingPasses = async (selectedDate) => {
       setLoading(true);
       try {
-        const response = await fetch('/api/fetch_old_passes_for_warden', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ date: selectedDate }) 
+        const response = await axiosInstance.get('/api/fetch_passes_', {
+          params: { date: selectedDate }
         });
-    
-        const data = await response.json();
-    
+
+        const data = response.data;
+
         if (data.data) {
           setRecords(data.data);
           setDepartments([...new Set(data.data.map(pass => pass.dept))]);
@@ -99,24 +91,19 @@ function WardenHistory() {
         }
       } catch (error) {
         console.error("Error fetching passes:", error);
-        Swal.fire({
-          title: "Error ❌",
-          text: "Failed to fetch pass history. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK"
-        });
+        setRecords([]);
       } finally {
         setLoading(false);
       }
     };
     fetchPendingPasses(selectedDate);
 
-  },[selectedDate])
-  
+  }, [selectedDate])
+
   const filteredRecords = records.filter(record => {
     const searchQuery = filters.search.toLowerCase();
     const recordDate = new Date(record.from).toISOString().split('T')[0];
-    
+
     return (
       (!filters.year || record.year.toString() === filters.year) &&
       (!filters.department || record.dept === filters.department) &&
@@ -136,9 +123,11 @@ function WardenHistory() {
 
   return (
     <div className="AR-app">
-      <HostelSidebar role="warden" />
       <div className="AR-main">
-        <h1 className="AR-page-title"> Previous Requests of {wardenYears.map((year) => `${yearToAlphabet[year]} `)} year</h1>
+        <div className='flex gap-3 items-center'>
+          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}><ArrowLeft className='w-5' />Back</button>
+          <h1 className="AR-page-title"> Previous Requests of {wardenYears.map((year) => `${yearToAlphabet[year]} `)} year</h1>
+        </div>
 
         <div className="AR-filter-bar">
           <div className="AR-search-container">
@@ -157,16 +146,16 @@ function WardenHistory() {
               {wardenYears.map(year => (
                 <option key={year} value={year}>
                   {year === 1 ? "First Year" :
-                   year === 2 ? "Second Year" :
-                   year === 3 ? "Third Year" :
-                   year === 4 ? "Fourth Year" :
-                   year === 10 ? "MBA" :
-                   year === 9 ? "ME" : `year ${year}`}
+                    year === 2 ? "Second Year" :
+                      year === 3 ? "Third Year" :
+                        year === 4 ? "Fourth Year" :
+                          year === 10 ? "MBA" :
+                            year === 9 ? "ME" : `year ${year}`}
                 </option>
               ))}
             </select>
 
-             {/* Department Filter */}
+            {/* Department Filter */}
             <select className="AR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}>
               <option value="">All Departments</option>
               {departments.length > 0 ? (
@@ -200,16 +189,16 @@ function WardenHistory() {
               value={selectedDate}  // Bind the value to state
               onChange={(e) => {
                 const newDate = e.target.value;
-                setSelectedDate(newDate);  
-                setFilters(prev => ({ ...prev, date: newDate })); 
+                setSelectedDate(newDate);
+                setFilters(prev => ({ ...prev, date: newDate }));
                 // fetchPendingPasses(newDate); 
               }}
             />
 
             <select className="AR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}>
-                <option value="">All Statuses</option>
-                <option value="accepted">Accepted</option>
-                <option value="declined">Declined</option>
+              <option value="">All Statuses</option>
+              <option value="accepted">Accepted</option>
+              <option value="declined">Declined</option>
             </select>
           </div>
         </div>
@@ -220,34 +209,34 @@ function WardenHistory() {
           <p className="AR-no-data-message">📋 No pass requests found for the selected date and filters.</p>
         ) : (
           <div className='AR-table-container'>
-          <table className="AR-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Year</th>
-                <th>Room</th>
-                <th>Req data</th>
-                <th>Pass Type</th>
-                <th>from Date</th>
-                <th>Warden Approval</th>
-                <th>Parent Approval</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords?.map((record) => {
-                const getStatusClass = (status) => {
-                  if (status === null) return "AR-status-orange"; // Pending (Orange)
-                  return status ? "AR-status-green" : "AR-status-red"; // Accepted (Green) | Declined (Red)
-                };    
+            <table className="AR-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Year</th>
+                  <th>Room</th>
+                  <th>Req data</th>
+                  <th>Pass Type</th>
+                  <th>from Date</th>
+                  <th>Warden Approval</th>
+                  <th>Parent Approval</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRecords?.map((record) => {
+                  const getStatusClass = (status) => {
+                    if (status === null) return "AR-status-orange"; // Pending (Orange)
+                    return status ? "AR-status-green" : "AR-status-red"; // Accepted (Green) | Declined (Red)
+                  };
 
-                return (
-                  <tr key={record.pass_id} onClick={() => setSelectedRecord(record)}>
-                    <td>{record.name}</td>
-                    <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
-                    <td>{record.room_no}</td>
-                    <td>{new Date(record.request_time).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
-                    <td>{passTypeLabels[record.passtype] || record.passtype}</td>
-                    <td>{new Date(record.from).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
+                  return (
+                    <tr key={record.pass_id} onClick={() => setSelectedRecord(record)}>
+                      <td>{record.name}</td>
+                      <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
+                      <td>{record.room_no}</td>
+                      <td>{new Date(record.request_time).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
+                      <td>{passTypeLabels[record.passtype] || record.passtype}</td>
+                      <td>{new Date(record.from).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
                       <td>
                         {record.wardern_approval !== null ? (
                           <span className={`AR-status-circle ${getStatusClass(record.wardern_approval)}`}>
@@ -264,19 +253,19 @@ function WardenHistory() {
                           {record.parent_approval === null ? "Pending" : record.parent_approval ? "Accepted" : "Declined"}
                         </span>
                       </td>
-                  </tr>
-                );
+                    </tr>
+                  );
                 })}
-                </tbody>
-          </table>
+              </tbody>
+            </table>
           </div>
         )}
 
         {selectedRecord && (
           <DetailModal
-          record={selectedRecord}
-          onClose={() => setSelectedRecord(null)}
-        />
+            record={selectedRecord}
+            onClose={() => setSelectedRecord(null)}
+          />
         )}
       </div>
     </div>
@@ -320,7 +309,7 @@ function DetailModal({ record, onClose }) {
 
   let formattedInDate = "Not yet returned";
   let formattedINTime = "";
-  
+
   if (record.re_entry_time) {
     const indateTime = new Date(record.re_entry_time);
     formattedInDate = indateTime.toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
@@ -330,10 +319,10 @@ function DetailModal({ record, onClose }) {
       hour12: true
     });
   }
-  
+
   const handleDocumentButtonClick = (e) => {
     e.stopPropagation(); // Prevent click from propagating to overlay
-    
+
     if (!record.file_path) {
       Swal.fire({
         title: "No Document",
@@ -343,7 +332,7 @@ function DetailModal({ record, onClose }) {
       });
       return;
     }
-    
+
     // Show loading message
     Swal.fire({
       title: "Loading Document ⏳",
@@ -374,7 +363,7 @@ function DetailModal({ record, onClose }) {
     "staypass": "Stay Pass",
     "leave": "Leave"
   };
-  
+
   const reasonTypeLabels = {
     "intern": "Intern",
     "semester": "Semester",
@@ -382,121 +371,121 @@ function DetailModal({ record, onClose }) {
     "medical": "Medical",
     "others": "Other"
   };
-  
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  
+
+  const BASE_URL = process.env.REACT_APP_QR_URL;
+
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
-  return(
-      <div className="AR-modal-overlay" onClick={handleOverlayClick}> {/* Overlay click handler for main modal */}
-            <div className="AR-modal-container" onClick={handleModalClick}> {/* Modal click handler */}
-            <div className="AR-modal-content">
-              <div className="AR-modal-header">
-                <h2 className="AR-title">Request Details</h2>
-                <button onClick={onClose} className="AR-close-button">
-                  <X className="AR-icon" />
-                </button>
-              </div>
-    
-              <div className="AR-modal-body">
-                <PairedInfo
-                  left={{ label: "Name", value: record.name }}
-                  right={{ label: "Department", value: record.dept }}
-                />
-                
-                <PairedInfo
-                  left={{ label: "Year", value: record.year }}
-                  right={{ label: "Room", value: record.room_no }}
-                />
-                
-                <PairedInfo
-                  left={{ 
-                    label: "Pass Type", 
-                    value: (
-                      <span className="AR-badge AR-badge-primary">
-                        {passTypeLabels[record.passtype] || record.passtype}
-                      </span>
-                    )
-                  }}
-
-                  right={{ 
-                    label: "Returned Detail", 
-                    value: `${formattedInDate} - ${formattedINTime}` 
-                  }}
-                />
-    
-                <PairedInfo 
-                  left={{ label: "From Date", value: formattedFromDate }} 
-                  right={{ label: "From Time", value: formattedFromTime }} 
-                />
-                <PairedInfo 
-                  left={{ label: "To Date", value: formattedToDate }} 
-                  right={{ label: "To Time", value: formattedToTime }} 
-                />
-    
-                <PairedInfo
-                  left={{ label: "Place to Visit", value: record.place_to_visit }}
-                  right={{
-                    label: "Reason Category",
-                    value: (
-                      <span className="AR-badge AR-badge-secondary">
-                        {reasonTypeLabels[record.reason_type] || record.reason_type}
-                      </span>
-                    )
-                  }}
-                />
-
-                {record.reason_type === 'others' && (
-                  <div className="AR-additional-info">
-                    <span className="AR-label">Additional Details</span>
-                    <p className="AR-value">{record.reason_for_visit || ''}</p>
-                  </div>
-                )}
-
-                {record.comment !== null &&  (
-                  <div className="AR-warden-note">
-                    <span className="AR-label-warden">Warden notes</span>
-                    <p>{record.comment}</p>
-                  </div>
-                )}
-              </div>
-    
-              {(record.passtype === 'od' || record.passtype === 'leave') && record.file_path && (
-                <button
-                  onClick={handleDocumentButtonClick}  // Use the new handler
-                  className="AR-document-button"
-                >
-                  <FileText className="AR-icon" />
-                  <span>View Document</span>
-                </button>
-              )}
-            </div>
+  return (
+    <div className="AR-modal-overlay" onClick={handleOverlayClick}> {/* Overlay click handler for main modal */}
+      <div className="AR-modal-container" onClick={handleModalClick}> {/* Modal click handler */}
+        <div className="AR-modal-content">
+          <div className="AR-modal-header">
+            <h2 className="AR-title">Request Details</h2>
+            <button onClick={onClose} className="AR-close-button">
+              <X className="AR-icon" />
+            </button>
           </div>
-    
-          {showDocument && (
-            <div className="AR-document-modal" onClick={handleOverlayClick}> {/* Overlay click handler */}
-              <div className="AR-document-container" onClick={handleModalClick}> {/* Modal click handler */}
-                {/* ... document content */}
-                <div className="AR-document-header">
-                  <h3 className="AR-document-title">Document Preview</h3>
-                  <button onClick={() => setShowDocument(false)} className="AR-close-button">
-                    <X className="AR-icon" />
-                  </button>
-                </div>
-                <div className="AR-document-content">
-                  <iframe
-                    src={UrlParser(record.file_path)}
-                    className="AR-document-frame"
-                    title="Document Preview"
-                  />
-                </div>
+
+          <div className="AR-modal-body">
+            <PairedInfo
+              left={{ label: "Name", value: record.name }}
+              right={{ label: "Department", value: record.dept }}
+            />
+
+            <PairedInfo
+              left={{ label: "Year", value: record.year }}
+              right={{ label: "Room", value: record.room_no }}
+            />
+
+            <PairedInfo
+              left={{
+                label: "Pass Type",
+                value: (
+                  <span className="AR-badge AR-badge-primary">
+                    {passTypeLabels[record.passtype] || record.passtype}
+                  </span>
+                )
+              }}
+
+              right={{
+                label: "Returned Detail",
+                value: `${formattedInDate} - ${formattedINTime}`
+              }}
+            />
+
+            <PairedInfo
+              left={{ label: "From Date", value: formattedFromDate }}
+              right={{ label: "From Time", value: formattedFromTime }}
+            />
+            <PairedInfo
+              left={{ label: "To Date", value: formattedToDate }}
+              right={{ label: "To Time", value: formattedToTime }}
+            />
+
+            <PairedInfo
+              left={{ label: "Place to Visit", value: record.place_to_visit }}
+              right={{
+                label: "Reason Category",
+                value: (
+                  <span className="AR-badge AR-badge-secondary">
+                    {reasonTypeLabels[record.reason_type] || record.reason_type}
+                  </span>
+                )
+              }}
+            />
+
+            {record.reason_type === 'others' && (
+              <div className="AR-additional-info">
+                <span className="AR-label">Additional Details</span>
+                <p className="AR-value">{record.reason_for_visit || ''}</p>
               </div>
-            </div>
+            )}
+
+            {record.comment !== null && (
+              <div className="AR-warden-note">
+                <span className="AR-label-warden">Warden notes</span>
+                <p>{record.comment}</p>
+              </div>
+            )}
+          </div>
+
+          {(record.passtype === 'od' || record.passtype === 'leave') && record.file_path && (
+            <button
+              onClick={handleDocumentButtonClick}  // Use the new handler
+              className="AR-document-button"
+            >
+              <FileText className="AR-icon" />
+              <span>View Document</span>
+            </button>
           )}
         </div>
+      </div>
+
+      {showDocument && (
+        <div className="AR-document-modal" onClick={handleOverlayClick}> {/* Overlay click handler */}
+          <div className="AR-document-container" onClick={handleModalClick}> {/* Modal click handler */}
+            {/* ... document content */}
+            <div className="AR-document-header">
+              <h3 className="AR-document-title">Document Preview</h3>
+              <button onClick={() => setShowDocument(false)} className="AR-close-button">
+                <X className="AR-icon" />
+              </button>
+            </div>
+            <div className="AR-document-content">
+              <iframe
+                src={UrlParser(record.file_path)}
+                className="AR-document-frame"
+                title="Document Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
-export default WardenHistory;
+export default WardenPassHistory;

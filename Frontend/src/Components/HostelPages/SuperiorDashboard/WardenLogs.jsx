@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./WardenLogs.css";
 import Swal from 'sweetalert2';
+import axiosInstance from "../../../api/axios";
+
+const yearToAlphabet = {
+  '1': 'First Year',
+  '2': 'Second Year',
+  '3': 'Third Year',
+  '4': 'Fourth Year',
+  '10': 'MBA',
+  '9': 'ME',
+  'overall': 'Overall'
+};
 
 const WardenLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -18,14 +29,9 @@ const WardenLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await fetch("/api/fetch_logs");
+        const response = await axiosInstance.get("/api/fetch_logs");
         
-        if (!response.ok) {
-          throw new Error("Failed to fetch logs");
-        }
-        
-        const data = await response.json();
-        setLogs(data.logs);
+        setLogs(response.data.logs);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching logs:", err);
@@ -75,7 +81,7 @@ const WardenLogs = () => {
       // Add reassignment details to the existing entry
       existingEntry.reassignedTo.push({
         name: log.new_warden_name,
-        years: log.transferred_year,
+        years: log.transferred_batch || log.transferred_year || "",
       });
     });
 
@@ -163,7 +169,7 @@ const WardenLogs = () => {
                     Responsibilities transferred: <br />
                     {entry.reassignedTo.map((warden, idx) => (
                       <span key={idx} className="HOS-W-transfer-text">
-                        <strong>{warden.years} year{warden.years > 1 ? "s" : ""}</strong> → <strong>{warden.name}</strong> 
+                        <strong>{yearToAlphabet[warden.years] || warden.years}</strong> → <strong>{warden.name}</strong> 
                         <br />
                       </span>
                     ))}

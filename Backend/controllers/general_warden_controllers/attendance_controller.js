@@ -26,7 +26,7 @@ async function getFoodCount(req, res) {
     const target_years =
       userType === "superior"
         ? await studentCollection.distinct("year")
-        : warden_data.primary_year;
+        : (warden_data.primary_batch || warden_data.primary_year);
 
     let foodCounts = {};
 

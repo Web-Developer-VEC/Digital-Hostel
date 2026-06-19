@@ -1,5 +1,4 @@
 const { getDb } = require("../../config/db");
-const { generateQR } = require("../../services/generateQR.service");
 
 async function profileChangeRequestSuperior(req, res) {
   try {
@@ -194,6 +193,7 @@ async function confirmVacate(req, res) {
 
     if (action === "decline") {
       await vacateCollection.deleteOne({ registration_number: student_id });
+      await studentCollection.updateOne({ registration_number: student_id }, { $set: { superior_wardern_approval: false } })
       return res.json({
         message: "Student vacate request declined, removed from vacate forms",
       });

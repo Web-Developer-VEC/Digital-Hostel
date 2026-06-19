@@ -1,23 +1,19 @@
 /* App Layout */
 .AR-app {
-  display: flex;
   min-height: 100vh;
   background-color: #f9fafb;
   margin-left: 16rem;
-  margin-top: -20px;
 }
 
 .AR-main {
   flex: 1;
-  padding: 2rem;
-  margin-top: -20px;
+  padding: 1rem;
 }
 
 .AR-page-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 1.5rem;
 }
 
 /* Sidebar Styles */
@@ -43,12 +39,12 @@
   transition: background-color 0.2s;
 }
 
-.student-nav-button:hover{
+.student-nav-button:hover {
   background-color: #fdcd03;
   color: #000;
 }
 
-.student-nav-button:hover .student-icon{
+.student-nav-button:hover .student-icon {
   color: #fff;
 }
 
@@ -67,6 +63,7 @@
   margin-right: 0.75rem;
   color: #fdcd03;
 }
+
 /* Filter Bar Styles */
 .AR-filter-bar {
   margin-bottom: 1.5rem;
@@ -129,7 +126,8 @@
 }
 
 input[type="date"].AR-filter-select {
-  appearance: none; /* Remove default styling */
+  appearance: none;
+  /* Remove default styling */
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -233,7 +231,7 @@ input[type="date"].AR-filter-select {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter:blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 .AR-modal-container {
@@ -249,15 +247,18 @@ input[type="date"].AR-filter-select {
 
 /* Row Colors */
 .AR-row-green {
-  background-color: #f0fdf4  !important; /* Light Green */
+  background-color: #f0fdf4 !important;
+  /* Light Green */
 }
 
 .AR-row-orange {
-  background-color: #fff7ed !important; /* Light Orange */
+  background-color: #fff7ed !important;
+  /* Light Orange */
 }
 
 .AR-row-red {
-  background-color: #fef3f3 !important; /* Light Red */
+  background-color: #fef3f3 !important;
+  /* Light Red */
 }
 
 /* Late Count Circle */
@@ -270,20 +271,24 @@ input[type="date"].AR-filter-select {
   text-align: center;
   font-weight: bold;
   color: rgb(4, 0, 0);
-  background-color: #343a40; /* Dark Gray */
+  background-color: #343a40;
+  /* Dark Gray */
 }
 
 /* Make Circle Match Row Color */
 .AR-late-circle.AR-row-green {
-  background-color: #cff4dc !important; /* Dark Green */
+  background-color: #cff4dc !important;
+  /* Dark Green */
 }
 
 .AR-late-circle.AR-row-orange {
-  background-color: #fbe8cf !important; /* Dark Orange */
+  background-color: #fbe8cf !important;
+  /* Dark Orange */
 }
 
 .AR-late-circle.AR-row-red {
-  background-color: #ffaeb6a9 !important; /* Dark Red */
+  background-color: #ffaeb6a9 !important;
+  /* Dark Red */
 }
 
 /* Status Circle */
@@ -294,24 +299,27 @@ input[type="date"].AR-filter-select {
   line-height: 25px;
   border-radius: 15px;
   text-align: center;
-  font-weight:lighter;
+  font-weight: lighter;
   color: rgb(0, 0, 0);
 }
 
 /* Status Colors */
 .AR-status-green {
-  background-color: #cff4dc !important; /* Green */
+  background-color: #cff4dc !important;
+  /* Green */
 }
 
 .AR-status-orange {
-  background-color: #fbe8cf !important; /* Orange */
+  background-color: #fbe8cf !important;
+  /* Orange */
 }
 
 .AR-status-red {
-  background-color: #ffaeb6a9 !important; /* Red */
+  background-color: #ffaeb6a9 !important;
+  /* Red */
 }
 
-.AR-status-gray{
+.AR-status-gray {
   background-color: #e8f0e9 !important;
 }
 
@@ -598,13 +606,13 @@ input[type="date"].AR-filter-select {
     width: 100%;
   }
 
-  .AR-app{
+  .AR-app {
     margin-top: 2.5rem;
     flex-direction: column;
     margin-left: 0rem;
   }
 
-  .Food-Request-button{
+  .Food-Request-button {
     text-align: left;
     background-color: #fdcc03;
     padding: 10px;
@@ -616,7 +624,7 @@ input[type="date"].AR-filter-select {
 
 }
 
-.Food-Request-button{
+.Food-Request-button {
   background-color: #fdcc03;
   padding: 8px;
   border-radius: 10px;
@@ -653,7 +661,8 @@ textarea {
 
 textarea:focus {
   outline: none;
-  border-color: #007bff; /* Blue color when focused */
+  border-color: #007bff;
+  /* Blue color when focused */
 }
 
 textarea::placeholder {
@@ -661,9 +670,8 @@ textarea::placeholder {
   font-style: italic;
 }
 
-.navigate-button{
+.navigate-button {
   display: flex;
   justify-content: space-between;
   width: 100%;
 }
-

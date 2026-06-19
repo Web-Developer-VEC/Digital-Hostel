@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   BarChart3,
   FileText,
   Users,
   ClipboardCheck,
-  UserX, 
-  AlertTriangle, 
+  UserX,
+  AlertTriangle,
   Utensils,
-  X 
+  X
 } from 'lucide-react';
 import './AttendanceDashboard.css';
-import HostelSidebar from '../HostelSidebar';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -87,14 +86,14 @@ function AttendanceDashboard() {
   const [activeNav, setActiveNav] = useState('attendance'); // Add this for mobile navigation
   const [foodCount, setFoodCount] = useState(null);
   const [availableYear, setAvailableYears] = useState(null);
-  
+
 
   // ... (keep all your existing useEffect and helper functions)
   // const currentData = yearData[selectedYear];
   // const attendancePercentage = (currentData.presentStudents / currentData.totalStudents) * 100;
-  
+
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -102,80 +101,80 @@ function AttendanceDashboard() {
     '9': 'ME',
     'overall': 'Overall'
   };
-  
+
   useEffect(() => {
     // Reset animations when year changes
     setAnimatedCount(0);
     setAnimatedVeg(0);
     setAnimatedNonVeg(0);
-    
+
     // Animate half donut
     // const speedDuration = 1500;
     // const speedSteps = 60;
     // const speedIncrement = attendancePercentage / speedSteps;
     // let speedCurrent = 0;
-    
+
     // const speedInterval = setInterval(() => {
-      //   if (speedCurrent < attendancePercentage) {
-        //     speedCurrent += speedIncrement;
-        //     setAnimatedCount(Math.min(speedCurrent, attendancePercentage));
-        //   } else {
-          //     clearInterval(speedInterval);
-          //   }
-          // }, speedDuration / speedSteps);
-          
-          // Animate food counts
-          const foodDuration = 1000;
-          const foodSteps = 40;
-          const vegIncrement = vegCount / foodSteps;
-          const nonVegIncrement = nonVegCount / foodSteps;
-          let vegCurrent = 0;
-          let nonVegCurrent = 0;
-          
-          const foodInterval = setInterval(() => {
-            if (vegCurrent < vegCount || nonVegCurrent < nonVegCount) {
-              vegCurrent = Math.min(vegCurrent + vegIncrement, vegCount);
-              nonVegCurrent = Math.min(nonVegCurrent + nonVegIncrement, nonVegCount);
-              setAnimatedVeg(Math.round(vegCurrent));
-              setAnimatedNonVeg(Math.round(nonVegCurrent));
-            } else {
-              clearInterval(foodInterval);
-            }
-          }, foodDuration / foodSteps);
-          
-          return () => {
-            // clearInterval(speedInterval);
-            clearInterval(foodInterval);
-          };
-        }, [selectedYear]);
-        
-        const getSpeedometerColor = (percentage) => {
-          if(percentage > 80) return "green";
-          else if(percentage > 35) return "#fdcc03";
-          else return "red";
-        };
-        
-        const handleModalOverlayClick = (e, closeModal) => {
-          if (e.target === e.currentTarget) {
+    //   if (speedCurrent < attendancePercentage) {
+    //     speedCurrent += speedIncrement;
+    //     setAnimatedCount(Math.min(speedCurrent, attendancePercentage));
+    //   } else {
+    //     clearInterval(speedInterval);
+    //   }
+    // }, speedDuration / speedSteps);
+
+    // Animate food counts
+    const foodDuration = 1000;
+    const foodSteps = 40;
+    const vegIncrement = vegCount / foodSteps;
+    const nonVegIncrement = nonVegCount / foodSteps;
+    let vegCurrent = 0;
+    let nonVegCurrent = 0;
+
+    const foodInterval = setInterval(() => {
+      if (vegCurrent < vegCount || nonVegCurrent < nonVegCount) {
+        vegCurrent = Math.min(vegCurrent + vegIncrement, vegCount);
+        nonVegCurrent = Math.min(nonVegCurrent + nonVegIncrement, nonVegCount);
+        setAnimatedVeg(Math.round(vegCurrent));
+        setAnimatedNonVeg(Math.round(nonVegCurrent));
+      } else {
+        clearInterval(foodInterval);
+      }
+    }, foodDuration / foodSteps);
+
+    return () => {
+      // clearInterval(speedInterval);
+      clearInterval(foodInterval);
+    };
+  }, [selectedYear]);
+
+  const getSpeedometerColor = (percentage) => {
+    if (percentage > 80) return "green";
+    else if (percentage > 35) return "#fdcc03";
+    else return "red";
+  };
+
+  const handleModalOverlayClick = (e, closeModal) => {
+    if (e.target === e.currentTarget) {
       closeModal();
     }
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get('/api/food_count_warden');
         const fetchedData = response.data;
-        
-        const years = Object.keys(fetchedData).map(Number);
+
+        const years = Object.keys(fetchedData.foodCounts).map(Number);
         setAvailableYears(years);
-        
+
         if (years.length > 0) {
           setSelectedYear(years[0]);
         }
-        
-        setFoodCount(fetchedData);
-      } catch (err) { 
+
+        setFoodCount(fetchedData.foodCounts);
+      } catch (err) {
         console.error("Failed to fetch data", err);
         Swal.fire({
           title: "Error ❌",
@@ -187,8 +186,8 @@ function AttendanceDashboard() {
     };
     fetchData();
   }, []);
-  
-  const vegCount = foodCount?.[selectedYear]?.veg_count || 0; 
+
+  const vegCount = foodCount?.[selectedYear]?.veg_count || 0;
   const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
   const totalStudents = vegCount + nonVegCount;
 
@@ -203,11 +202,10 @@ function AttendanceDashboard() {
       });
     }
   }, [selectedYear, totalStudents]);
-  
-  
+
+
   return (
     <div className="attendance-container">
-      <HostelSidebar role='warden' />
       {/* Main Content */}
       <div className="attendance-main">
         {/* ... (keep all your existing main content) */}
@@ -296,7 +294,7 @@ function AttendanceDashboard() {
           </div>
       </div> */}
 
-      <div className="attendance-food-section">
+        <div className="attendance-food-section">
           <div className="attendance-food-counts">
             <div className="attendance-food-type">
               <Utensils className="attendance-food-icon attendance-veg" />
@@ -344,7 +342,7 @@ function AttendanceDashboard() {
           </div>
         </div>
 
-      {/* <button 
+        {/* <button 
         className="attendance-consolidation-button"
         onClick={() => setShowIframe(true)}
       >
@@ -370,7 +368,7 @@ function AttendanceDashboard() {
           </div>
         )} */}
 
-      {/* ... (keep all your existing modals) */}
+        {/* ... (keep all your existing modals) */}
         {/* {showAbsentModal && (
           <div 
             className="attendance-modal-overlay"
@@ -427,8 +425,8 @@ function AttendanceDashboard() {
             </div>
           </div>
         )} */}
+      </div>
     </div>
-  </div>
   );
 }
 
