@@ -1,97 +1,195 @@
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import axios from "axios";
+import Swal from "sweetalert2";
 
-// Create axios instance with default config
+let isAlertOpen = false;
+
+const showAlert = ({
+  icon = "error",
+  title = "Error",
+  text = "Something went wrong",
+}) => {
+  if (isAlertOpen) return;
+
+  isAlertOpen = true;
+
+  Swal.fire({
+    icon,
+    title,
+    text,
+    confirmButtonText: "OK",
+  }).finally(() => {
+    isAlertOpen = false;
+  });
+};
+
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL || '',
-  timeout: 30000, // 30 seconds timeout
-  withCredentials: true, // Always send cookies with requests
+  baseURL: process.env.REACT_APP_BASE_URL,
+  timeout: 30000,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    Accept: "application/json",
+    "Content-Type": "application/json",
   },
 });
 
-// Request interceptor
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // You can add auth tokens here if needed
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for global error handling
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
+
   (error) => {
-    // Handle different error scenarios
-    if (error.response) {
-      // Server responded with error status
-      const { status, data } = error.response;
+    /*
+     * Request Timeout
+     */
+    if (error.code === "ECONNABORTED") {
+      showAlert({
+        title: "Request Timeout",
+        text: "The server took too long to respond. Please try again.",
+      });
 
-      // Only handle truly global errors here
-      // Let components handle specific status codes like 401, 400, 404, etc.
-      switch (status) {
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          // Only show alert for server errors
+      return Promise.reject(error);
+    }
+
+    /*
+     * Network Error
+     */
+    if (!error.response) {
+      showAlert({
+        title: "Network Error",
+        text: "Unable to connect to the server. Please check your internet connection.",
+      });
+
+      return Promise.reject(error);
+    }
+
+    const { status, data } = error.response;
+
+    /*
+     * Don't show alerts for login errors.
+     * Login page already handles them.
+     */
+    const currentUrl = error.config?.url || "";
+
+    if (
+      currentUrl.includes("/login") &&
+      [400, 401, 404].includes(status)
+    ) {
+      return Promise.reject(error);
+    }
+
+    switch (status) {
+      case 400:
+        showAlert({
+          icon: "warning",
+          title: "Invalid Request",
+          text:
+            data?.error ||
+            data?.message ||
+            "Please verify your input.",
+        });
+        break;
+
+      case 401:
+        if (!isAlertOpen) {
+          isAlertOpen = true;
+
           Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: data.message || 'An internal server error occurred. Please try again later.',
-            confirmButtonText: 'OK'
+            icon: "warning",
+            title: "Session Expired",
+            text: "Please login again.",
+            confirmButtonText: "OK",
+          }).then(() => {
+            isAlertOpen = false;
+            window.location.href = "/";
           });
-          break;
+        }
 
-        default:
-          // Let component handle all other status codes (401, 403, 404, 400, etc.)
-          break;
-      }
-    } else if (error.request) {
-      // Request was made but no response received (network error)
-      Swal.fire({
-        icon: 'error',
-        title: 'Network Error',
-        text: 'Unable to connect to the server. Please check your internet connection.',
-        confirmButtonText: 'OK'
-      });
-    } else if (error.code === 'ECONNABORTED') {
-      // Request timeout
-      Swal.fire({
-        icon: 'error',
-        title: 'Request Timeout',
-        text: 'The request took too long. Please try again.',
-        confirmButtonText: 'OK'
-      });
+        return Promise.reject(error);
+
+      case 403:
+        showAlert({
+          icon: "warning",
+          title: "Access Denied",
+          text:
+            data?.error ||
+            "You do not have permission to perform this action.",
+        });
+        break;
+
+      case 404:
+        showAlert({
+          icon: "info",
+          title: "Not Found",
+          text:
+            data?.error ||
+            "The requested resource could not be found.",
+        });
+        break;
+
+      case 429:
+        showAlert({
+          icon: "warning",
+          title: "Too Many Requests",
+          text: "Please wait a few moments before trying again.",
+        });
+        break;
+
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        showAlert({
+          icon: "error",
+          title: "Server Error",
+          text:
+            data?.error ||
+            "The server is temporarily unavailable.",
+        });
+        break;
+
+      default:
+        showAlert({
+          icon: "error",
+          title: "Error",
+          text:
+            data?.error ||
+            data?.message ||
+            error.message ||
+            "Something went wrong.",
+        });
     }
 
     return Promise.reject(error);
   }
 );
 
-// Helper function for FormData requests
-export const createFormDataRequest = (url, formData, config = {}) => {
-  return axiosInstance.post(url, formData, {
+export const getRequest = (url, config = {}) =>
+  axiosInstance.get(url, config);
+
+export const postRequest = (url, data, config = {}) =>
+  axiosInstance.post(url, data, config);
+
+export const putRequest = (url, data, config = {}) =>
+  axiosInstance.put(url, data, config);
+
+export const patchRequest = (url, data, config = {}) =>
+  axiosInstance.patch(url, data, config);
+
+export const deleteRequest = (url, config = {}) =>
+  axiosInstance.delete(url, config);
+
+export const createJsonRequest = (url, data, config = {}) =>
+  axiosInstance.post(url, data, config);
+
+export const createFormDataRequest = (
+  url,
+  formData,
+  config = {}
+) =>
+  axiosInstance.post(url, formData, {
     ...config,
     headers: {
-      'Content-Type': 'multipart/form-data',
+      ...config.headers,
+      "Content-Type": "multipart/form-data",
     },
   });
-};
-
-// Helper function for JSON requests
-export const createJsonRequest = (url, data, config = {}) => {
-  return axiosInstance.post(url, data, config);
-};
 
 export default axiosInstance;

@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {BarChart, ClipboardList, GraduationCap, Search, Filter, Check, X, Footprints, Download } from 'lucide-react';
+import { BarChart, ClipboardList, GraduationCap, Search, Filter, Check, X, Footprints, Download } from 'lucide-react';
 import { Home, Walk } from "lucide-react";
-import HostelSidebar from '../HostelSidebar';
+
 import './Hostelstudents.css';
 import axios from 'axios';
 import DownloadPdf from '../pdf';
 import showSweetAlert from '../Alert';
 import Swal from 'sweetalert2';
+import { getRequest, postRequest } from '../../../api/axios';
 
 function Hostelstudents() {
-    const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     year: 'All',
@@ -27,17 +28,17 @@ function Hostelstudents() {
   const [yearData, setYearData] = useState(null);
   const [reg, setReg] = useState(null);
   const [editingRoomStates, setEditingRoomStates] = useState({});
-  const [tempRoomNumbers, setTempRoomNumbers] = useState({});  
-  
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  
+  const [tempRoomNumbers, setTempRoomNumbers] = useState({});
+
+  const BASE_URL = process.env.REACT_APP_QR_URL;
+
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
   // Year Mapping
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -60,12 +61,12 @@ function Hostelstudents() {
     "MECH": "Mechanical",
     "MBA": "MBA",
   };
-  
+
   // Fetching Data for warden student base
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/get_student_details');
+        const response = await getRequest('/api/get_student_details');
         if (response.data && response.data.students) {
           const formattedData = response.data.students.map((student) => ({
             id: student._id,
@@ -98,7 +99,7 @@ function Hostelstudents() {
     };
     fetchData();
   }, []);
-  
+
 
   const handleVacateStatus = async (studentId) => {
 
@@ -106,9 +107,9 @@ function Hostelstudents() {
     const student = studentsData.find(s => s.id === studentId);
 
     if (!student) {
-        console.error("Student not found for ID:", studentId);
-        showSweetAlert("Error", "Student not found!", "error");
-        return;
+      console.error("Student not found for ID:", studentId);
+      showSweetAlert("Error", "Student not found!", "error");
+      return;
     }
 
     // Confirmation dialog
@@ -138,55 +139,54 @@ function Hostelstudents() {
     });
 
     try {
-        const response = await axios.post(
-            "/api/mark_student_vacate",
-            { student_id: student.registrationNumber },  
-            { withCredentials: true }
-        );
+      const response = await postRequest(
+        "/api/mark_student_vacate",
+        { student_id: student.registrationNumber }
+      );
 
-        if (response.status === 200) {
-            Swal.fire({
-              title: "Success! ✅",
-              text: response.data.message || "Student marked as vacated successfully.",
-              icon: "success",
-              timer: 2000,
-              showConfirmButton: false
-            }).then(() => {
-              window.location.reload();
-            });
-        }
-    } catch (error) {
-        console.error("Error Fetching Data:", error);
+      if (response.status === 200) {
         Swal.fire({
-          title: "Error ❌",
-          text: error.response?.data?.message || "Failed to mark student as vacated. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK"
-        });
+          title: "Success! ✅",
+          text: response.data.message || "Student marked as vacated successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setStudentData(studentsData.map(s => s.id === studentId ? { ...s, vacateStatus: true } : s));
+        })
+      }
+    } catch (error) {
+      console.error("Error Fetching Data:", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "Failed to mark student as vacated. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
-};
+  };
 
 
   //getting year data
-  useEffect(()=>{
+  useEffect(() => {
     const fetchData = async () => {
-        try{
-          const response = await axios.get('/api/sidebar_warden');
-          const fetchdata = response.data;
-          setYearData(fetchdata?.["primary year"]); 
-        }
-        catch (err) {
-          console.error("Failed to fetch",err);
-          Swal.fire({
-            title: "Error ❌",
-            text: "Failed to fetch year data. Some filters may not work properly.",
-            icon: "error",
-            confirmButtonText: "OK"
-          });
-        }
+      try {
+        const response = await getRequest('/api/sidebar_warden');
+        const fetchdata = response.data;
+        setYearData(fetchdata?.["primary batch"] || fetchdata?.["primary year"]);
       }
-      fetchData();
-  },[]);
+      catch (err) {
+        console.error("Failed to fetch", err);
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch year data. Some filters may not work properly.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
+      }
+    }
+    fetchData();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -200,18 +200,6 @@ function Hostelstudents() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // const toggleCard = (id) => {
-  //   setExpandedCards(prev => {
-  //     const newSet = new Set(prev);
-  //     if (newSet.has(id)) {
-  //       newSet.delete(id);
-  //     } else {
-  //       newSet.add(id);
-  //     }
-  //     return newSet;
-  //   });
-  // };
 
   const toggleCard = (id) => {
     setExpandedCards(prev => (prev === id ? null : id));
@@ -233,10 +221,10 @@ function Hostelstudents() {
   const saveFoodType = async (studentId) => {
     const newFoodType = tempFoodTypes[studentId];
     if (!newFoodType) return;
-  
+
     const student = studentsData?.find(s => s.id === studentId);
     if (!student) return;
-  
+
     // Confirmation dialog
     const result = await Swal.fire({
       title: "Change Food Type?",
@@ -264,13 +252,12 @@ function Hostelstudents() {
         Swal.showLoading();
       }
     });
-  
+
     try {
-      const response = await axios.post('/api/warden_change_foodtype', 
+      await postRequest('/api/warden_change_foodtype',
         { registration_number: student.registrationNumber },
-        { withCredentials: true } 
       );
-  
+
       Swal.fire({
         title: "Success! ✅",
         text: "Food type updated successfully.",
@@ -278,17 +265,16 @@ function Hostelstudents() {
         timer: 2000,
         showConfirmButton: false
       }).then(() => {
-        setStudentData(prev => prev?.map(student => 
+        setStudentData(prev => prev?.map(student =>
           student.id === studentId
             ? { ...student, foodType: newFoodType }
             : student
         ));
-        
+
         setEditingStates(prev => ({ ...prev, [studentId]: false }));
         setTempFoodTypes(prev => ({ ...prev, [studentId]: null }));
-        window.location.reload();
       });
-  
+
     } catch (error) {
       console.error("Error updating food type:", error);
       Swal.fire({
@@ -307,12 +293,12 @@ function Hostelstudents() {
       [studentId]: studentsData.find(s => s.id === studentId)?.roomNumber
     }));
   };
-  
+
   const cancelRoomEditing = (studentId) => {
     setEditingRoomStates(prev => ({ ...prev, [studentId]: false }));
     setTempRoomNumbers(prev => ({ ...prev, [studentId]: null }));
   };
-  
+
   const saveRoomNumber = async (studentId) => {
     const newRoomNumber = tempRoomNumbers[studentId];
     if (!newRoomNumber) {
@@ -324,10 +310,10 @@ function Hostelstudents() {
       });
       return;
     }
-    
+
     const student = studentsData?.find(s => s.id === studentId);
     if (!student) return;
-  
+
     // Confirmation dialog
     const result = await Swal.fire({
       title: "Change Room Number?",
@@ -355,16 +341,16 @@ function Hostelstudents() {
         Swal.showLoading();
       }
     });
-  
+
     try {
-      const response = await axios.post('/api/edit_student_room_number', 
-        { 
-          student_id: student.registrationNumber, 
-          new_room_number: newRoomNumber 
+      await axios.post('/api/edit_student_room_number',
+        {
+          student_id: student.registrationNumber,
+          new_room_number: newRoomNumber
         },
-        { withCredentials: true } 
+        { withCredentials: true }
       );
-  
+
       Swal.fire({
         title: "Success! ✅",
         text: "Room number updated successfully.",
@@ -372,15 +358,14 @@ function Hostelstudents() {
         timer: 2000,
         showConfirmButton: false
       }).then(() => {
-        setStudentData(prev => prev?.map(student => 
+        setStudentData(prev => prev?.map(student =>
           student.id === studentId
             ? { ...student, roomNumber: newRoomNumber }
             : student
         ));
-        
+
         setEditingRoomStates(prev => ({ ...prev, [studentId]: false }));
         setTempRoomNumbers(prev => ({ ...prev, [studentId]: null }));
-        window.location.reload();
       });
     } catch (error) {
       console.error("Error updating room number:", error);
@@ -392,7 +377,7 @@ function Hostelstudents() {
       });
     }
   };
-  
+
   const handleRoomNumberChange = (studentId, newValue) => {
     setTempRoomNumbers(prev => ({ ...prev, [studentId]: newValue }));
   };
@@ -403,14 +388,14 @@ function Hostelstudents() {
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return { date: "N/A", time: "N/A" }; // Handle missing values
-  
+
     const dateObj = new Date(dateTime);
     return {
       date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }), // Example: "21 February 2025"
       time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) // Example: "09:00 AM"
     };
   };
-  
+
 
 
   const filteredStudents = studentsData?.filter(student => {
@@ -418,40 +403,39 @@ function Hostelstudents() {
     const searchTermLower = searchTerm.toLowerCase();
 
     const matchesSearch =
-        student.name.toLowerCase().includes(searchTermLower) ||
-        student.admissionNumber.toLowerCase().includes(searchTermLower) ||
-        student.area.toLowerCase().includes(searchTermLower) ||
-        student.roomNumber.toString().includes(searchTermLower) ||
-        student.studentMobile.toString().includes(searchTermLower) ||
-        departmentLabels[student.department]?.toLowerCase().includes(searchTermLower);
+      student.name.toLowerCase().includes(searchTermLower) ||
+      student.admissionNumber.toLowerCase().includes(searchTermLower) ||
+      student.area.toLowerCase().includes(searchTermLower) ||
+      student.roomNumber.toString().includes(searchTermLower) ||
+      student.studentMobile.toString().includes(searchTermLower) ||
+      departmentLabels[student.department]?.toLowerCase().includes(searchTermLower);
 
     const matchesYear =
-          filters.year === "All" || student.year === yearToAlphabet[filters.year];
-          
+      filters.year === "All" || student.year === yearToAlphabet[filters.year];
+
     const matchesDepartment =
-          filters.department === "All" || student.department === filters.department;
+      filters.department === "All" || student.department === filters.department;
 
     const matchesFoodType =
-        filters.foodType === "All" || student.foodType === filters.foodType;
+      filters.foodType === "All" || student.foodType === filters.foodType;
 
     const matchesTransitStatus =
-        filters.transitStatus === "All" || 
-        (filters.transitStatus === "true" && student.transitStatus) || 
-        (filters.transitStatus === "false" && !student.transitStatus);
+      filters.transitStatus === "All" ||
+      (filters.transitStatus === "true" && student.transitStatus) ||
+      (filters.transitStatus === "false" && !student.transitStatus);
 
-        const matchesPassType = 
-        filters.passType === 'All' ||
-        (filters.passType === 'staypass' && student.passInfo.passtype === 'staypass') ||
-        (filters.passType === 'outpass' && student.passInfo.passtype === 'outpass') ||
-        (filters.passType === 'od' && student.passInfo.passtype === 'od') ||
-        (filters.passType === 'leave' && student.passInfo.passtype === 'leave');
+    const matchesPassType =
+      filters.passType === 'All' ||
+      (filters.passType === 'staypass' && student.passInfo.passtype === 'staypass') ||
+      (filters.passType === 'outpass' && student.passInfo.passtype === 'outpass') ||
+      (filters.passType === 'od' && student.passInfo.passtype === 'od') ||
+      (filters.passType === 'leave' && student.passInfo.passtype === 'leave');
 
     return matchesSearch && matchesYear && matchesDepartment && matchesFoodType && matchesTransitStatus && matchesPassType;
-});
+  });
 
   return (
     <div className="details-container">
-      <HostelSidebar role='warden' />
       {/* Main Content */}
       <div className="details-main">
         {/* Header with Search and Filter */}
@@ -466,106 +450,106 @@ function Hostelstudents() {
               className="details-search-input"
             />
           </div>
-            <div className="buttons">
+          <div className="buttons">
 
-                <button className='filter-button download'>
-                  <Download />
-                  <DownloadPdf studentData={filteredStudents}/>
-                </button>
+            <button className='filter-button download'>
+              <Download />
+              <DownloadPdf studentData={filteredStudents} />
+            </button>
 
-                <div className="details-filter" ref={filterRef}>
-                  <button 
-                    className="filter-button"
-                    onClick={() => setShowFilters(!showFilters)}
-                  >
-                    <Filter size={20} />
-                    Filters
-                  </button>
-                  
-                  {showFilters && (
-                    <div className="filter-popup">
-                      <div className="filter-section">
-                        <label className="filter-label">Year</label>
-                        <select
-                          className="filter-select"
-                          value={filters.year}
-                          onChange={(e) => setFilters({...filters, year: e.target.value})}
-                        >
-                          <option value="All">All Years</option>
-                            {yearData?.map((year) => (
-                              <option key={year} value={year}>  
-                                {yearToAlphabet[year]}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-                      
-                      <div className="filter-section">
-                        <label className="filter-label">Department</label>
-                        <select
-                          className="filter-select"
-                          value={filters.department}
-                          onChange={(e) => setFilters({...filters, department: e.target.value})}
-                        >
-                          <option value="All">All Departments</option>
-                          <option value="AI&DS">AI</option>
-                          <option value="AUTO">Automobile</option>
-                          <option value="CIVIL">Civil</option>
-                          <option value="CSE">Computer Science</option>
-                          <option value="CYBER">Cyber</option>
-                          <option value="ECE">ECE</option>
-                          <option value="EEE">EEE</option>
-                          <option value="EIE">EIE</option>
-                          <option value="IT">IT</option>
-                          <option value="MECH">Mechanical</option>
-                          <option value="MBA">MBA</option>
-                        </select>
-                      </div>
-                      
-                      <div className="filter-section">
-                        <label className="filter-label">Food Type</label>
-                        <select
-                          className="filter-select"
-                          value={filters.foodType}
-                          onChange={(e) => setFilters({...filters, foodType: e.target.value})}
-                        >
-                          <option value="All">All Types</option>
-                          <option value="Vegetarian">Vegetarian</option>
-                          <option value="Non-Vegetarian">Non-Vegetarian</option>
-                        </select>
-                      </div>
-                      {/* Transit Status Filter */}
-                      <div className="filter-section">
-                        <label className="filter-label">Transit Status</label>
-                        <select
-                          className="filter-select"
-                          value={filters.transitStatus}
-                          onChange={(e) => setFilters({...filters, transitStatus: e.target.value})}
-                        >
-                          <option value="All">All Students</option>
-                          <option value="true">In Transit</option>
-                          <option value="false">In Hostel</option>
-                        </select>
-                      </div>
-                      <div className="filter-section">
-                        <label className="filter-label">Pass Type</label>
-                        <select
-                          className="filter-select"
-                          value={filters.passType}
-                          onChange={(e) => setFilters({ ...filters, passType: e.target.value })}
-                        >
-                          <option value="All">All Students</option>
-                          <option value="staypass">Stay Pass</option>
-                          <option value="outpass">Out Pass</option>
-                          <option value="od">OD</option>
-                          <option value="leave">Leave</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
+            <div className="details-filter" ref={filterRef}>
+              <button
+                className="filter-button"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter size={20} />
+                Filters
+              </button>
+
+              {showFilters && (
+                <div className="filter-popup">
+                  <div className="filter-section">
+                    <label className="filter-label">Year</label>
+                    <select
+                      className="filter-select"
+                      value={filters.year}
+                      onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                    >
+                      <option value="All">All Years</option>
+                      {yearData?.map((year) => (
+                        <option key={year} value={year}>
+                          {yearToAlphabet[year]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-section">
+                    <label className="filter-label">Department</label>
+                    <select
+                      className="filter-select"
+                      value={filters.department}
+                      onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                    >
+                      <option value="All">All Departments</option>
+                      <option value="AI&DS">AI</option>
+                      <option value="AUTO">Automobile</option>
+                      <option value="CIVIL">Civil</option>
+                      <option value="CSE">Computer Science</option>
+                      <option value="CYBER">Cyber</option>
+                      <option value="ECE">ECE</option>
+                      <option value="EEE">EEE</option>
+                      <option value="EIE">EIE</option>
+                      <option value="IT">IT</option>
+                      <option value="MECH">Mechanical</option>
+                      <option value="MBA">MBA</option>
+                    </select>
+                  </div>
+
+                  <div className="filter-section">
+                    <label className="filter-label">Food Type</label>
+                    <select
+                      className="filter-select"
+                      value={filters.foodType}
+                      onChange={(e) => setFilters({ ...filters, foodType: e.target.value })}
+                    >
+                      <option value="All">All Types</option>
+                      <option value="Vegetarian">Vegetarian</option>
+                      <option value="Non-Vegetarian">Non-Vegetarian</option>
+                    </select>
+                  </div>
+                  {/* Transit Status Filter */}
+                  <div className="filter-section">
+                    <label className="filter-label">Transit Status</label>
+                    <select
+                      className="filter-select"
+                      value={filters.transitStatus}
+                      onChange={(e) => setFilters({ ...filters, transitStatus: e.target.value })}
+                    >
+                      <option value="All">All Students</option>
+                      <option value="true">In Transit</option>
+                      <option value="false">In Hostel</option>
+                    </select>
+                  </div>
+                  <div className="filter-section">
+                    <label className="filter-label">Pass Type</label>
+                    <select
+                      className="filter-select"
+                      value={filters.passType}
+                      onChange={(e) => setFilters({ ...filters, passType: e.target.value })}
+                    >
+                      <option value="All">All Students</option>
+                      <option value="staypass">Stay Pass</option>
+                      <option value="outpass">Out Pass</option>
+                      <option value="od">OD</option>
+                      <option value="leave">Leave</option>
+                    </select>
+                  </div>
                 </div>
-
+              )}
             </div>
+
+          </div>
         </div>
 
         {/* Student Cards Grid */}
@@ -573,11 +557,21 @@ function Hostelstudents() {
           {filteredStudents?.map(student => (
             <div key={student.id} className="details-card">
               <div className="logo">
-                {student.transitStatus ? <Footprints size={18} className="transit-icon" /> : <Home size={18} className="home-icon" />}
+                <div className="tooltip-container">
+                  {student.transitStatus ? (
+                    <Footprints size={18} className="transit-icon" />
+                  ) : (
+                    <Home size={18} className="home-icon" />
+                  )}
+
+                  <span className="tooltip">
+                    {student.transitStatus ? "In Transit" : "In Hostel"}
+                  </span>
+                </div>
               </div>
               <div className="details-basic-info">
                 <img
-                  src={UrlParser(student.photo)} 
+                  src={UrlParser(student.photo)}
                   alt={student.name}
                   className="details-student-photo"
                 />
@@ -588,46 +582,45 @@ function Hostelstudents() {
                   <p className="details-department">{departmentLabels[student.department]}</p>
                 </div>
               </div>
-              
-              <div className={`details-extended-info ${
-                expandedCards === student.id ? 'details-expanded' : ''
-              }`}>
+
+              <div className={`details-extended-info ${expandedCards === student.id ? 'details-expanded' : ''
+                }`}>
                 <div className="details-info-grid">
-                <div className="details-info-item">
-                  <span className="details-label">Room Number:</span>
-                  {editingRoomStates[student.id] ? (
-                    <div className="details-food-edit">
-                      <input
-                        type="text"
-                        value={tempRoomNumbers[student.id] || student.roomNumber}
-                        onChange={(e) => handleRoomNumberChange(student.id, e.target.value)}
-                        className="details-room-input"
-                      />
-                      <button
-                        className="details-food-button save"
-                        onClick={() => saveRoomNumber(student.id)}
-                      >
-                        ✔
-                      </button>
-                      <button
-                        className="details-food-button cancel"
-                        onClick={() => cancelRoomEditing(student.id)}
-                      >
-                        ✘
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="details-food-display">
-                      <span>{student.roomNumber}</span>
-                      <button
-                        className="details-food-edit-button"
-                        onClick={() => startRoomEditing(student.id)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  <div className="details-info-item">
+                    <span className="details-label">Room Number:</span>
+                    {editingRoomStates[student.id] ? (
+                      <div className="details-food-edit">
+                        <input
+                          type="text"
+                          value={tempRoomNumbers[student.id] || student.roomNumber}
+                          onChange={(e) => handleRoomNumberChange(student.id, e.target.value)}
+                          className="details-room-input"
+                        />
+                        <button
+                          className="details-food-button save"
+                          onClick={() => saveRoomNumber(student.id)}
+                        >
+                          ✔
+                        </button>
+                        <button
+                          className="details-food-button cancel"
+                          onClick={() => cancelRoomEditing(student.id)}
+                        >
+                          ✘
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="details-food-display">
+                        <span>{student.roomNumber}</span>
+                        <button
+                          className="details-food-edit-button"
+                          onClick={() => startRoomEditing(student.id)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="details-info-item">
                     <span className="details-label">Transit Status:</span>
                     {student.transitStatus ? <span>In Transit</span> : <span>In Hostel</span>}
@@ -679,7 +672,7 @@ function Hostelstudents() {
                           className="details-food-button save"
                           onClick={() => saveFoodType(student.id)}
                         >
-                           ✔
+                          ✔
                         </button>
                         <button
                           className="details-food-button cancel"
@@ -699,21 +692,21 @@ function Hostelstudents() {
                         </button>
                       </div>
                     )}
-                </div>
-                {!student.vacateStatus && (
-                  <div className="details-vaccate-display">
-                    <button
-                      className="details-vaccate-button"
-                      onClick={() => handleVacateStatus(student.id)}
-                    >
-                      Mark Vaccate
-                    </button>
-                    {/* <span>Vacate </span> */}
                   </div>
-                )}
+                  {!student.vacateStatus && (
+                    <div className="details-vaccate-display">
+                      <button
+                        className="details-vaccate-button"
+                        onClick={() => handleVacateStatus(student.id)}
+                      >
+                        Mark Vaccate
+                      </button>
+                      {/* <span>Vacate </span> */}
+                    </div>
+                  )}
                 </div>
               </div>
-              
+
               <button
                 className="details-view-more"
                 onClick={() => toggleCard(student.id)}

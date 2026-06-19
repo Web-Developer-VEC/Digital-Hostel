@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import Calendar from "react-calendar"; // Import the calendar component
 import "react-calendar/dist/Calendar.css"; // Import the calendar styles
 import "./SuperiorAnalytics.css";
-import axios from "axios";
+import axiosInstance from "../../../api/axios";
 import { format } from "date-fns";
 import Swal from 'sweetalert2';
 
@@ -55,7 +55,7 @@ const Dashboard1 = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const response = await axios.get('/api/pass_measures_superior');
+          const response = await axiosInstance.get('/api/pass_measures_superior');
           const fetchedData = response.data;
     
           // Extract years from the fetched data
@@ -225,7 +225,7 @@ const Dashboard1 = () => {
     console.log(selectedGender === 'Boys' ? "Male" : "Female");
     
     try {
-      const response = await axios.post('/api/pass_analysis_superior', {
+      const response = await axiosInstance.post('/api/pass_analysis_superior', {
         type: data.name.trim().toLowerCase().replace(/\s+/g, ''), // Pass type (e.g., "od", "leave")
         year: selectedYear, // Selected year (e.g., "1", "2", "3", "4")
         gender: selectedGender === 'Boys' ? "Male" : "Female"
@@ -278,7 +278,7 @@ const Dashboard1 = () => {
     setError(null);
   
     try {
-      const response = await axios.post('/api/pass_analysis_by_date_superior', {
+      const response = await axiosInstance.post('/api/pass_analysis_by_date_superior', {
         type: chartPopupData?.title.trim().toLowerCase().replace(/\s+/g, ''), // Pass type (e.g., "od", "leave")
         year: selectedYear, // Selected year (e.g., "1", "2", "3", "4")
         gender: selectedGender === 'Boys' ? "Male" : "Female",

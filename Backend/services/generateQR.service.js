@@ -1,5 +1,5 @@
 const QRCode = require('qrcode');
-const sharp = require('sharp'); 
+const sharp = require('sharp');
 const s3 = require('../config/aws');
 
 async function generateQR(pass_id, registration_number) {
@@ -11,7 +11,7 @@ async function generateQR(pass_id, registration_number) {
     });
 
     const webpBuffer = await sharp(jpegBuffer)
-      .webp({ quality: 80 }) 
+      .webp({ quality: 80 })
       .toBuffer();
 
     const filename = `${registration_number}.webp`;
@@ -22,7 +22,7 @@ async function generateQR(pass_id, registration_number) {
       Key: s3Path,
       Body: webpBuffer,
       ContentType: 'image/webp',
-      ContentDisposition: 'attachment', 
+      ContentDisposition: 'attachment',
     };
 
     const s3Result = await s3.upload(params).promise();

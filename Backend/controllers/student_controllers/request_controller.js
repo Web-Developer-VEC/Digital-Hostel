@@ -91,8 +91,8 @@ async function submitPass(req, res) {
         .json({ error: "To date cannot be earlier than From date" });
     }
 
-    const toHours = toDate.getUTCHours();
-    const toMinutes = toDate.getUTCMinutes();
+    const toHours = toDate.getHours();
+    const toMinutes = toDate.getMinutes();
     const totalToMinutes = toHours * 60 + toMinutes;
 
     const maleTimeLimit = 21 * 60 + 30;
@@ -356,12 +356,14 @@ async function EditPassDetails(req, res) {
         .json({ error: "To date cannot be earlier than From date" });
     }
 
-    const toHours = toDate.getUTCHours();
-    const toMinutes = toDate.getUTCMinutes();
+    const toHours = toDate.getHours();
+    const toMinutes = toDate.getMinutes();
     const totalToMinutes = toHours * 60 + toMinutes;
 
     const maleTimeLimit = 21 * 60 + 30;
     const femaleTimeLimit = 18 * 60;
+
+    const { gender } = pass_details;
 
     if (passtype.toLowerCase() === "outpass") {
       if (gender === "Male" && totalToMinutes > maleTimeLimit) {
@@ -448,7 +450,7 @@ async function verifyStudent(req, res) {
       return res.status(401).json({ error: "Couldn't Find the User data" });
     }
     if (user_valid.phone_number_student !== phone_number_student) {
-      return res.status(401).json({ error: "Enter Valid Mobile number" });
+      return res.status(400).json({ error: "Enter Valid Mobile number" });
     }
     const student = await usersCollection.findOne({
       phone_number_student: String(phone_number_student),
@@ -470,6 +472,8 @@ async function verifyStudent(req, res) {
       registration_number: student.registration_number,
       block_name: student.block_name,
       vacate_status: student.vacate_status,
+      vacate_form: student.vacate_form,
+      superior_wardern_approval: student.superior_wardern_approval
     });
   } catch (error) {
     console.error("❌ Error verifying mobile number:", error);

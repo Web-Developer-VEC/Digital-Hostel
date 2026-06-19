@@ -6,53 +6,68 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { createFormDataRequest, createJsonRequest } from '../../../api/axios';
 
+// Hoisted static variables to prevent reallocation on every render
+const ReasonTypeMapping = {
+  od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
+  leave: ['Function', 'Medical', 'Exams', 'Emergency', 'Others'], // Fixed typo 'Ohers'
+  outpass: ['Shopping', 'Classes', 'Internship', 'Medical', 'Others'],
+  staypass: ['Holiday', 'Weekend Holiday', 'Semester Holiday', 'Festival Holiday', 'Others']
+};
+
+const getCurrentDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 function HostelPass() {
   const [verified, setVerified] = useState(false);
   const [passType, setPassType] = useState('');
   const [showDocUpload, setShowDocUpload] = useState(false);
   const [reasonType, setReasonType] = useState('');
-  const [phone_number_student, setMobileno] = useState(null);
+  const [mobileNumber, setMobileNumber] = useState(''); // Standardized naming
   const [studentData, setStudentData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
-  const [from, setFrom] = useState(null);
-  const [to, setTo] = useState(null);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [place, setPlace] = useState("");
-  const [reason, setReason] = useState(null);
+  const [reason, setReason] = useState("");
   const [existingFilePath, setExistingFilePath] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
-  const [parentApproval, setParentApproval] = useState(true)
+  const [parentApproval, setParentApproval] = useState(true);
 
   const location = useLocation();
-  let passid  = location.state?.passid
+  const passid = location.state?.passid;
 
   const navigate = useNavigate();
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
+  const BASE_URL = process.env.REACT_APP_QR_URL;
 
   const UrlParser = (path) => {
-      return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
+    return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
-  // Handle 401 authentication errors
-  const handle401Error = (error) => {
-    if (error.response?.status === 401) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Session Expired',
-        text: error.response.data.message || 'Your session has expired. Please login again.',
-        confirmButtonText: 'Login',
-        allowOutsideClick: false
-      }).then(() => {
-        // Redirect to login page
-        navigate('/');
-      });
-      return true;
+  // Prevent memory leaks: revoke object URL when previewURL changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewURL) {
+        URL.revokeObjectURL(previewURL);
+      }
+    };
+  }, [previewURL]);
+
+  // Fetch pass details if passid is present
+  useEffect(() => {
+    if (passid) {
+      fetchPassDetails();
+      setIsEditMode(true);
     }
-    return false;
-  };
-
-  const ReasonTypeMapping =  { od : [ 'Internship','Symposium','Hackathon','Sports','Others'], leave : ['Function','Medical','Exams','Emergency','Ohers'], outpass :['Shopping','Classes','Internship','Medical','Others'], staypass: ['Holiday','Weekend Holiday','Semester Holiday','Festival Holiday','Others']}
+  }, [passid]);
 
   const handleFileChange = (event) => {
     const file = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
@@ -61,19 +76,20 @@ function HostelPass() {
       if (file.size > 10 * 1024 * 1024) {
         Swal.fire({
           title: "Error",
-          text: "❌ File size exceed 10mb limit",
+          text: "❌ File size exceeds 10mb limit",
           icon: "error",
           showConfirmButton: false,
-          timer: 1500, // Auto-close in 1.5 sec
-          didClose: () => {
-            Swal.close();
-          },
+          timer: 1500,
         });
         return;
       }
 
+      if (previewURL) {
+        URL.revokeObjectURL(previewURL);
+      }
+
       setSelectedFile(file);
-      setPreviewURL(URL.createObjectURL(file)); // Generate preview link
+      setPreviewURL(URL.createObjectURL(file));
     }
   };
 
@@ -81,33 +97,19 @@ function HostelPass() {
     setPassType(type);
     setShowDocUpload(type === 'od' || type === 'leave');
 
-    setFrom('');              
-    setTo('');        
-    // setFirstTime('')         
-    // setSecondTime('');
-    // setSelectedFromDate('');
-    // setSelectedToDateTime('');
-    // setOutpassFromDate('');
+    setFrom('');
+    setTo('');
     setPlace("");
-    setReason(null);
+    setReason("");
     setReasonType('');
     setSelectedFile(null);
-    // setPreviewURL(null);
+    if (previewURL) {
+      URL.revokeObjectURL(previewURL);
+      setPreviewURL(null);
+    }
     setExistingFilePath('');
   };
 
-  // Get current datetime in local format for min attribute
-  const getCurrentDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
-  // Get max datetime for "To" field when outpass is selected (same day as from)
   const getMaxToDateTime = () => {
     if (passType === 'outpass' && from) {
       const fromDate = from.split('T')[0];
@@ -116,78 +118,71 @@ function HostelPass() {
     return undefined;
   };
 
-  const showTimeAlert = (message, inputElement) => {
-    if (inputElement?.blur) {
-      inputElement.blur();
-    }
-    showSweetAlert("Alert!", message, "error", { position: "top" });
-  };
-
-  const validateFromTime = (dateTime, gender, inputElement) => {
-    // Only validate for outpass type
+  const validateFromTime = (dateTime, gender) => {
     if (passType !== 'outpass') return true;
-    
+
     const selectedTime = new Date(dateTime);
     const selectedHour = selectedTime.getHours();
     const selectedMinutes = selectedTime.getMinutes();
     const totalMinutes = selectedHour * 60 + selectedMinutes;
-    
+
     const minTimeLimit = 5 * 60; // 5:00 AM
-    const maxTimeLimit = gender === "Female" ? 18 * 60 : 21 * 60; // 6:00 PM for girls, 9:00 PM for boys
-    
+    const maxTimeLimit = gender === "Female" ? 18 * 60 : (21 * 60 + 30); // 6:00 PM female, 9:30 PM male
+
     if (totalMinutes < minTimeLimit) {
-      showTimeAlert("From time cannot be before 5:00 AM for outpass.", inputElement);
+      showSweetAlert("Alert!", "From time cannot be before 5:00 AM for outpass.", "error");
       return false;
     }
 
     if (totalMinutes > maxTimeLimit) {
       const limitMessage = gender === "Female"
         ? "From time cannot be after 6:00 PM for outpass."
-        : "From time cannot be after 9:00 PM for outpass.";
-      showTimeAlert(limitMessage, inputElement);
+        : "From time cannot be after 9:30 PM for outpass.";
+      showSweetAlert("Alert!", limitMessage, "error");
       return false;
     }
-    
+
     return true;
   };
 
-  const validateToTime = (dateTime, gender, inputElement) => {
-    // Only validate for outpass type
+  const validateToTime = (dateTime, gender) => {
     if (passType !== 'outpass') return true;
-    
+
     const selectedTime = new Date(dateTime);
     const selectedHour = selectedTime.getHours();
     const selectedMinutes = selectedTime.getMinutes();
     const totalMinutes = selectedHour * 60 + selectedMinutes;
-    
-    const maleTimeLimit = 21 * 60; // 9:00 PM
+
+    const maleTimeLimit = 21 * 60 + 30; // 9:30 PM
     const femaleTimeLimit = 18 * 60; // 6:00 PM
-    
+
     if (gender === "Female" && totalMinutes > femaleTimeLimit) {
-      showTimeAlert("Girls are not allowed to select a time after 6:00 PM for outpass.", inputElement);
+      showSweetAlert("Alert!", "Girls are not allowed to select a time after 6:00 PM for outpass.", "error");
       return false;
     } else if (gender === "Male" && totalMinutes > maleTimeLimit) {
-      showTimeAlert("Boys are not allowed to select a time after 9:00 PM for outpass.", inputElement);
+      showSweetAlert("Alert!", "Boys are not allowed to select a time after 9:30 PM for outpass.", "error");
       return false;
     }
-    
+
     return true;
   };
 
   const handleFromChange = (e) => {
     const fromDateTime = e.target.value;
-    
+
     if (!fromDateTime) {
       setFrom('');
       return;
     }
-  
-    // Validate from time (check if after 5:00 AM for outpass)
-    if (validateFromTime(fromDateTime, studentData?.gender, e.target)) {
+
+    if (validateFromTime(fromDateTime, studentData?.gender)) {
       setFrom(fromDateTime);
+      // Reset To Date if it is earlier than the new From selection
+      if (to && new Date(to) < new Date(fromDateTime)) {
+        setTo('');
+      }
     } else {
       setFrom('');
-      return;
     }
   };
 
@@ -198,208 +193,156 @@ function HostelPass() {
       setTo('');
       return;
     }
-    
-    // For outpass: ensure same day selection
+
+    // Ensure To date & time is not earlier than From date & time
+    if (from && new Date(toDateTime) < new Date(from)) {
+      showSweetAlert("Alert!", "To date & time cannot be earlier than From date & time.", "error");
+      setTo('');
+      return;
+    }
+
     if (passType === "outpass") {
-      // Validate time constraints (before 9 PM for boys, before 6 PM for girls)
-      if (validateToTime(toDateTime, studentData?.gender, e.target)) {
+      if (validateToTime(toDateTime, studentData?.gender)) {
         setTo(toDateTime);
       } else {
         setTo('');
       }
       return;
     }
+    setTo(toDateTime);
   };
 
-  // Fetch pass details if passid is present
-  useEffect(() => {
-    if (passid) {
-      fetchPassDetails();
-      setIsEditMode(true); // Enable edit mode
-    }
-  }, [passid]);
-
-  // Fetch pass details
   const fetchPassDetails = async () => {
     try {
-      const response = await createJsonRequest("/api/get_student_pass_by_passid", { 
-        pass_id: passid 
+      const response = await createJsonRequest("/api/get_student_pass_by_passid", {
+        pass_id: passid
       });
 
       const data = response.data.pass_details;
 
-      if (response.status === 200) {
-        // Update form state with fetched data
-        setPassType(data.passtype);
-        setShowDocUpload(data.passtype === "od" || data.passtype === "leave");
-        setReasonType(data.reason_type);
-        setFrom(data.from.split("T")[0] + "T" + data.from.split("T")[1].slice(0, 5));
-        setTo(data.to.split("T")[0] + "T" + data.to.split("T")[1].slice(0, 5))
-        setPlace(data.place_to_visit);
-        setReason(data.reason_for_visit);
-        setExistingFilePath(data.file_path || "");
-        setMobileno(data.mobile_number);
-        setParentApproval(data.parent_approval === null ? true : false);
+      setPassType(data.passtype);
+      setShowDocUpload(data.passtype === "od" || data.passtype === "leave");
+      setReasonType(data.reason_type);
+      setFrom(data.from.split("T")[0] + "T" + data.from.split("T")[1].slice(0, 5));
+      setTo(data.to.split("T")[0] + "T" + data.to.split("T")[1].slice(0, 5));
+      setPlace(data.place_to_visit);
+      setReason(data.reason_for_visit);
+      setExistingFilePath(data.file_path || "");
+      setMobileNumber(data.mobile_number);
+      setParentApproval(data.parent_approval === null);
 
-        // Fetch student data for verification
-        const studentResponse = await createJsonRequest("/api/verify_student", { 
-          phone_number_student: data.mobile_number 
-        });
+      const studentResponse = await createJsonRequest("/api/verify_student", {
+        phone_number_student: data.mobile_number
+      });
 
-        const studentData = studentResponse.data;
-
-        if (studentResponse.status === 200) {
-          setStudentData(studentData);
-          setVerified(true);
-        } else {
-          showSweetAlert("Error!", "Student not found. Please check the mobile number", "error");
-        }
-      } else {
-        showSweetAlert("Error!", response.data.error || "Failed to fetch pass details", "error");
+      if (studentResponse.data) {
+        setStudentData(studentResponse.data);
+        setVerified(true);
       }
     } catch (error) {
       console.error("Error fetching pass details:", error);
-      
-      // Handle 401 authentication error
-      if (handle401Error(error)) return;
-      
-      if (error.response?.data?.error) {
-        showSweetAlert("Error!", error.response.data.error, "error");
-      } else if (error.response?.data?.message) {
-        showSweetAlert("Error!", error.response.data.message, "error");
-      }
     }
   };
 
-// Handle update pass
-const handleUpdatePass = async () => {
-  if (!phone_number_student) {
-    showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("pass_id", passid);
-  formData.append("passtype", passType);
-  formData.append("from", from);
-  formData.append("to", to);
-  formData.append("place_to_visit", place);
-  formData.append("reason_type", reasonType);
-  formData.append("reason_for_visit", reason || "");
-
-  if (selectedFile) {
-    formData.append("file", selectedFile);
-  }
-
-  try {
-    const response = await createFormDataRequest("/api/edit_student_pass", formData);
-
-    const data = response.data;
-
-    if (response.status === 200) {
-      setPassType("");
-      setShowDocUpload(false);
-      setReasonType("");
-      setFrom("");
-      setTo("");
-      setPlace("");
-      setReason("");
-      setSelectedFile(null);
-      setPreviewURL(null);
-      setExistingFilePath("");
-      setMobileno("");
-
-      setStudentData(null);
-
-      setVerified(false);
-
-      setIsEditMode(false);
-      if (location.state?.passid) {
-        location.state.passid = null;
-      }
-
-      Swal.fire({
-        title: "Successful",
-        text: `✅ Pass updated successfully!`,
-        icon: "success",
-        timer: 2000,
-        showConfirmButton: false,
-        willClose: () => {
-          Swal.close();
-          navigate('/hostel/student/previousrequest');
-        },
-      });
-    } else {
-      showSweetAlert("Error!", data.error || "Failed to update pass", "error");
-    }
-  } catch (error) {
-    console.error("Error updating pass:", error);
-    
-    // Handle 401 authentication error
-    if (handle401Error(error)) return;
-    
-    if (error.response?.data?.error) {
-      showSweetAlert("Error!", error.response.data.error, "error");
-    } else if (error.response?.data?.message) {
-      showSweetAlert("Error!", error.response.data.message, "error");
-    }
-  }
-};
-
-  //verify details from mobile number
-  const handleVerify = async () => {
-    if (!phone_number_student) {
-      showSweetAlert("Alert!", "Please enter a mobile number.", "warning");
-      return;
-    }
-  
-    try {
-      const response = await createJsonRequest("/api/verify_student", { 
-        phone_number_student 
-      });
-  
-      const data = response.data;
-  
-      if (response.status === 200) {
-        setStudentData(data);
-        setVerified(true);
-        showSweetAlert("Success!", "Student verified successfully.", "success");
-      } else {
-        setStudentData(null);
-        showSweetAlert("Error!", "Student not found. Please check the mobile number", "error");
-      }
-    } catch (error) {
-      console.error("❌ Error fetching data:", error);
-      
-      // Handle 401 authentication error
-      if (handle401Error(error)) return;
-      
-      if (error.response?.data?.error) {
-        showSweetAlert("Error!", error.response.data.error, "error");
-      } else if (error.response?.data?.message) {
-        showSweetAlert("Error!", error.response.data.message, "error");
-      } else {
-        showSweetAlert("Error!", "Error verifying student. Please try again.", "error");
-      }
-    }
-  };
-
-  //Unified function to submit pass with different modes
-  const submitPassRequest = async (mode) => {
-    if (!phone_number_student) {
+  const handleUpdatePass = async () => {
+    if (!mobileNumber) {
       showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
       return;
     }
-  
+
     const formData = new FormData();
-    formData.append("mobile_number", phone_number_student);
-    formData.append("name", studentData?.name);
-    formData.append("department_name", studentData?.department);
-    formData.append("batch", studentData?.batch);
-    formData.append("year", studentData?.year);
-    formData.append("room_no", studentData?.room_number);
-    formData.append("registration_number", studentData?.registration_number);
-    formData.append("block_name", studentData?.block_name);
+    formData.append("pass_id", passid);
+    formData.append("passtype", passType);
+    formData.append("from", from);
+    formData.append("to", to);
+    formData.append("place_to_visit", place);
+    formData.append("reason_type", reasonType);
+    formData.append("reason_for_visit", reason || "");
+
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+    }
+
+    try {
+      const response = await createFormDataRequest("/api/edit_student_pass", formData);
+
+      if (response.status === 200) {
+        setPassType("");
+        setShowDocUpload(false);
+        setReasonType("");
+        setFrom("");
+        setTo("");
+        setPlace("");
+        setReason("");
+        setSelectedFile(null);
+        if (previewURL) {
+          URL.revokeObjectURL(previewURL);
+          setPreviewURL(null);
+        }
+        setExistingFilePath("");
+        setMobileNumber("");
+        setStudentData(null);
+        setVerified(false);
+        setIsEditMode(false);
+        if (location.state?.passid) {
+          location.state.passid = null;
+        }
+
+        Swal.fire({
+          title: "Successful",
+          text: `✅ Pass updated successfully!`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+          willClose: () => {
+            Swal.close();
+            navigate('/hostel/student/previousrequest');
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error updating pass:", error);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!mobileNumber) {
+      showSweetAlert("Alert!", "Please enter a mobile number.", "warning");
+      return;
+    }
+
+    try {
+      const response = await createJsonRequest("/api/verify_student", {
+        phone_number_student: mobileNumber
+      });
+
+      if (response.data) {
+        setStudentData(response.data);
+        setVerified(true);
+        showSweetAlert("Success!", "Student verified successfully.", "success");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching data:", error);
+      setStudentData(null);
+      setVerified(false);
+    }
+  };
+
+  const submitPassRequest = async (mode) => {
+    if (!mobileNumber) {
+      showSweetAlert("Alert!", "Please verify your mobile number first.", "warning");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("mobile_number", mobileNumber);
+    formData.append("name", studentData?.name || "");
+    formData.append("department_name", studentData?.department || "");
+    formData.append("batch", studentData?.batch || "");
+    formData.append("year", studentData?.year || "");
+    formData.append("room_no", studentData?.room_number || "");
+    formData.append("registration_number", studentData?.registration_number || "");
+    formData.append("block_name", studentData?.block_name || "");
     formData.append("pass_type", passType);
     formData.append("from", from);
     formData.append("to", to);
@@ -407,18 +350,16 @@ const handleUpdatePass = async () => {
     formData.append("reason_type", reasonType);
     formData.append("reason_for_visit", reason || "");
     formData.append("mode", mode);
-  
+
     if (selectedFile) {
       formData.append("file", selectedFile);
     } else if (existingFilePath) {
       formData.append("existingFilePath", existingFilePath);
     }
-  
+
     try {
       const response = await createFormDataRequest("/api/submit_pass", formData);
-  
-      const data = response.data;
-  
+
       if (response.status === 200 || response.status === 201) {
         const successMessages = {
           parent: "✅ Pass request submitted. Parent notified!",
@@ -438,39 +379,24 @@ const handleUpdatePass = async () => {
             window.location.reload();
           },
         });
-      } else {
-        showSweetAlert("Error!", `${data.error}`, "error");
       }
     } catch (error) {
       console.error("Error submitting pass:", error);
-      
-      // Handle 401 authentication error
-      if (handle401Error(error)) return;
-      
-      if (error.response?.data?.error) {
-        showSweetAlert("Error!", error.response.data.error, "error");
-      } else if (error.response?.data?.message) {
-        showSweetAlert("Error!", error.response.data.message, "error");
-      } else {
-        showSweetAlert("Error!", "Something went wrong! Please try again.", "error");
-      }
     }
   };
 
-  //fetch Draft data
   const fetchDrafts = async () => {
     try {
       const response = await createJsonRequest("/api/fetch_drafts", {});
-
       const data = response.data;
 
-      if (response.status === 200 && data.drafts?.length > 0) {
+      if (data.drafts?.length > 0) {
         const firstDraft = data.drafts[0];
 
         setPassType(firstDraft.passtype);
         setShowDocUpload(firstDraft.passtype === "od" || firstDraft.passtype === "leave");
         setReasonType(firstDraft.reason_type);
-        setMobileno(firstDraft.mobile_number);
+        setMobileNumber(firstDraft.mobile_number);
         setStudentData({
           name: firstDraft.name,
           department: firstDraft.dept,
@@ -480,39 +406,24 @@ const handleUpdatePass = async () => {
           block_name: firstDraft.blockname,
         });
 
-        // Set Place to Visit and Reason for Visit correctly
         setReasonType(firstDraft.reason_type);
         setFrom(firstDraft.from.split("T")[0] + "T" + firstDraft.from.split("T")[1].slice(0, 5));
-        setTo(firstDraft.to.split("T")[0] + "T" + firstDraft.to.split("T")[1].slice(0, 5))
+        setTo(firstDraft.to.split("T")[0] + "T" + firstDraft.to.split("T")[1].slice(0, 5));
         setPlace(firstDraft.place_to_visit || "");
-        setReason(firstDraft.reason_for_visit || "")
+        setReason(firstDraft.reason_for_visit || "");
 
         if (firstDraft.file_path) {
-          setExistingFilePath(firstDraft.file_path); 
-          setSelectedFile(null); 
+          setExistingFilePath(firstDraft.file_path);
+          setSelectedFile(null);
         } else {
           setExistingFilePath("");
         }
-
       } else {
-        showSweetAlert("Oops..!","No drafts found.", "info");
+        showSweetAlert("Oops..!", "No drafts found.", "info");
       }
     } catch (error) {
       console.error("Error fetching drafts:", error);
-      
-      // Handle 401 authentication error
-      if (handle401Error(error)) return;
-      
-      if (error.response?.data?.message) {
-        showSweetAlert("Info", error.response.data.message, "info");
-      } else if (error.response?.data?.error) {
-        showSweetAlert("Error!", error.response.data.error, "error");
-      } else {
-        showSweetAlert("Error!", "Error fetching drafts. Please try again.", "error");
-      }
     }
-    setFrom("")
-    setTo("")
   };
 
   return (
@@ -531,16 +442,16 @@ const handleUpdatePass = async () => {
                     type="tel"
                     className="HS-input"
                     placeholder="Enter your mobile number"
-                    onChange={(e) => setMobileno(e.target.value)}
-                    value={phone_number_student}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    value={mobileNumber}
                   />
                 </div>
-                    <button
-                    onClick={() => handleVerify()}
-                    className="HS-button HS-button-verify"
-                    >
-                    Verify
-                    </button>
+                <button
+                  onClick={() => handleVerify()}
+                  className="HS-button HS-button-verify"
+                >
+                  Verify
+                </button>
               </div>
             </div>
 
@@ -553,31 +464,31 @@ const handleUpdatePass = async () => {
               <div className="HS-grid">
                 <div className="HS-input-group">
                   <label className="HS-label">Name</label>
-                  <input type="text" className="HS-input" value={studentData?.name} />
+                  <input type="text" className="HS-input" value={studentData?.name || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Admission Number</label>
-                  <input type="text" className="HS-input" value={studentData?.registration_number} />
+                  <input type="text" className="HS-input" value={studentData?.registration_number || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Department Name</label>
-                  <input type="text" className="HS-input" value={studentData?.department} />
+                  <input type="text" className="HS-input" value={studentData?.department || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Batch</label>
-                  <input type="text" className="HS-input" value={studentData?.batch} />
+                  <input type="text" className="HS-input" value={studentData?.batch || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Year</label>
-                  <input type="number" className="HS-input" value={studentData?.year}/>
+                  <input type="number" className="HS-input" value={studentData?.year || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Room Number</label>
-                  <input type="text" className="HS-input" value={studentData?.room_number}/>
+                  <input type="text" className="HS-input" value={studentData?.room_number || ""} readOnly />
                 </div>
                 <div className="HS-input-group">
                   <label className="HS-label">Block Name</label>
-                  <input type="text" className="HS-input" value={studentData?.block_name}/>
+                  <input type="text" className="HS-input" value={studentData?.block_name || ""} readOnly />
                 </div>
               </div>
             </div>
@@ -599,7 +510,6 @@ const handleUpdatePass = async () => {
                       name="passType"
                       value={type}
                       className="HS-radio"
-                      
                       onChange={() => handlePassTypeChange(type)}
                       required
                     />
@@ -652,7 +562,7 @@ const handleUpdatePass = async () => {
                   ) : null}
                   {selectedFile ? (
                     <a
-                      href={previewURL}
+                      href={previewURL || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="HS-upload-success"
@@ -676,14 +586,13 @@ const handleUpdatePass = async () => {
                 <div className="HS-grid">
                   <div className="HS-input-group">
                     <label className="HS-label">From Date & Time</label>
-                    <input 
-                      type="datetime-local" 
-                      className="HS-input" 
-                      onkeydown="return false;"  
-                      id='fromDateTime' 
-                      value={from} 
+                    <input
+                      type="datetime-local"
+                      className="HS-input"
+                      id='fromDateTime'
+                      value={from}
                       onChange={handleFromChange}
-                      onKeyDown={(e) => e.preventDefault()} 
+                      onKeyDown={(e) => e.preventDefault()}
                       onPaste={(e) => e.preventDefault()}
                       min={getCurrentDateTime()}
                       required
@@ -691,15 +600,14 @@ const handleUpdatePass = async () => {
                   </div>
                   <div className="HS-input-group">
                     <label className="HS-label">To Date & Time</label>
-                    <input 
-                      type="datetime-local" 
-                      className="HS-input" 
-                      id='toDateTime' 
-                      value={to} 
-                      onkeydown="return false;"  
+                    <input
+                      type="datetime-local"
+                      className="HS-input"
+                      id='toDateTime'
+                      value={to}
                       onChange={handleToChange}
-                      onKeyDown={(e) => e.preventDefault()} 
-                      onPaste={(e) => e.preventDefault()} 
+                      onKeyDown={(e) => e.preventDefault()}
+                      onPaste={(e) => e.preventDefault()}
                       min={passType === 'outpass' && from ? from.split('T')[0] + 'T00:00' : from || getCurrentDateTime()}
                       max={getMaxToDateTime()}
                       required
@@ -708,26 +616,25 @@ const handleUpdatePass = async () => {
                   </div>
                   <div className="HS-input-group">
                     <label className="HS-label">Place of Visit</label>
-                    <input type="text" className="HS-input"  id='placeOfVisit' value={place} onChange={(e)=> setPlace(e.target.value)} required
-                    />
+                    <input type="text" className="HS-input" id='placeOfVisit' value={place} onChange={(e) => setPlace(e.target.value)} required />
                   </div>
                   <div className="HS-input-group">
                     <label className="HS-label">Reason Type</label>
-                    <select 
+                    <select
                       className="HS-select"
                       value={reasonType}
                       onChange={(e) => setReasonType(e.target.value)}
                     >
                       <option value="">Select Reason Type</option>
-                      {ReasonTypeMapping[passType]?.map((type)=>(
-                        <option value={type}>{type}</option>
+                      {ReasonTypeMapping[passType]?.map((type) => (
+                        <option key={type} value={type}>{type}</option>
                       ))}
                     </select>
                   </div>
                   {reasonType === 'Others' && (
                     <div className="HS-input-group HS-full-width">
                       <label className="HS-label">Reason for Visit</label>
-                      <textarea rows={3} className="HS-textarea" id='reasonForVisit' value={reason} onChange={(e)=> setReason(e.target.value)}/>
+                      <textarea rows={3} className="HS-textarea" id='reasonForVisit' value={reason} onChange={(e) => setReason(e.target.value)} />
                     </div>
                   )}
                 </div>
@@ -743,16 +650,13 @@ const handleUpdatePass = async () => {
                       Update Pass
                     </button>
                     {parentApproval && (
-                      <button className="HS-button HS-button-parent" onClick={() => submitPassRequest('parent')}> 
-                          Parent Approval
+                      <button className="HS-button HS-button-parent" onClick={() => submitPassRequest('parent')}>
+                        Parent Approval
                       </button>
                     )}
                   </>
                 ) : (
                   <>
-                    {/* <button className="HS-button HS-button-parent" onClick={() => submitPassRequest('parent')}> 
-                      Parent Approval
-                    </button> */}
                     <button className="HS-button HS-button-warden" onClick={() => submitPassRequest('warden')}>
                       Warden Approval
                     </button>

@@ -65,7 +65,7 @@ async function changeFoodType(req, res) {
     }
     if (!warden) {
       return res
-        .status(403)
+        // .status(403)
         .json({ message: "No active warden found for this student batch" });
     }
 

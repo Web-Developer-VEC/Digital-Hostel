@@ -6,7 +6,7 @@ const ensureAuthenticatedStudent = (req, res, next) => {
 };
 
 const ensureAuthenticatedWarden = (req, res, next) => {
-    if (!req.session || !req.session.user || req.session.user.type !="warden") {  
+    if (!req.session || !req.session.user || (req.session.user.type !== "warden" && req.session.user.type !== "superior")) {  
         return res.status(401).json({ error: "Unauthorized access" });
     }
     next();

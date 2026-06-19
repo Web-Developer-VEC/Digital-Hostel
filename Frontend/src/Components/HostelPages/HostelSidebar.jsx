@@ -51,8 +51,10 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           console.error("Failed to fetch",err);
         }
       }
-      fetchData();
-  },[]);
+      if(role === "student"){
+        fetchData();
+      }
+  },[items]);
 
   const navigate = useNavigate();
 
@@ -102,7 +104,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     return romanMap[num] || num; 
   };
 
-  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary year"]) ? wardenSlidebar["primary year"] : [];
+  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary batch"]) ? wardenSlidebar["primary batch"] : (Array.isArray(wardenSlidebar?.["primary year"]) ? wardenSlidebar["primary year"] : []);
   const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
 
 

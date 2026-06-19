@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Edit, Power, Trash2 } from 'lucide-react';
 import './WardenProfile.css';
-import axios from "axios";
-import showSweetAlert from "../Alert";
+import axiosInstance from "../../../api/axios";
 import Swal from "sweetalert2";
 
 const WardenProfile = () => {
@@ -27,9 +26,9 @@ const WardenProfile = () => {
     password: "",
     joinedDate: "",
   });
-  
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  
+
+  const BASE_URL = process.env.REACT_APP_QR_URL;
+
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
@@ -45,8 +44,8 @@ const WardenProfile = () => {
   //   'PG2': 'Postgraduate Second Year'
   // };
 
-    const yearToAlphabet = {
-    '1': 'First Year', 
+  const yearToAlphabet = {
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -59,24 +58,27 @@ const WardenProfile = () => {
   useEffect(() => {
     const fetchWardens = async () => {
       try {
-        const response = await axios.get("/api/fetch_warden_details");
+        const response = await axiosInstance.get("/api/fetch_warden_details");
         const fetchedWardens = response.data.wardens;
 
-        const formattedWardens = fetchedWardens.map((warden) => ({
-          id: warden.unique_id,
-          name: warden.warden_name,
-          img: warden.image_path,
-          wardenFor: warden.primary_year.map((year) => yearToAlphabet[year]).join(", "),
-          inCharge: warden.gender === "Male" ? "Boys" : "Girls",
-          date: warden.joined_date,
-          isActive: warden.active,
-          phone_number: warden.phone_number,
-          primaryYears: warden.primary_year
-        }));  
+        const formattedWardens = fetchedWardens.map((warden) => {
+          const pBatch = warden.primary_batch || warden.primary_year || [];
+          return {
+            id: warden.unique_id,
+            name: warden.warden_name,
+            img: warden.image_path,
+            wardenFor: pBatch.map((year) => yearToAlphabet[year]).join(", "),
+            inCharge: warden.gender === "Male" ? "Boys" : "Girls",
+            date: warden.joined_date,
+            isActive: warden.active,
+            phone_number: warden.phone_number,
+            primaryYears: pBatch
+          };
+        });
 
         setWardens(formattedWardens);
-        console.log("Wardens",formattedWardens);
-        
+        console.log("Wardens", formattedWardens);
+
       } catch (err) {
         console.error("Error fetching warden data", err);
         Swal.fire({
@@ -96,7 +98,7 @@ const WardenProfile = () => {
     const warden = wardens.find(w => w.id === id);
 
     if (!warden) return;
-  
+
     const newStatus = warden.isActive;
 
     // Show loading alert
@@ -108,22 +110,23 @@ const WardenProfile = () => {
         Swal.showLoading();
       }
     });
-    
+
     try {
       if (newStatus) {
         for (const year of primaryYears) {
-          await axios.post("/api/warden_inactive_status_handling", {
+          await axiosInstance.post("/api/warden_inactive_status_handling", {
             warden_name: selectedReallocations[year],
             inactive_warden_id: id,
-            year: parseInt(year),
+            batch: parseInt(year),
+            year: parseInt(year)
           });
         }
       } else {
-        await axios.post('/api/warden_active_status_handling', {
+        await axiosInstance.post('/api/warden_active_status_handling', {
           warden_id: id
         });
       }
-      
+
       Swal.fire({
         title: "Success! ✅",
         text: `Warden ${newStatus ? 'deactivated' : 'activated'} successfully.`,
@@ -229,13 +232,13 @@ const WardenProfile = () => {
     formData.append("name", newWarden.name);
     formData.append("phone_number", newWarden.phone_number);
     formData.append("gender", newWarden.inCharge === "Boys" ? "Male" : "Female");
-    formData.append("primary_year", JSON.stringify(primaryYearArray ));
+    formData.append("primary_batch", JSON.stringify(primaryYearArray));
     formData.append("password", newWarden.password); // Add password
     formData.append("category", "assistant"); // Assuming category is always "assistant"
     formData.append("joined_date", newWarden.joinedDate); // Add joined date
 
     if (newWarden.file) {
-        formData.append("wardenImage", newWarden.file);
+      formData.append("wardenImage", newWarden.file);
     }
 
     // Show loading alert
@@ -249,52 +252,50 @@ const WardenProfile = () => {
     });
 
     try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.post("/api/add_warden", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${token}`,
-            },
-        });
+      const response = await axiosInstance.post("/api/add_warden", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-        if (response.status === 201) {
-          Swal.fire({
-            title: "Success! ✅",
-            text: "Warden added successfully.",
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false
-          }).then(() => {
-            setIsAddModalOpen(false);
-            setNewWarden({
-                name: "",
-                phone_number: "",
-                inCharge: "",
-                primaryWarden: [],
-                photo: null,
-                password: "",
-                joinedDate: "",
-            });
-            window.location.reload();
+      if (response.status === 201) {
+        Swal.fire({
+          title: "Success! ✅",
+          text: "Warden added successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          setIsAddModalOpen(false);
+          setNewWarden({
+            name: "",
+            phone_number: "",
+            inCharge: "",
+            primaryWarden: [],
+            photo: null,
+            password: "",
+            joinedDate: "",
           });
-        } else {
-          Swal.fire({
-            title: "Error ❌",
-            text: "Failed to add warden. Please try again.",
-            icon: "error",
-            confirmButtonText: "OK"
-          });
-        }
-    } catch (error) {
-        console.error("Error adding warden", error);
+          window.location.reload();
+        });
+      } else {
         Swal.fire({
           title: "Error ❌",
-          text: error.response?.data?.message || "An error occurred while adding the warden.",
+          text: "Failed to add warden. Please try again.",
           icon: "error",
           confirmButtonText: "OK"
         });
+      }
+    } catch (error) {
+      console.error("Error adding warden", error);
+      Swal.fire({
+        title: "Error ❌",
+        text: error.response?.data?.message || "An error occurred while adding the warden.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
-};
+  };
 
   // delete a warden
   const handleDelete = async (registration_number) => {
@@ -309,18 +310,14 @@ const WardenProfile = () => {
         Swal.showLoading();
       }
     });
-    
+
     try {
-      const response = await fetch("/api/delete_student", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", 
-        body: JSON.stringify({ registration_number , type: "warden" }), 
+      const response = await axiosInstance.post("/api/delete_student", {
+        registration_number,
+        type: "warden"
       });
-  
-      if (response.ok) {
+
+      if (response.status === 200) {
         Swal.fire({
           title: "Success! ✅",
           text: "Warden data deleted successfully.",
@@ -330,21 +327,18 @@ const WardenProfile = () => {
         }).then(() => {
           window.location.reload();
         });
-      } else {
-        showSweetAlert("Error","Failed to delete warden. Please try again later.",'error');
       }
     } catch (error) {
       console.error("❌ Error deleting warden:", error);
-      showSweetAlert("Error","Error deleting warden. Please try again.",'error');
     }
   };
 
   // Save edited warden details
   const handleSave = async () => {
     if (!editedWarden || !selectedWarden) return;
-  
+
     const updateFields = {};
-  
+
     // Compare edited fields with original fields
     if (editedWarden.name !== selectedWarden.name) {
       updateFields.warden_name = editedWarden.name;
@@ -356,14 +350,14 @@ const WardenProfile = () => {
       updateFields.gender = editedWarden.inCharge === "Boys" ? "Male" : "Female";
     }
     if (editedWarden.primaryWarden !== selectedWarden.primaryYears) {
-      updateFields.primary_year = editedWarden.primaryWarden; // Send the updated primary years
+      updateFields.primary_batch = editedWarden.primaryWarden.map(year => parseInt(year, 10)); // Send the updated primary batch
     }
-      
+
     // Handle file upload
     if (editedWarden.file) {
       updateFields.file = editedWarden.file; // Append the file to updateFields
     }
-  
+
     if (Object.keys(updateFields).length === 0) {
       Swal.fire({
         title: "No Changes",
@@ -383,14 +377,14 @@ const WardenProfile = () => {
         Swal.showLoading();
       }
     });
-  
+
     try {
       const formData = new FormData();
       formData.append("unique_id", selectedWarden.id);
-  
+
       // Append updated fields to formData
       Object.keys(updateFields).forEach(key => {
-        if (key === "primary_year" || key === "secondary_year") {
+        if (key === "primary_batch" || key === "secondary_batch" || key === "primary_year" || key === "secondary_year") {
           formData.append(key, JSON.stringify(updateFields[key]));
         } else if (key === "file") {
           formData.append("wardenImage", updateFields.file); // Append the file to FormData
@@ -398,15 +392,13 @@ const WardenProfile = () => {
           formData.append(key, updateFields[key]);
         }
       });
-  
-      const token = localStorage.getItem("authToken");
-      const response = await axios.post("/api/update_warden_by_superior", formData, {
+
+      const response = await axiosInstance.post("/api/update_warden_by_superior", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.status === 200) {
         Swal.fire({
           title: "Success! ✅",
@@ -434,18 +426,18 @@ const WardenProfile = () => {
         confirmButtonText: "OK"
       });
     }
-  
+
     setIsEditing(false);
     setIsModalOpen(false);
   };
 
   const handleToggle = async (wardenId) => {
     try {
-      const response = await axios.post("/api/fetch_warden_details_reallocation", {
+      const response = await axiosInstance.post("/api/fetch_warden_details_reallocation", {
         target_warden_id: wardenId
       });
       setReallocationWardens(response.data.warden_names);
-      setPrimaryYears(response.data.primary_years);
+      setPrimaryYears(response.data.primary_batchs || response.data.primary_years || []);
     } catch (error) {
       console.error("Error fetching reallocation wardens", error);
       Swal.fire({
@@ -483,7 +475,7 @@ const WardenProfile = () => {
     <div className="warden-container">
       <div className="add-buttons">
         <button className="add-warden" onClick={() => setIsAddModalOpen(true)}>
-        Add New Warden
+          Add New Warden
         </button>
       </div>
       <div className="wardens-grid">
@@ -491,7 +483,7 @@ const WardenProfile = () => {
           <div
             key={warden.id}
             className={`hos-warden-card ${warden.inCharge.toLowerCase()}`}
-            onClick={(e) => {openModal(warden, e); setPendingToggleId(warden.id);}}
+            onClick={(e) => { openModal(warden, e); setPendingToggleId(warden.id); }}
           >
             <div className="warden-content">
               <div className="warden-image-wrapper">
@@ -584,21 +576,25 @@ const WardenProfile = () => {
               <div className="form-row">
                 <label>Warden For:</label>
                 <div className="checkbox-container no-border">
-                  {["1", "2", "3", "4", "MBA", "ME"].map((option) => (
+                  {["1", "2", "3", "4", "10", "9"].map((option) => (
                     <div key={option} className="checkbox-item">
                       <input
                         type="checkbox"
                         name="primaryWarden"
                         value={option}
-                        checked={newWarden.primaryWarden?.includes(option)}
+                        checked={newWarden.primaryWarden?.map(String).includes(option)}
                         onChange={(e) => {
                           const selectedYear = e.target.value;
-                          setNewWarden((prev) => ({
-                            ...prev,
-                            primaryWarden: prev.primaryWarden?.includes(selectedYear)
-                              ? prev.primaryWarden.filter((y) => y !== selectedYear) // Remove if already selected
-                              : [...(prev.primaryWarden || []), selectedYear], // Add if not selected
-                          }));
+                          setNewWarden((prev) => {
+                            const stringYears = prev.primaryWarden?.map(String) || [];
+                            const updatedYears = stringYears.includes(selectedYear)
+                              ? stringYears.filter((y) => y !== selectedYear)
+                              : [...stringYears, selectedYear];
+                            return {
+                              ...prev,
+                              primaryWarden: updatedYears,
+                            };
+                          });
                         }}
                       />
                       <label>{yearToAlphabet[option] || option}</label>
@@ -672,7 +668,7 @@ const WardenProfile = () => {
                       <p className="text-left"><span className="label">Status:</span> {selectedWarden.isActive ? 'Active' : 'Inactive'}</p>
                     </div>
                     <button className="delete-button" onClick={() => setconfirmModalOpenDelete(true)}>
-                    <Trash2 className="superior-icon" /> Remove Warden
+                      <Trash2 className="superior-icon" /> Remove Warden
                     </button>
                   </div>
                 </div>
@@ -701,19 +697,20 @@ const WardenProfile = () => {
                 <div className="form-row">
                   <label>Select Primary Years:</label>
                   <div className="checkbox-container no-border">
-                    {["1", "2", "3", "4", "MBA", "ME"].map((option) => (
+                    {["1", "2", "3", "4", "10", "9"].map((option) => (
                       <div key={option} className="checkbox-item">
                         <input
                           type="checkbox"
                           name="primaryWarden"
                           value={option}
-                          checked={editedWarden?.primaryWarden?.includes(option)} // Reflect current state
+                          checked={editedWarden?.primaryWarden?.map(String).includes(option)} // Reflect current state
                           onChange={(e) => {
                             const selectedYear = e.target.value;
                             setEditedWarden((prev) => {
-                              const updatedYears = prev.primaryWarden?.includes(selectedYear)
-                                ? prev.primaryWarden.filter((y) => y !== selectedYear) // Remove if already selected
-                                : [...(prev.primaryWarden || []), selectedYear]; // Add if not selected
+                              const stringYears = prev.primaryWarden?.map(String) || [];
+                              const updatedYears = stringYears.includes(selectedYear)
+                                ? stringYears.filter((y) => y !== selectedYear)
+                                : [...stringYears, selectedYear];
                               return { ...prev, primaryWarden: updatedYears };
                             });
                           }}
@@ -787,7 +784,7 @@ const WardenProfile = () => {
           <div className="confirm-modal">
             <h3>Confirm Action</h3>
             <p>Are you sure you want to {wardens.find(w => w.id === pendingToggleId)?.name} ?</p>
-            {console.log("IID",pendingToggleId)
+            {console.log("IID", pendingToggleId)
             }
             <div className="confirm-actions">
               <button className="confirm-button" onClick={() => handleDelete(pendingToggleId)}>

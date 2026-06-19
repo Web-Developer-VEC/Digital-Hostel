@@ -20,7 +20,8 @@
 }
 
 .Hostel-sidebar-menu {
-  flex-grow: 1; /* Pushes the Log Out button down */
+  flex-grow: 1;
+  /* Pushes the Log Out button down */
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -30,7 +31,8 @@
 /* Add this to your CSS */
 .scrollable {
   overflow-y: auto;
-  max-height: calc(100vh - 200px); /* Adjust based on your layout */
+  max-height: calc(100vh - 200px);
+  /* Adjust based on your layout */
 }
 
 /* Optional: Add a scrollbar style */
@@ -42,6 +44,7 @@
   background-color: #888;
   border-radius: 4px;
 }
+
 .scrollable::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
@@ -95,20 +98,20 @@
   color: white;
 }
 
-.Logout-container:hover .Hostel-icon{
+.Logout-container:hover .Hostel-icon {
   color: black;
 }
 
 /* Responsive Sidebar (for Mobile) */
 @media (max-width: 768px) {
   .Hostel-sidebar {
-      width: 14rem;
-      transform: translateX(-100%);
-      position: absolute;
+    width: 14rem;
+    transform: translateX(-100%);
+    position: absolute;
   }
 
   .Hostel-sidebar.open {
-      transform: translateX(0);
+    transform: translateX(0);
   }
 }
 
@@ -127,7 +130,7 @@
 /* Show button only in mobile */
 @media (max-width: 768px) {
   .mobile-menu-button {
-      display: block;
+    display: block;
   }
 }
 
@@ -157,7 +160,8 @@
 }
 
 .Hostel-mobile-nav-button.active {
-  color: #1abc9c; /* Active state color */
+  color: #1abc9c;
+  /* Active state color */
 }
 
 .Hostel-mobile-nav-icon {
@@ -246,7 +250,8 @@
 /* Warden Profile Popup */
 .warden-profile-popup {
   position: absolute;
-  bottom: 90px; /* Adjust based on your navbar height */
+  bottom: 90px;
+  /* Adjust based on your navbar height */
   right: 15px;
   background-color: #2c3e50;
   padding: 15px;
@@ -317,7 +322,7 @@
   font-size: 16px;
 }
 
-.Logout-container{
+.Logout-container {
   display: flex;
   align-items: center;
   width: 100%;
@@ -335,10 +340,8 @@
   gap: 0.5rem;
 }
 
-.Logout-container:hover{
+.Logout-container:hover {
   background-color: #fdcd03;
   color: #000;
   /* transform: translateX(5px); */
 }
-
-

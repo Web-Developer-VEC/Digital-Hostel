@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Plane } from '@react-three/drei';
 import "./Hostel_Login.css"
 import { useNavigate } from "react-router-dom";
@@ -112,17 +112,14 @@ function LoginForm() {
     e.preventDefault();
   
     try {
-      console.log(process.env.REACT_APP_BASE_URL)
       const response = await createJsonRequest("/api/login", { 
         registration_number, 
         password, 
         type 
       });
-      console.log(response)
   
       const data = response.data;
-      console.log(data)
-  
+
       if (response.status === 200) {
         setMessage(`Success: ${data.message}`);
         Swal.fire({
@@ -241,6 +238,7 @@ function LoginForm() {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
           <button type="submit" className="HL-form-button">Log In</button>
+          <p>{message}</p>
         </motion.div>
       </form>
     </motion.div>

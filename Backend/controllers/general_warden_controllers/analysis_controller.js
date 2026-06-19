@@ -34,7 +34,7 @@ async function passMeasureWarden(req, res) {
     if (warden_type === "superior") {
       primary_years = await collection.distinct("year");
     } else {
-      primary_years = warden_data.primary_year;
+      primary_years = warden_data.primary_batch || warden_data.primary_year;
     }
 
     if (
@@ -243,7 +243,7 @@ async function analysisWarden(req, res) {
     const primary_years =
       warden_type === "superior"
         ? await collection.distinct("year")
-        : warden_data.primary_year;
+        : (warden_data.primary_batch || warden_data.primary_year);
     if (!Array.isArray(primary_years) || primary_years.length === 0) {
       return res
         .status(400)

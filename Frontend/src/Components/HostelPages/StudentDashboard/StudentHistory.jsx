@@ -13,7 +13,7 @@ const StudentHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
+  const BASE_URL = process.env.REACT_APP_QR_URL;
 
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
@@ -76,13 +76,13 @@ const StudentHistory = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching passes:", error);
-        
+
         // Handle 401 authentication error
         if (handle401Error(error)) {
           setLoading(false);
           return;
         }
-        
+
         if (error.response?.data?.error) {
           setError(error.response.data.error);
           Swal.fire({
@@ -159,7 +159,7 @@ const StudentHistory = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       Swal.fire({
         title: "Success!",
         text: "✅ QR Code downloaded successfully.",
@@ -206,9 +206,9 @@ const StudentHistory = () => {
 
   return (
     <div className="student-history-container">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mt-[10%] md:mt-[1%] mb-8 flex justify-between items-center">
         <h2 className="student-history-header flex items-center gap-2">
-          <History className="" size={42} /> 
+          <History className="" size={42} />
           Student History
         </h2>
         <select
@@ -254,25 +254,25 @@ const StudentHistory = () => {
                         </p>
                       </div>
                       <div className="history-info">
-                          {info.reason_for_visit ? (
-                              <p className="text-secondary">
-                                <strong className="text"><FileText size={16} className="inline mr-1" /> Reason:</strong> {info.reason_for_visit}
-                              </p>
-                          ) : (
-                            <p className="text-secondary">
-                              <strong className="text"><FileText size={16} className="inline mr-1" /> Reason:</strong> {info.reason_type}
-                            </p>
-                          )}
+                        {info.reason_for_visit ? (
+                          <p className="text-secondary">
+                            <strong className="text"><FileText size={16} className="inline mr-1" /> Reason:</strong> {info.reason_for_visit}
+                          </p>
+                        ) : (
+                          <p className="text-secondary">
+                            <strong className="text"><FileText size={16} className="inline mr-1" /> Reason:</strong> {info.reason_type}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="two">
                       <div className="history-info in-out">
                         <p className="text-secondary">
-                          <strong className="text"><LogOut size={16} className="inline mr-1" /> OUT:</strong> 
+                          <strong className="text"><LogOut size={16} className="inline mr-1" /> OUT:</strong>
                           <span className="text-danger">{formatDate(info.from)}</span>
                         </p>
                         <p className="text-secondary">
-                          <strong className="text"><LogIn size={16} className="inline mr-1" /> IN:</strong> 
+                          <strong className="text"><LogIn size={16} className="inline mr-1" /> IN:</strong>
                           <span className="text-success">{formatDate(info.to)}</span>
                         </p>
                       </div>
@@ -289,7 +289,7 @@ const StudentHistory = () => {
                             <strong className="text">Warden Status:</strong> {getStatusBadge(info.wardern_approval, 'warden')}
                           </p>
                         )}
-                    </div>
+                      </div>
                     </div>
                     <div className="card-action-buttons">
                       <button className='view-details-button' onClick={() => handleCardClick(info, val.year)}>
@@ -329,10 +329,10 @@ const StudentHistory = () => {
                   </p>
 
                 ) : (
-                    <p>
-                      <strong>Reason</strong>
-                      {selectedData.reason_type}
-                    </p>
+                  <p>
+                    <strong>Reason</strong>
+                    {selectedData.reason_type}
+                  </p>
                 )}
                 <p>
                   <strong>Out Date</strong>
@@ -364,53 +364,53 @@ const StudentHistory = () => {
                 </p>
               </div>
             </div>
-            
+
             {selectedData.file_path && (
-            <div className="mt-4">
-              <p className="font-semibold text-blue-800 mb-2">Supporting Document:</p>
+              <div className="mt-4">
+                <p className="font-semibold text-blue-800 mb-2">Supporting Document:</p>
 
-              {selectedData.file_path && (
-                (() => {
-                  const fileUrl = UrlParser(selectedData.file_path);
-                  const fileExtension = fileUrl.split('.').pop().toLowerCase();
+                {selectedData.file_path && (
+                  (() => {
+                    const fileUrl = UrlParser(selectedData.file_path);
+                    const fileExtension = fileUrl.split('.').pop().toLowerCase();
 
-                  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
-                    return <img src={fileUrl} alt="Proof" className="modal-image" />;
-                  } else if (fileExtension === 'pdf') {
-                    return (
-                      <iframe
-                        src={fileUrl}
-                        title="PDF Document"
-                        className="w-full h-96 border"
-                      >
-                        This browser does not support PDFs. Please download the PDF to view it:
-                        {/* <a href={fileUrl}>Download PDF</a> */}
-                      </iframe>
-                    );
-                  } else {
-                    return <p>Unsupported file format.</p>;
-                  }
-                })()
-              )}
-            </div>
+                    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
+                      return <img src={fileUrl} alt="Proof" className="modal-image" />;
+                    } else if (fileExtension === 'pdf') {
+                      return (
+                        <iframe
+                          src={fileUrl}
+                          title="PDF Document"
+                          className="w-full h-96 border"
+                        >
+                          This browser does not support PDFs. Please download the PDF to view it:
+                          {/* <a href={fileUrl}>Download PDF</a> */}
+                        </iframe>
+                      );
+                    } else {
+                      return <p>Unsupported file format.</p>;
+                    }
+                  })()
+                )}
+              </div>
             )}
-            
+
             {selectedData.qrcode_path && (
               <div className="qr-container">
                 <p>
                   <strong>Scan QR Code</strong>
                 </p>
-                <button 
-                  onClick={() => downloadImage(selectedData.qrcode_path, `${selectedData.registration_number}_${selectedData.from.split('T')[0]}.png`)} 
+                <button
+                  onClick={() => downloadImage(selectedData.qrcode_path, `${selectedData.registration_number}_${selectedData.from.split('T')[0]}.png`)}
                   className="download-icon"
                   title="Click to download QR code"
                 >
                   <img src={UrlParser(selectedData.qrcode_path)} alt="QR Code" className="qr-image" />
                   <Download size={20} className="absolute bottom-2 right-2 bg-blue-500 text-white p-1 rounded-full" />
-                </button>            
+                </button>
               </div>
             )}
-            
+
             <button onClick={closeModal} className="modal-close-button">
               Close Details
             </button>

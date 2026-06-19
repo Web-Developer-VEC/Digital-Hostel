@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   BarChart3,
   FileText,
   Users,
   ClipboardCheck,
-  UserX, 
-  AlertTriangle, 
+  UserX,
+  AlertTriangle,
   Utensils,
-  X 
+  X
 } from 'lucide-react';
 import './SuperiorAttendance.css';
-import axios from 'axios';
+import axiosInstance from '../../../api/axios';
 import Swal from 'sweetalert2';
 
 
@@ -23,8 +23,8 @@ function AttendanceDashboard() {
   const [animatedNonVeg, setAnimatedNonVeg] = useState(0);
   const [showAbsentModal, setShowAbsentModal] = useState(false);
   const [showMismatchModal, setShowMismatchModal] = useState(false);
-  const [maledata , setMaleData] = useState(null);
-  const [femaledata , setFemaledata] = useState(null);
+  const [maledata, setMaleData] = useState(null);
+  const [femaledata, setFemaledata] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,20 +33,20 @@ function AttendanceDashboard() {
     } else {
       document.body.style.overflow = "auto"; // Restore scrolling when all modals are closed
     }
-  
+
     return () => {
       document.body.style.overflow = "auto"; // Ensure scrolling restores on unmount
     };
   }, [showAbsentModal, showMismatchModal, showIframe]); // Runs when modal state changes
-  
 
-  useEffect(()=>{
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('/api/food_count_superior')
+        const response = await axiosInstance.get('/api/food_count_warden')
 
-        const fetchedData = response.data;
+        const fetchedData = response.data.foodCounts;
 
         if (!fetchedData || (!fetchedData.Male && !fetchedData.Female)) {
           Swal.fire({
@@ -61,7 +61,7 @@ function AttendanceDashboard() {
         setFemaledata(fetchedData.Female);
 
       } catch (error) {
-        console.error("error fetched food count data",error);
+        console.error("error fetched food count data", error);
         Swal.fire({
           title: "Error!",
           text: "❌ Failed to fetch food count data. Please refresh the page.",
@@ -73,12 +73,12 @@ function AttendanceDashboard() {
       }
     }
     fetchData();
-  },[]);
+  }, []);
 
   const handleYearChange = (e) => {
     const newYear = e.target.value;
     setSelectedYear(newYear);
-    
+
     // Check if data exists for the selected filters
     const data = getCurrentData();
     if (data.veg_count === 0 && data.non_veg_count === 0) {
@@ -95,7 +95,7 @@ function AttendanceDashboard() {
   const handleGenderChange = (e) => {
     const newGender = e.target.value;
     setSelectedGender(newGender);
-    
+
     // Check if data exists for the selected filters
     setTimeout(() => {
       const data = getCurrentData();
@@ -111,21 +111,21 @@ function AttendanceDashboard() {
     }, 100);
   };
 
-  
+
   const getCurrentData = () => {
     // Determine the gender key based on the selected gender
     const genderKey = selectedGender === 'boys' ? 'Male' : selectedGender === 'girls' ? 'Female' : null;
-    
+
     // Determine the year key based on the selected year
     const yearKey = selectedYear === 'first' ? '1' :
-                   selectedYear === 'second' ? '2' :
-                   selectedYear === 'third' ? '3' :
-                   selectedYear === 'fourth' ? '4' :
-                   selectedYear === 'me1' ? '8' :
-                   selectedYear === 'me2' ? '7' :
-                   selectedYear === 'mba1' ? '10' :
-                   selectedYear === 'mba2' ? '9' : 'Overall';
-    
+      selectedYear === 'second' ? '2' :
+        selectedYear === 'third' ? '3' :
+          selectedYear === 'fourth' ? '4' :
+            selectedYear === 'me1' ? '8' :
+              selectedYear === 'me2' ? '7' :
+                selectedYear === 'mba1' ? '10' :
+                  selectedYear === 'mba2' ? '9' : 'Overall';
+
     // If "overall" is selected for gender, combine Male and Female data
     if (selectedGender === 'overall') {
       const maleData = maledata?.[yearKey] || { veg_count: 0, non_veg_count: 0 };
@@ -136,13 +136,13 @@ function AttendanceDashboard() {
         non_veg_count: maleData.non_veg_count + femaleData.non_veg_count,
       };
     }
-  
+
     // If a specific gender is selected, return the corresponding data
     if (genderKey) {
       const genderData = genderKey === 'Male' ? maledata : femaledata;
       return genderData?.[yearKey] || { veg_count: 0, non_veg_count: 0 };
     }
-  
+
     // Default fallback
     return { veg_count: 0, non_veg_count: 0 };
   };
@@ -167,10 +167,10 @@ function AttendanceDashboard() {
       document.body.style.overflow = "auto";
     }, 100);
   };
-  
+
   const currentData = getCurrentData();
-  console.log("Current Data ",currentData);
-  
+  console.log("Current Data ", currentData);
+
 
   useEffect(() => {
     const targetCount = currentData.veg_count + currentData.non_veg_count;
@@ -207,11 +207,11 @@ function AttendanceDashboard() {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [selectedYear, selectedGender ,maledata, femaledata]);
+  }, [selectedYear, selectedGender, maledata, femaledata]);
 
   const getFilteredList = (list) => {
     if (selectedGender === 'overall') return list;
-    return list.filter(item => 
+    return list.filter(item =>
       (selectedGender === 'boys' && item.gender === 'male') ||
       (selectedGender === 'girls' && item.gender === 'female')
     );
@@ -224,42 +224,42 @@ function AttendanceDashboard() {
           <p style={{ fontSize: '20px' }}>⏳ Loading food count data...</p>
         </div>
       ) : (
-      <div className="attendance-main">
-        <div className="attendance-filters">
-          <div className="attendance-filter-group">
-            <label className="attendance-filter-label">Year</label>
-            <select 
-              className="attendance-filter-select"
-              value={selectedYear}
-              onChange={handleYearChange}
-            >
-              <option value="overall">Overall</option>
-              <option value="first">First Year</option>
-              <option value="second">Second Year</option>
-              <option value="third">Third Year</option>
-              <option value="fourth">Fourth Year</option>
-              <option value="me1">ME First Year</option>
-              <option value="me2">ME Second Year</option>
-              <option value="mba1">MBA First Year</option>
-              <option value="mba2">MBA Second Year</option>
-            </select>
+        <div className="attendance-main">
+          <div className="attendance-filters">
+            <div className="attendance-filter-group">
+              <label className="attendance-filter-label">Year</label>
+              <select
+                className="attendance-filter-select"
+                value={selectedYear}
+                onChange={handleYearChange}
+              >
+                <option value="overall">Overall</option>
+                <option value="first">First Year</option>
+                <option value="second">Second Year</option>
+                <option value="third">Third Year</option>
+                <option value="fourth">Fourth Year</option>
+                <option value="me1">ME First Year</option>
+                <option value="me2">ME Second Year</option>
+                <option value="mba1">MBA First Year</option>
+                <option value="mba2">MBA Second Year</option>
+              </select>
+            </div>
+
+            <div className="attendance-filter-group">
+              <label className="attendance-filter-label">Gender</label>
+              <select
+                className="attendance-filter-select"
+                value={selectedGender}
+                onChange={handleGenderChange}
+              >
+                <option value="overall">Overall</option>
+                <option value="boys">Boys</option>
+                <option value="girls">Girls</option>
+              </select>
+            </div>
           </div>
 
-          <div className="attendance-filter-group">
-            <label className="attendance-filter-label">Gender</label>
-            <select 
-              className="attendance-filter-select"
-              value={selectedGender}
-              onChange={handleGenderChange}
-            >
-              <option value="overall">Overall</option>
-              <option value="boys">Boys</option>
-              <option value="girls">Girls</option>
-            </select>
-          </div>
-        </div>
-
-        {/* <div className="attendance-overview">
+          {/* <div className="attendance-overview">
           <div className="attendance-chart">
             <div className="attendance-chart-container">
               <svg viewBox="0 0 200 100" className="attendance-donut">
@@ -332,66 +332,66 @@ function AttendanceDashboard() {
           </div>
         </div> */}
 
-        <div className="attendance-food-section">
-          <div className="attendance-food-counts">
-            <div className="attendance-food-type">
-              <Utensils className="attendance-food-icon attendance-veg" />
-              <div className="attendance-food-details">
-                <h3>Vegetarian</h3>
-                <p className="attendance-food-number">{animatedVeg}</p>
-                <p className="attendance-food-percentage">
-                  {(currentData.veg_count + currentData.non_veg_count) > 0 
-                    ? ((currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
-                    : '0.0'}%
-                </p>
+          <div className="attendance-food-section">
+            <div className="attendance-food-counts">
+              <div className="attendance-food-type">
+                <Utensils className="attendance-food-icon attendance-veg" />
+                <div className="attendance-food-details">
+                  <h3>Vegetarian</h3>
+                  <p className="attendance-food-number">{animatedVeg}</p>
+                  <p className="attendance-food-percentage">
+                    {(currentData.veg_count + currentData.non_veg_count) > 0
+                      ? ((currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
+                      : '0.0'}%
+                  </p>
+                </div>
+              </div>
+              <div className="attendance-food-type">
+                <Utensils className="attendance-food-icon attendance-non-veg" />
+                <div className="attendance-food-details">
+                  <h3>Non-Vegetarian</h3>
+                  <p className="attendance-food-number">{animatedNonVeg}</p>
+                  <p className="attendance-food-percentage">
+                    {(currentData.veg_count + currentData.non_veg_count) > 0
+                      ? ((currentData.non_veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
+                      : '0.0'}%
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="attendance-food-type">
-              <Utensils className="attendance-food-icon attendance-non-veg" />
-              <div className="attendance-food-details">
-                <h3>Non-Vegetarian</h3>
-                <p className="attendance-food-number">{animatedNonVeg}</p>
-                <p className="attendance-food-percentage">
-                  {(currentData.veg_count + currentData.non_veg_count) > 0 
-                    ? ((currentData.non_veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100).toFixed(1)
-                    : '0.0'}%
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <div className="attendance-pie-chart">
-          <div
-            className="attendance-pie"
-            style={{
-              background: `conic-gradient(
+            <div className="attendance-pie-chart">
+              <div
+                className="attendance-pie"
+                style={{
+                  background: `conic-gradient(
                 #10b981 0% ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}%,
                 #10b981 ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}% ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}%,
                 #ef4444 ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}% 100%
               )`
-            }}
-          />
-            <div className="attendance-pie-legend">
-              <div className="attendance-legend-item">
-                <span className="attendance-legend-color attendance-veg"></span>
-                <span>Vegetarian</span>
-              </div>
-              <div className="attendance-legend-item">
-                <span className="attendance-legend-color attendance-non-veg"></span>
-                <span>Non-Vegetarian</span>
+                }}
+              />
+              <div className="attendance-pie-legend">
+                <div className="attendance-legend-item">
+                  <span className="attendance-legend-color attendance-veg"></span>
+                  <span>Vegetarian</span>
+                </div>
+                <div className="attendance-legend-item">
+                  <span className="attendance-legend-color attendance-non-veg"></span>
+                  <span>Non-Vegetarian</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* <button 
+          {/* <button 
           className="attendance-consolidation-button"
           onClick={() => setShowIframe(true)}
         >
           View Attendance Consolidation
         </button> */}
 
-        {/* {showIframe && (
+          {/* {showIframe && (
           <div className="attendance-modal-overlay" onClick={() => setShowIframe(false)}>
             <div className="attendance-modal" onClick={(e) => e.stopPropagation()}>
               <div className="attendance-modal-header">
@@ -410,7 +410,7 @@ function AttendanceDashboard() {
           </div>
         )} */}
 
-        {/* {showAbsentModal && (
+          {/* {showAbsentModal && (
           <div 
             className="attendance-modal-overlay"
             onClick={(e) => {
@@ -441,7 +441,7 @@ function AttendanceDashboard() {
           </div>
         )} */}
 
-        {/* {showMismatchModal && (
+          {/* {showMismatchModal && (
           <div 
             className="attendance-modal-overlay"
             onClick={(e) => {
@@ -474,7 +474,7 @@ function AttendanceDashboard() {
             </div>
           </div>
         )} */}
-      </div>      )}    </div>
+        </div>)}    </div>
   );
 }
 

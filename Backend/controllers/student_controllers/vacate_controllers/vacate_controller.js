@@ -43,9 +43,9 @@ async function submitVacateForm(req, res) {
       room_no: studentData.room_number,
       blockname: studentData.block_name,
       Reason,
-      date_time,
+      date_time: new Date(),
       Address,
-      vacate_date: new Date(),
+      vacate_date: date_time,
     };
 
     await vacateCollection.insertOne(vacateEntry);

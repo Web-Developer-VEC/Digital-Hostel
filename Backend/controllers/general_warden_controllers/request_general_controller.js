@@ -18,7 +18,8 @@ async function fetchPassWarden(req, res) {
 
     const user_id = user.registration_number;
     const usertype = user.type;
-    const { date, warden_id } = req.body;
+    const date = req.body?.date || req.query?.date;
+    const warden_id = req.body?.warden_id || req.query?.warden_id;
     const warden_data = await wardenCollection.findOne({ unique_id: user_id });
     if (!warden_data) {
       return res.status(404).json({ error: "Warden not found" });
@@ -43,7 +44,7 @@ async function fetchPassWarden(req, res) {
         }
       } else {
         query.gender = warden_data.gender;
-        query.year = { $in: warden_data.primary_year };
+        query.batch = { $in: (warden_data.primary_batch || warden_data.primary_year || []) };
       }
       const oldPasses = await passCollection.find(query).toArray();
       return res
@@ -51,12 +52,8 @@ async function fetchPassWarden(req, res) {
         .json({ message: "Old passes fetched successfully", data: oldPasses });
     }
 
-    const target_years =
-      usertype === "superior"
-        ? await studentCollection.distinct("year")
-        : warden_data.primary_year;
     const target_genders =
-      usertype === "superior" ? ["Male", "female"] : warden.gender;
+      usertype === "superior" ? ["Male", "Female"] : [warden_data.gender];
 
     query = {
       request_completed: false,
@@ -67,13 +64,23 @@ async function fetchPassWarden(req, res) {
       superior_wardern_approval: null,
       notify_superior: usertype === "superior",
       parent_approval: { $ne: false },
-      year: { $in: target_years },
     };
+
+    if (usertype === "superior") {
+      const target_years = await studentCollection.distinct("year");
+      query.year = { $in: target_years };
+    } else {
+      const target_batches = warden_data.primary_batch || warden_data.primary_year || [];
+      query.batch = { $in: target_batches };
+    }
 
     const pendingPasses = await passCollection.find(query).toArray();
 
     if (pendingPasses.length === 0) {
-      return res.status(404).json({ message: "No pending passes found" });
+      return res.status(200).json({
+        message: "No pending passes found",
+        data: [],
+      });
     }
 
     return res.status(200).json({
@@ -125,15 +132,14 @@ async function WardenDecision(req, res) {
       return res.status(404).json({ error: "Pass not found" });
     }
 
-    const handling_year =
-      usertype === "superior"
-        ? await studentCollection.distinct("year")
-        : warden.primary_year;
+    const isIncluded = isSuperior
+      ? (await studentCollection.distinct("year")).some(y => y?.toString() === passData.year?.toString())
+      : (warden_data.primary_batch || warden_data.primary_year || []).some(b => b?.toString() === passData.batch?.toString());
 
-    if (!handling_year.includes(passData.year)) {
+    if (!isIncluded) {
       return res
         .status(400)
-        .json({ error: "Warden is accessing a pass outside assigned year" });
+        .json({ error: `Warden is accessing a pass outside assigned ${isSuperior ? "year" : "batch"}` });
     }
 
     const approvalField = isSuperior
@@ -142,9 +148,8 @@ async function WardenDecision(req, res) {
 
     if (passData[approvalField] !== null) {
       return res.status(400).json({
-        message: `You have already ${
-          passData[approvalField] ? "approved" : "rejected"
-        } this request.`,
+        message: `You have already ${passData[approvalField] ? "approved" : "rejected"
+          } this request.`,
       });
     }
 

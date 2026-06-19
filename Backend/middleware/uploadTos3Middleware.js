@@ -1,5 +1,5 @@
 const path = require('path');
-const sharp = require('sharp'); 
+const sharp = require('sharp');
 const s3 = require('../config/aws');
 const resolveS3Path = require('./s3PathResolver');
 
@@ -19,17 +19,17 @@ async function uploadToS3(file, fieldname) {
 
   if (isImage) {
     fileBuffer = await sharp(file.buffer)
-      .webp({ quality: 80 }) 
+      .webp({ quality: 80 })
       .toBuffer();
     contentType = 'image/webp';
   }
 
   const params = {
-    Bucket: process.env.AWS_S3_NAME,
+    Bucket: process.env.AWS_BUCKET_NAME,
     Key: key,
     Body: fileBuffer,
     ContentType: contentType,
-    ACL: 'public-read',
+    // ACL: 'public-read',
   };
 
   const uploadResult = await s3.upload(params).promise();
