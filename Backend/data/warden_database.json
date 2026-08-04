@@ -1,0 +1,33 @@
+[
+    {
+        "unique_id": "001",
+        "warden_name": "Krishna",
+        "phone_number": 1234567890,
+        "image_path": "https://preview.redd.it/what-are-your-thoughts-on-itachi-uchiha-v0-d1v84pkpcsdb1.jpg?auto=webp&s=d666c9922aa2215836db1860e522038b0e161dde",
+        "active": true,
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "gender": "Male",
+        "category": "assistant",
+        "joined_date": "22/12/2020",
+        "primary_batch": [
+            "2023-2027"
+        ]
+    },
+    {
+        "unique_id": "004",
+        "warden_name": "Selvan",
+        "phone_number": 1234567890,
+        "image_path": "/static/images/warden_profile_photos/004.jpeg",
+        "active": true,
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "gender": "Male",
+        "category": "head",
+        "joined_date": "22/12/2020",
+        "profile_years": [
+            "2023-2027",
+            "2024-2028"
+        ],
+        "vacated_students": 2,
+        "primary_batch": []
+    }
+]
