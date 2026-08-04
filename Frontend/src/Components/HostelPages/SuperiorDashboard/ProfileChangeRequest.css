@@ -448,8 +448,6 @@
 
 .SR-checkbox:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #93c5fd;
 }
 
 .SR-checkbox-text {
