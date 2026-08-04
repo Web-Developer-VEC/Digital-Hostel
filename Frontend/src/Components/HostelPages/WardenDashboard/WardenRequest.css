@@ -452,8 +452,6 @@ input[type="date"].AR-filter-select {
 
 .AR-checkbox:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #93c5fd;
 }
 
 .AR-checkbox-text {
