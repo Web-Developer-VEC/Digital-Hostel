@@ -1,5 +1,14 @@
 const { getDb } = require("../../config/db");
 const { generateQR } = require("../../services/generateQR.service");
+const {
+  sendParentReachedSMS,
+  sendParentApprovalSMS,
+} = require("../../services/sendSMS.service");
+const crypto = require("crypto");
+
+const hashOTP = (otp) => {
+  return crypto.createHash("sha256").update(String(otp)).digest("hex");
+};
 
 async function fetchPassWarden(req, res) {
   try {
@@ -44,7 +53,9 @@ async function fetchPassWarden(req, res) {
         }
       } else {
         query.gender = warden_data.gender;
-        query.batch = { $in: (warden_data.primary_batch || warden_data.primary_year || []) };
+        query.batch = {
+          $in: warden_data.primary_batch || warden_data.primary_year || [],
+        };
       }
       const oldPasses = await passCollection.find(query).toArray();
       return res
@@ -70,10 +81,12 @@ async function fetchPassWarden(req, res) {
       const target_years = await studentCollection.distinct("year");
       query.year = { $in: target_years };
     } else {
-      const target_batches = warden_data.primary_batch || warden_data.primary_year || [];
-      query.batch = { $in: target_batches };
+      const target_batches =
+        warden_data.primary_batch || warden_data.primary_year || [];
+      query.year = { $in: target_batches };
     }
 
+    console.log(JSON.stringify(query, null, 2));
     const pendingPasses = await passCollection.find(query).toArray();
 
     if (pendingPasses.length === 0) {
@@ -107,11 +120,9 @@ async function WardenDecision(req, res) {
     const isSuperior = user?.type === "superior";
     const { pass_id, action, medical_status, comment } = req.body;
     if (!pass_id || !["approve", "reject"].includes(action)) {
-      return res
-        .status(400)
-        .json({
-          error: "pass_id and valid action (approve/reject) are required",
-        });
+      return res.status(400).json({
+        error: "pass_id and valid action (approve/reject) are required",
+      });
     }
     const db = getDb();
     const passCollection = db.collection("pass_details");
@@ -133,13 +144,17 @@ async function WardenDecision(req, res) {
     }
 
     const isIncluded = isSuperior
-      ? (await studentCollection.distinct("year")).some(y => y?.toString() === passData.year?.toString())
-      : (warden_data.primary_batch || warden_data.primary_year || []).some(b => b?.toString() === passData.batch?.toString());
+      ? (await studentCollection.distinct("year")).some(
+          (y) => y?.toString() === passData.year?.toString(),
+        )
+      : (warden_data.primary_batch || warden_data.primary_year || []).some(
+          (b) => b?.toString() === passData.year?.toString(),
+        );
 
     if (!isIncluded) {
-      return res
-        .status(400)
-        .json({ error: `Warden is accessing a pass outside assigned ${isSuperior ? "year" : "batch"}` });
+      return res.status(400).json({
+        error: `Warden is accessing a pass outside assigned ${isSuperior ? "year" : "batch"}`,
+      });
     }
 
     const approvalField = isSuperior
@@ -148,8 +163,9 @@ async function WardenDecision(req, res) {
 
     if (passData[approvalField] !== null) {
       return res.status(400).json({
-        message: `You have already ${passData[approvalField] ? "approved" : "rejected"
-          } this request.`,
+        message: `You have already ${
+          passData[approvalField] ? "approved" : "rejected"
+        } this request.`,
       });
     }
 
@@ -163,6 +179,9 @@ async function WardenDecision(req, res) {
     }
 
     if (action === "approve") {
+      if (passData.parent_approval != "approved") {
+        return res.status(400).json({ message: "Parents Approval Needed!" });
+      }
       const qrPath = await generateQR(pass_id, passData.registration_number);
 
       updateData.qrcode_path = qrPath;
@@ -196,7 +215,236 @@ async function WardenDecision(req, res) {
   }
 }
 
+async function sendParentApprovalOTP(req, res) {
+  try {
+    const { pass_id } = req.body;
+
+    if (!pass_id) {
+      return res.status(400).json({
+        success: false,
+        error: "Pass ID is required",
+      });
+    }
+
+    const db = getDb();
+    const PassCollection = db.collection("pass_details");
+
+    // Find pass
+    const pass = await PassCollection.findOne({ pass_id });
+
+    if (!pass) {
+      return res.status(404).json({
+        success: false,
+        error: "Pass not found",
+      });
+    }
+
+    // Check existing status
+    if (
+      pass.parent_approval === "approved" ||
+      pass.parent_approval === "declined"
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Parent has already responded",
+      });
+    }
+
+    // Generate secure OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
+
+    const otpHash = hashOTP(otp);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    
+    // Save OTP details in pass document
+    await PassCollection.updateOne(
+      { pass_id },
+      {
+        $set: {
+          parent_otp_hash: otpHash,
+          parent_otp_expires_at: expiresAt,
+          parent_otp_attempts: 0,
+          parent_otp_used: false,
+          parent_approval: "pending",
+          parent_sms_sent_status: false,
+          parent_otp_created_at: new Date(),
+        },
+      },
+    );
+
+    console.log("otp",otp);
+    // Send OTP
+  //   await sendParentApprovalSMS(
+  //     pass.phone_number_parent,
+  //     pass.name,
+  //     pass.place_to_visit,
+  //     pass.reason_for_visit,
+  //     pass.from,
+  //     pass.to,
+  //     otp,
+  //  );
+
+    // Update SMS status
+    await PassCollection.updateOne(
+      { pass_id },
+      {
+        $set: {
+          parent_sms_sent_status: true,
+          parent_sms_sent_at: new Date(),
+        },
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to parent",
+      pass_id,
+    });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Failed to send OTP",
+    });
+  }
+}
+
+
+async function verifyParentOTP(req, res) {
+  try {
+    const { pass_id, otp } = req.body;
+    // Validation
+    if (!pass_id || !otp) {
+      return res.status(400).json({
+        success: false,
+        error: "Pass ID and OTP are required",
+      });
+    }
+
+    // OTP format validation
+    if (!/^\d{6}$/.test(String(otp))) {
+      return res.status(400).json({
+        success: false,
+        error: "OTP must be 6 digits",
+      });
+    }
+
+    const db = getDb();
+    const PassCollection = db.collection("pass_details");
+
+    const pass = await PassCollection.findOne({ pass_id });
+
+    if (!pass) {
+      return res.status(404).json({
+        success: false,
+        error: "Pass not found",
+      });
+    }
+
+    // OTP not generated
+    if (!pass.parent_otp_hash) {
+      return res.status(400).json({
+        success: false,
+        error: "OTP not generated. Please request a new OTP",
+      });
+    }
+
+    // OTP already used
+    if (pass.parent_otp_used) {
+      return res.status(400).json({
+        success: false,
+        error: "OTP already used",
+      });
+    }
+
+    // OTP expiry check
+    if (new Date() > new Date(pass.parent_otp_expires_at)) {
+      return res.status(400).json({
+        success: false,
+        error: "OTP expired. Please request a new OTP",
+      });
+    }
+
+    // Maximum 5 attempts
+    if (pass.parent_otp_attempts >= 5) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many attempts. Please request a new OTP",
+      });
+    }
+
+    // Hash entered OTP
+    const enteredOtpHash = crypto
+      .createHash("sha256")
+      .update(String(otp))
+      .digest("hex");
+
+    // Secure comparison
+    const otpValid = crypto.timingSafeEqual(
+      Buffer.from(enteredOtpHash, "hex"),
+      Buffer.from(pass.parent_otp_hash, "hex"),
+    );
+
+    // Wrong OTP
+    if (!otpValid) {
+      await PassCollection.updateOne(
+        { pass_id },
+        {
+          $inc: {
+            parent_otp_attempts: 1,
+          },
+        },
+      );
+
+      return res.status(400).json({
+        success: false,
+        error: "Invalid OTP",
+      });
+    }
+
+    // Mark OTP as verified and used
+    const result = await PassCollection.updateOne(
+      {
+        pass_id,
+        parent_otp_used: false,
+      },
+      {
+        $set: {
+          parent_otp_used: true,
+          parent_approval:"Approved",
+          parent_otp_verified: true,
+          parent_otp_verified_at: new Date(),
+        },
+      },
+    );
+
+    // Prevent OTP reuse / race condition
+    if (result.modifiedCount !== 1) {
+      return res.status(409).json({
+        success: false,
+        error: "OTP has already been processed",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      pass_id,
+    });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Failed to verify OTP",
+    });
+  }
+}
+
 module.exports = {
   fetchPassWarden,
   WardenDecision,
+  sendParentApprovalOTP,
+  verifyParentOTP,
 };
