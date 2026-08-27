@@ -25,12 +25,16 @@ app.use(session);
 // Connect to MongoDB
 connectToDatabase();
 
-app.use('/api', hostelroutes);
-
+app.use((req, res, next) => {
+    console.log("Hits:", req.originalUrl);
+    
+    next();
+});
 
 app.get('/', (req, res) => {
     res.send("Welcome to the Node.js MongoDB API!");
 });
+app.use('/api',  hostelroutes);
 
 // Start the server
 app.listen(port, () => {

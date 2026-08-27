@@ -136,7 +136,7 @@ export default function SecurityCheckout() {
 
       const data = await response.json();
       if (response.ok) {
-        setPassDetails(data);
+        setPassDetails(data.pass_data);
       } else {
         alert(data.message || "Error fetching pass details");
       }
