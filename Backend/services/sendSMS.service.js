@@ -1,97 +1,160 @@
-const twilio = require('twilio');
-const { twilio: twilioConfig } = require('../config/env');
+const {
+  SendTextMessageCommand,
+} = require("@aws-sdk/client-pinpoint-sms-voice-v2");
 
-const twilioClient = twilio(twilioConfig.accountSid, twilioConfig.authToken);
+const { awsSmsClient } = require("../config/sms");
 
-const sendParentApprovalSMS = async (parentPhoneNumber, name, place_to_visit, reason_for_visit, from, to, pass_id) => {
-    const approvalUrl = `http://localhost:5000/api/parent_accept/${pass_id}`;
-    const rejectionUrl = `http://localhost:5000/api/parent_not_accept/${pass_id}`;    
-    const smsMessage = `
-    📢 Pass Request Notification
+// ============================================
+// TEST PHONE NUMBER
+// ============================================
 
-    ${name}, a student of Velammal Engineering College,  
-    has requested a pass to visit **${place_to_visit}**  
-    for the reason: **${reason_for_visit}**.  
+const phoneno = process.env.PHONE;
 
-    📅 Duration: ${from} ➝ ${to}  
+// ============================================
+// COMMON SMS FUNCTION
+// ============================================
 
-    Please review and take action:  
-    ✅ Approve: ${approvalUrl}  
-    ❌ Reject: ${rejectionUrl}  
-    `;
+const sendSMS = async (phoneNumber, message) => {
+  try {
+    // phoneNumber is accepted but ignored during testing
+    console.log("Original destination:", phoneNumber);
+    console.log("Testing destination:", phoneno);
 
-    try {
-        await twilioClient.messages.create({
-            body: smsMessage,
-            from: twilioPhoneNumber,
-            to: parentPhoneNumber
-        });
-        console.log("✅ SMS sent successfully to parent");
-    } catch (error) {
-        console.error("❌ Error sending SMS:", error);
-        throw new Error("Failed to send SMS");
-    }
+    const command = new SendTextMessageCommand({
+      // Always send to .env phone during testing
+      DestinationPhoneNumber: phoneno,
+
+      MessageBody: message,
+
+      MessageType: "TRANSACTIONAL",
+    });
+
+    const response = await awsSmsClient.send(command);
+
+    console.log("✅ SMS sent successfully");
+    console.log("Message ID:", response.MessageId);
+
+    return response;
+  } catch (error) {
+    console.error("❌ SMS Error:", error);
+
+    throw new Error(error.Reason || error.message || "Failed to send SMS");
+  }
 };
 
-const sendParentReachedSMS = async (parentPhoneNumber, name, reachedTime) => {  
-    const smsMessage = `
-    📢 Arrival Notification  
+// ============================================
+// PARENT APPROVAL SMS
+// ============================================
 
-    Dear Parent,  
+const sendParentApprovalSMS = async (
+  parentPhoneNumber,
+  name,
+  place_to_visit,
+  reason_for_visit,
+  from,
+  to,
+  otp
+) => {
+ console.log("otp",otp);
+ 
 
-    Your ward **${name}** has safely returned to the hostel.  
+  const smsMessage = `
+VEC HOSTEL - Pass Approval
 
-    🏡 **Hostel Arrival Time:** ${reachedTime}  
+Student: ${name}
 
-    Thank you,  
-    Velammal Engineering College  
-    `;
-    try {
-        await twilioClient.messages.create({
-            body: smsMessage,
-            from: twilioPhoneNumber,
-            to: parentPhoneNumber
-        });
-        console.log(`✅ SMS sent successfully to parent of ${name}`);
-    } catch (error) {
-        console.error("❌ Error sending SMS:", error);
-        throw new Error("Failed to send SMS");
-    }
+Place: ${place_to_visit}
+
+Reason: ${reason_for_visit}
+
+Duration:
+${from} to ${to}
+
+Your verification OTP: ${otp}
+
+Use this OTP to approve or reject the pass request.
+OTP expires in 5 minutes.
+Do not share this OTP with anyone.
+`;
+
+  await sendSMS(parentPhoneNumber, smsMessage);
+
+  return {
+    success: true,
+    message: "OTP sent successfully",
+    pass_id,
+  };
 };
 
-const sendOTPForForgetPassword = async (warden_number, name, req) => {  
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    console.log(otp);
-    req.session.otp = JSON.stringify(otp);
-    req.session.otpExpires = Date.now() + 5 * 60 * 1000;
-    const smsMessage = `
-    🔐 Password Reset OTP  
+// ============================================
+// STUDENT REACHED HOSTEL SMS
+// ============================================
 
-    Dear ${name},  
+const sendParentReachedSMS = async (parentPhoneNumber, name, reachedTime) => {
+  const smsMessage = `
+VEC HOSTEL - Arrival Notification
 
-    Your One-Time Password (OTP) for resetting your password is: **${otp}**  
+Dear Parent,
 
-    ⏳ This OTP is valid for 5 minutes. Do not share it with anyone.  
+Your ward ${name} has safely returned to the hostel.
 
-    Thank you,  
-    Velammal Engineering College  
-    `;
+Arrival Time: ${reachedTime}
 
-    try {
-        await twilioClient.messages.create({
-            body: smsMessage,
-            from: twilioPhoneNumber,
-            to: warden_number
-        });
-        console.log(`OTP sent successfully to ${name}`);
-    } catch (error) {
-        console.error("Error sending OTP:", error);
-        throw new Error("Failed to send OTP");
-    }
+Thank you,
+Velammal Engineering College
+`;
+
+  return await sendSMS(parentPhoneNumber, smsMessage);
 };
+
+// ============================================
+// FORGOT PASSWORD OTP
+// ============================================
+
+const sendOTPForForgetPassword = async (warden_number, name, req) => {
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  console.log("OTP:", otp);
+
+  // Store OTP in session
+  req.session.otp = String(otp);
+
+  // OTP expires after 5 minutes
+  req.session.otpExpires = Date.now() + 5 * 60 * 1000;
+
+  const smsMessage = `
+VEC HOSTEL
+
+Dear ${name},
+
+Your password reset OTP is:
+
+${otp}
+
+This OTP is valid for 5 minutes.
+
+Do not share this OTP with anyone.
+
+Velammal Engineering College
+`;
+
+  await sendSMS(warden_number, smsMessage);
+
+  console.log(`✅ OTP sent successfully to ${name}`);
+
+  return otp;
+};
+
+// ============================================
+// EXPORTS
+// ============================================
 
 module.exports = {
-    sendOTPForForgetPassword,
-    sendParentApprovalSMS,
-    sendParentReachedSMS
-}
+  sendSMS,
+
+  sendOTPForForgetPassword,
+
+  sendParentApprovalSMS,
+
+  sendParentReachedSMS,
+};
