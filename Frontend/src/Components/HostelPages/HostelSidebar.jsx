@@ -40,6 +40,12 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const [showProfile, setShowProfile] = useState(false);
   const [wardenSlidebar, setWardenSlidebar] = useState(null);
   const [message, setMessage] = useState(null)
+  const BASE_URL = process.env.REACT_APP_QR_URL;
+  const UrlParser = (path) => {
+    console.log("😂😂",path,path?.startsWith("http") ? path : `${BASE_URL}${path}`);
+    
+    return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
+  };
 
   useEffect(()=>{
     const fetchData = async () => {
@@ -159,7 +165,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
               <div className="warden-sidebar-top m-2">
                 <div className="warden-photo-container">
                   <img
-                    src={wardenSlidebar?.image_path}
+                    src={UrlParser(wardenSlidebar?.image_path) }
                     alt={wardenSlidebar?.name}
                     className="warden-photo"
                     style={{ color: "white" }}
@@ -211,7 +217,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           <div className="warden-profile-popup">
             <div className="warden-profile-header">
               <img
-                src={wardenSlidebar?.image_path || "https://via.placeholder.com/150"}
+                src={UrlParser(wardenSlidebar?.image_path) || "https://via.placeholder.com/150"}
                 alt={wardenSlidebar?.name}
                 className="warden-photo"
               />

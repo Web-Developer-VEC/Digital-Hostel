@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const { sendParentReachedSMS } = require("../../services/sendSMS.service");
 const path = require("path");
 const fs = require("fs");
-const { error } = require("console");
+const { error, log } = require("console");
 const uploadToS3 = require("../../middleware/uploadTos3Middleware");
 const s3 = require("../../config/aws");
 
@@ -100,21 +100,17 @@ async function submitPass(req, res) {
 
     if (pass_type.toLowerCase() === "outpass") {
       if (gender === "Male" && totalToMinutes > maleTimeLimit) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "For male students, outpass 'To' time cannot be later than 21:30 (9:30 PM)",
-          });
+        return res.status(400).json({
+          error:
+            "For male students, outpass 'To' time cannot be later than 21:30 (9:30 PM)",
+        });
       }
 
       if (gender === "Female" && totalToMinutes > femaleTimeLimit) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "For female students, outpass 'To' time cannot be later than 18:00 (6:00 PM)",
-          });
+        return res.status(400).json({
+          error:
+            "For female students, outpass 'To' time cannot be later than 18:00 (6:00 PM)",
+        });
       }
     }
 
@@ -173,6 +169,7 @@ async function submitPass(req, res) {
         registration_number,
       });
 
+      console.log("PassData :",PassData)
       if (existingDraft) {
         await DraftsCollection.updateOne(
           { registration_number: registration_number },
@@ -196,11 +193,9 @@ async function submitPass(req, res) {
     });
 
     if (activePassCount >= 3) {
-      return res
-        .status(400)
-        .json({
-          error: "Maximum of 3 active passes allowed per student for today",
-        });
+      return res.status(400).json({
+        error: "Maximum of 3 active passes allowed per student for today",
+      });
     }
 
     await studentDatabase.updateOne(
@@ -367,21 +362,17 @@ async function EditPassDetails(req, res) {
 
     if (passtype.toLowerCase() === "outpass") {
       if (gender === "Male" && totalToMinutes > maleTimeLimit) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "For male students, outpass 'To' time cannot be later than 21:30 (9:30 PM)",
-          });
+        return res.status(400).json({
+          error:
+            "For male students, outpass 'To' time cannot be later than 21:30 (9:30 PM)",
+        });
       }
 
       if (gender === "Female" && totalToMinutes > femaleTimeLimit) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "For female students, outpass 'To' time cannot be later than 18:00 (6:00 PM)",
-          });
+        return res.status(400).json({
+          error:
+            "For female students, outpass 'To' time cannot be later than 18:00 (6:00 PM)",
+        });
       }
     }
 
@@ -473,7 +464,7 @@ async function verifyStudent(req, res) {
       block_name: student.block_name,
       vacate_status: student.vacate_status,
       vacate_form: student.vacate_form,
-      superior_wardern_approval: student.superior_wardern_approval
+      superior_wardern_approval: student.superior_wardern_approval,
     });
   } catch (error) {
     console.error("❌ Error verifying mobile number:", error);
