@@ -1,282 +1,1238 @@
-/* Container */
+/* =========================================================
+   TUTORIAL PAGE — PREMIUM ANIMATED UI
+   Yellow + Maroon Theme
+   UI ONLY — NO FUNCTIONALITY CHANGES
+========================================================= */
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
 .tut-container {
-    min-height: 100vh;
-    background-color: rgba(251, 243, 219, 0.3); /* Light beige background from Vacate */
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center all components */
-    width: 80%;
-    justify-content: center;
-    margin-left: 18%;
-    margin-top: -20px;
+  position: relative;
+
+  min-height: 100vh;
+
+  padding: 3rem 2rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 80%;
+
+  margin-left: 18%;
+  margin-top: -20px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  animation:
+    pageFadeIn 0.8s ease both;
+}
+
+/* =========================================================
+   FLOATING BACKGROUND EFFECTS
+========================================================= */
+
+.tut-container::before,
+.tut-container::after {
+  content: "";
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  filter: blur(5px);
+
+  opacity: 0.7;
+
+  z-index: 0;
+}
+
+
+.tut-container::before {
+  width: 280px;
+  height: 280px;
+
+  top: -100px;
+  left: -100px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 212, 0, 0.16),
+      transparent 70%
+    );
+
+  animation:
+    floatBlob 9s ease-in-out infinite;
+}
+
+
+.tut-container::after {
+  width: 350px;
+  height: 350px;
+
+  bottom: -150px;
+  right: -120px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(128, 0, 0, 0.10),
+      transparent 70%
+    );
+
+  animation:
+    floatBlobReverse 11s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   PAGE ENTRANCE
+========================================================= */
+
+@keyframes pageFadeIn {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(15px);
   }
-  
-  /* Introduction Section */
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+/* =========================================================
+   FLOATING BLOBS
+========================================================= */
+
+@keyframes floatBlob {
+
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(40px, 30px)
+      scale(1.12);
+  }
+}
+
+
+@keyframes floatBlobReverse {
+
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(-40px, -30px)
+      scale(1.1);
+  }
+}
+
+
+/* =========================================================
+   INTRO SECTION
+========================================================= */
+
+.tut-intro {
+  position: relative;
+
+  z-index: 2;
+
+  text-align: center;
+
+  margin-bottom: 2.5rem;
+
+  width: 100%;
+
+  max-width: 850px;
+
+  animation:
+    introReveal
+    0.8s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+
+@keyframes introReveal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(-25px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.tut-title {
+
+  position: relative;
+
+  display: inline-block;
+
+  font-size:
+    clamp(2.2rem, 5vw, 4rem);
+
+  font-weight: 800;
+
+  letter-spacing:
+    -0.04em;
+
+  color:
+    #800000;
+
+  margin:
+    0 0 1rem;
+
+  line-height:
+    1.1;
+
+  animation:
+    titleGlow 5s ease-in-out infinite;
+}
+
+
+/* TITLE UNDERLINE */
+
+.tut-title::after {
+
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+
+  bottom: -12px;
+
+  transform:
+    translateX(-50%);
+
+  width: 80px;
+
+  height: 4px;
+
+  border-radius: 50px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #800000,
+      #ffd400,
+      #800000
+    );
+
+  background-size:
+    200%;
+
+  animation:
+    gradientMove 3s linear infinite;
+}
+
+
+@keyframes titleGlow {
+
+  0%,
+  100% {
+    text-shadow:
+      none;
+  }
+
+  50% {
+    text-shadow:
+      0 6px 18px
+      rgba(128, 0, 0, 0.12);
+  }
+}
+
+
+@keyframes gradientMove {
+
+  from {
+    background-position:
+      0%;
+  }
+
+  to {
+    background-position:
+      200%;
+  }
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.tut-text {
+
+  margin:
+    1.5rem auto 0;
+
+  max-width:
+    720px;
+
+  font-size:
+    1rem;
+
+  line-height:
+    1.8;
+
+  color:
+    #6b5a5a;
+
+  animation:
+    fadeUp
+    0.8s
+    ease
+    0.2s
+    both;
+}
+
+
+/* =========================================================
+   PDF SECTION
+========================================================= */
+
+.tut-pdf-section {
+
+  position: relative;
+
+  z-index: 2;
+
+  margin-bottom:
+    2.5rem;
+
+  width:
+    100%;
+
+  display:
+    flex;
+
+  justify-content:
+    center;
+
+  animation:
+    fadeUp
+    0.8s
+    ease
+    0.35s
+    both;
+}
+
+
+/* =========================================================
+   PDF BUTTON
+========================================================= */
+
+.tut-pdf-button {
+
+  position: relative;
+
+  overflow: hidden;
+
+  padding:
+    0.9rem
+    2rem;
+
+  font-size:
+    0.9rem;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.04em;
+
+  color:
+    #800000;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffd400,
+      #ffe45c
+    );
+
+  border:
+    1px solid
+    #d9ad00;
+
+  border-radius:
+    12px;
+
+  cursor:
+    pointer;
+
+  box-shadow:
+    0 6px 18px
+    rgba(0, 0, 0, 0.10);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+
+/* BUTTON SHINE */
+
+.tut-pdf-button::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+
+  left: -120%;
+
+  width: 60%;
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.55),
+      transparent
+    );
+
+  transform:
+    skewX(-20deg);
+
+  transition:
+    left 0.7s ease;
+}
+
+
+.tut-pdf-button:hover::before {
+
+  left:
+    150%;
+}
+
+
+.tut-pdf-button:hover {
+
+  transform:
+    translateY(-4px)
+    scale(1.03);
+
+  box-shadow:
+    0 12px 25px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+.tut-pdf-button:active {
+
+  transform:
+    translateY(-1px)
+    scale(0.98);
+}
+
+
+/* =========================================================
+   VIDEO CONTAINER
+========================================================= */
+
+.tut-video-container {
+
+  position: relative;
+
+  z-index: 2;
+
+  display:
+    flex;
+
+  justify-content:
+    center;
+
+  gap:
+    2rem;
+
+  width:
+    100%;
+
+  max-width:
+    1200px;
+
+  margin:
+    0 auto;
+
+  animation:
+    cardsReveal
+    0.9s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    0.45s
+    both;
+}
+
+
+@keyframes cardsReveal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+/* =========================================================
+   VIDEO SECTION CARD
+========================================================= */
+
+.tut-video-section {
+
+  position: relative;
+
+  flex: 1;
+
+  max-width: 50%;
+
+  padding:
+    0.6rem;
+
+  border-radius:
+    18px;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid
+    rgba(0,0,0,0.08);
+
+  box-shadow:
+    0 8px 25px
+    rgba(0,0,0,0.08);
+
+  overflow:
+    hidden;
+
+  transition:
+    transform 0.4s
+    cubic-bezier(0.22, 1, 0.36, 1),
+
+    box-shadow 0.4s ease,
+
+    border-color 0.3s ease;
+}
+
+
+/* CARD TOP ACCENT */
+
+.tut-video-section::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+
+  left: 15%;
+
+  width: 70%;
+
+  height: 3px;
+
+  border-radius:
+    0 0 10px 10px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #ffd400,
+      transparent
+    );
+
+  opacity:
+    0;
+
+  transition:
+    opacity 0.3s ease;
+}
+
+
+/* VIDEO CARD HOVER */
+
+.tut-video-section:hover {
+
+  transform:
+    translateY(-10px);
+
+  border-color:
+    #e5c94b;
+
+  box-shadow:
+    0 18px 40px
+    rgba(0,0,0,0.16);
+}
+
+
+.tut-video-section:hover::before {
+
+  opacity:
+    1;
+}
+
+
+/* =========================================================
+   VIDEO THUMBNAIL
+========================================================= */
+
+.tut-video-thumbnail {
+
+  display: block;
+
+  width:
+    100%;
+
+  height:
+    auto;
+
+  border-radius:
+    13px;
+
+  cursor:
+    pointer;
+
+  border:
+    1px solid
+    rgba(0,0,0,0.06);
+
+  transition:
+    transform 0.45s ease,
+    filter 0.35s ease;
+}
+
+
+.tut-video-section:hover
+.tut-video-thumbnail {
+
+  transform:
+    scale(1.035);
+
+  filter:
+    brightness(1.04);
+}
+
+
+/* =========================================================
+   VIDEO OVERLAY
+========================================================= */
+
+.tut-video-overlay {
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  display:
+    flex;
+
+  justify-content:
+    center;
+
+  align-items:
+    center;
+
+  padding:
+    1.5rem;
+
+  z-index:
+    1000;
+
+  background:
+    rgba(15, 10, 10, 0.72);
+
+  backdrop-filter:
+    blur(8px);
+
+  -webkit-backdrop-filter:
+    blur(8px);
+
+  animation:
+    overlayFade
+    0.3s
+    ease
+    both;
+}
+
+
+/* =========================================================
+   PDF OVERLAY
+========================================================= */
+
+.tut-pdf-overlay {
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  display:
+    flex;
+
+  justify-content:
+    center;
+
+  align-items:
+    center;
+
+  padding:
+    1.5rem;
+
+  z-index:
+    1000;
+
+  background:
+    rgba(15, 10, 10, 0.72);
+
+  backdrop-filter:
+    blur(8px);
+
+  -webkit-backdrop-filter:
+    blur(8px);
+
+  animation:
+    overlayFade
+    0.3s
+    ease
+    both;
+}
+
+
+@keyframes overlayFade {
+
+  from {
+    opacity:
+      0;
+  }
+
+  to {
+    opacity:
+      1;
+  }
+}
+
+
+/* =========================================================
+   VIDEO MODAL
+========================================================= */
+
+.tut-video-content {
+
+  position:
+    relative;
+
+  width:
+    min(850px, 90vw);
+
+  max-height:
+    85vh;
+
+  padding:
+    1rem;
+
+  overflow:
+    auto;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid
+    rgba(255,212,0,0.5);
+
+  border-radius:
+    18px;
+
+  box-shadow:
+    0 30px 80px
+    rgba(0,0,0,0.35);
+
+  animation:
+    modalPop
+    0.45s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+
+/* =========================================================
+   PDF MODAL
+========================================================= */
+
+.tut-pdf-content {
+
+  position:
+    relative;
+
+  width:
+    min(850px, 90vw);
+
+  max-height:
+    85vh;
+
+  padding:
+    1rem;
+
+  overflow:
+    auto;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid
+    rgba(255,212,0,0.5);
+
+  border-radius:
+    18px;
+
+  box-shadow:
+    0 30px 80px
+    rgba(0,0,0,0.35);
+
+  animation:
+    modalPop
+    0.45s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+
+@keyframes modalPop {
+
+  from {
+
+    opacity:
+      0;
+
+    transform:
+      translateY(30px)
+      scale(0.96);
+  }
+
+  to {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   VIDEO / PDF CONTENT
+========================================================= */
+
+.tut-video-full {
+
+  width:
+    100%;
+
+  height:
+    70vh;
+
+  border:
+    none;
+
+  border-radius:
+    12px;
+}
+
+
+.tut-pdf-iframe {
+
+  width:
+    100%;
+
+  height:
+    70vh;
+
+  border:
+    none;
+
+  border-radius:
+    12px;
+}
+
+
+/* =========================================================
+   CLOSE BUTTONS
+========================================================= */
+
+.tut-video-close-button,
+.tut-pdf-close-button {
+
+  position:
+    absolute;
+
+  top:
+    1rem;
+
+  right:
+    1rem;
+
+  z-index:
+    10;
+
+  padding:
+    0.55rem
+    1rem;
+
+  font-size:
+    0.78rem;
+
+  font-weight:
+    800;
+
+  color:
+    #800000;
+
+  background:
+    #ffd400;
+
+  border:
+    1px solid
+    #d9ad00;
+
+  border-radius:
+    9px;
+
+  cursor:
+    pointer;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+
+.tut-video-close-button:hover,
+.tut-pdf-close-button:hover {
+
+  transform:
+    rotate(3deg)
+    scale(1.06);
+
+  box-shadow:
+    0 6px 16px
+    rgba(0,0,0,0.18);
+}
+
+
+/* =========================================================
+   COMMON FADE UP
+========================================================= */
+
+@keyframes fadeUp {
+
+  from {
+
+    opacity:
+      0;
+
+    transform:
+      translateY(20px);
+  }
+
+  to {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+
+  .tut-container {
+
+    width:
+      100%;
+
+    margin-left:
+      0;
+
+    padding:
+      2.5rem 1.5rem;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .tut-container {
+
+    width:
+      100%;
+
+    margin:
+      0;
+
+    margin-top:
+      64px;
+
+    padding:
+      1.5rem 1rem;
+
+    min-height:
+      calc(100vh - 64px);
+  }
+
+
   .tut-intro {
-    text-align: center;
-    margin-bottom: 2rem;
-    width: 100%;
-    max-width: 800px; /* Limit width for better centering */
+
+    margin-bottom:
+      1.8rem;
   }
-  
+
+
   .tut-title {
-   
-    font-size: 4rem;
-    font-weight: 600; /* Bold as requested */
-    color: #92400e; /* Dark brown text from Vacate */
-    /* margin:40px; */
-    
+
+    font-size:
+      2rem;
   }
-  
+
+
   .tut-text {
-    font-size: 1rem;
-    color: #92400e; /* Dark brown text from Vacate */
-    max-width: 800px;
-  }
-  
-  /* PDF Button Section */
-  .tut-pdf-section {
-    margin-bottom: 2rem;
-    width: 100%;
-    display: flex;
-    justify-content: center; /* Center the PDF button */
+
+    font-size:
+      0.9rem;
+
+    line-height:
+      1.65;
   }
 
-  .wrapper{
 
-  }
-  
-  .tut-pdf-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: white;
-    background-color: #fbbf24; /* Amber button color from Vacate, improved styling */
-    border: 1px solid #fde68a; /* Light amber border from Vacate for better contrast */
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s; /* Added transform for better interaction */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  }
-  
-  .tut-pdf-button:hover {
-    background-color: #f59e0b; /* Darker amber on hover from Vacate */
-    transform: scale(1.05); /* Slight scale on hover for better visual feedback */
-  }
-  
-  /* Video Container and Thumbnail */
   .tut-video-container {
-    display: flex;
-    justify-content: center; /* Center the video container */
-    gap: 2rem;
-    width: 100%;
-    max-width: 1200px;
-    margin-left: auto;
+
+    flex-direction:
+      column;
+
+    gap:
+      1.2rem;
   }
-  
+
+
   .tut-video-section {
-    flex: 1;
-    max-width: 50%;
+
+    max-width:
+      100%;
   }
-  
-  .tut-video-thumbnail {
-    width: 100%;
-    height: auto;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #fde68a; /* Light amber border from Vacate */
-    cursor: pointer; /* Indicate clickable */
+
+
+  .tut-video-section:hover {
+
+    transform:
+      translateY(-5px);
   }
-  
-  .tut-video-thumbnail:hover {
-    transform: scale(1.02); /* Slight scale on hover for feedback */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+
+  .tut-pdf-button {
+
+    width:
+      100%;
+
+    max-width:
+      320px;
   }
-  
-  /* Video Overlay */
-  .tut-video-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .tut-video-content {
-    background-color: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    position: relative;
-    width: 80%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    border: 1px solid #fde68a; /* Light amber border from Vacate */
-  }
-  
-  .tut-video-full {
-    width: 100%;
-    height: 70vh;
-    border: none;
-    border-radius: 0.375rem;
-  }
-  
-  .tut-video-close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: white;
-    background-color: #f59e0b; /* Darker amber from Vacate */
-    border: 1px solid #fde68a; /* Light amber border from Vacate */
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-  }
-  
-  .tut-video-close-button:hover {
-    background-color: #d97706; /* Even darker amber for hover from Vacate */
-    transform: scale(1.05); /* Slight scale on hover for better visual feedback */
-  }
-  
-  /* PDF Overlay */
-  .tut-pdf-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
+
+
+  .tut-video-content,
   .tut-pdf-content {
-    background-color: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    position: relative;
-    width: 80%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    border: 1px solid #fde68a; /* Light amber border from Vacate */
+
+    width:
+      95vw;
+
+    max-height:
+      90vh;
+
+    padding:
+      0.75rem;
+
+    border-radius:
+      14px;
   }
-  
+
+
+  .tut-video-full,
   .tut-pdf-iframe {
-    width: 100%;
-    height: 70vh;
-    border: none;
+
+    height:
+      55vh;
   }
-  
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .tut-container {
+
+    padding:
+      1rem 0.75rem;
+  }
+
+
+  .tut-title {
+
+    font-size:
+      1.7rem;
+  }
+
+
+  .tut-text {
+
+    font-size:
+      0.82rem;
+  }
+
+
+  .tut-pdf-button {
+
+    padding:
+      0.8rem 1.2rem;
+
+    font-size:
+      0.8rem;
+  }
+
+
+  .tut-video-full,
+  .tut-pdf-iframe {
+
+    height:
+      48vh;
+  }
+
+
+  .tut-video-close-button,
   .tut-pdf-close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: white;
-    background-color: #f59e0b; /* Darker amber from Vacate */
-    border: 1px solid #fde68a; /* Light amber border from Vacate */
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
+
+    padding:
+      0.45rem 0.75rem;
+
+    font-size:
+      0.7rem;
   }
-  
-  .tut-pdf-close-button:hover {
-    background-color: #d97706; /* Even darker amber for hover from Vacate */
-    transform: scale(1.05); /* Slight scale on hover for better visual feedback */
+
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+========================================================= */
+
+@media (hover: none) {
+
+  .tut-video-section:hover {
+
+    transform:
+      none;
   }
-  
-  /* Media Queries */
-  @media (max-width: 768px) {
-    .tut-container {
-      padding: 1rem;
-      width: 100%;
-      margin: 0;
-      margin-left: auto;
-      margin-top: -28%;
-    }
-  
-    .tut-title {
-      font-size: 1.5rem;
-    }
-  
-    .tut-text {
-      font-size: 0.875rem;
-    }
-  
-    .tut-video-container {
-      flex-direction: column;
-      gap: 1rem;
-    }
-  
-    .tut-video-section {
-      max-width: 100%;
-    }
-  
-    .tut-pdf-button {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-    }
-  
-    .tut-video-content, .tut-pdf-content {
-      width: 90%;
-      max-height: 60vh;
-    }
-  
-    .tut-video-full, .tut-pdf-iframe {
-      height: 50vh;
-    }
-  
-    .tut-pdf-close-button, .tut-video-close-button {
-      padding: 0.375rem 0.875rem;
-      font-size: 0.75rem;
-    }
+
+
+  .tut-pdf-button:hover {
+
+    transform:
+      none;
   }
-  
-  @media (max-width: 480px) {
-    .tut-container {
-      padding: 0.5rem;
-    }
-  
-    .tut-title {
-      font-size: 1.25rem;
-    }
-  
-    .tut-text {
-      font-size: 0.75rem;
-    }
-  
-    .tut-pdf-button {
-      padding: 0.375rem 0.875rem;
-      font-size: 0.75rem;
-    }
-  
-    .tut-video-content, .tut-pdf-content {
-      width: 95%;
-      max-height: 50vh;
-    }
-  
-    .tut-video-full, .tut-pdf-iframe {
-      height: 40vh;
-    }
-  
-    .tut-pdf-close-button, .tut-video-close-button {
-      padding: 0.25rem 0.75rem;
-      font-size: 0.625rem;
-    }
+
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
   }
+
+}

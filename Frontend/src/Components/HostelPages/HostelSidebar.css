@@ -1,347 +1,1197 @@
-/* Sidebar Container */
+/* =========================================================
+   HOSTEL SIDEBAR
+   PREMIUM MAROON + GOLD DESIGN
+========================================================= */
+
+:root {
+  --header-height: 125px;
+
+  --hostel-maroon: #800000;
+  --hostel-maroon-dark: #550000;
+
+  --hostel-gold: #fdcd03;
+  --hostel-gold-light: #ffe47a;
+
+  --sidebar-dark: #171719;
+  --sidebar-dark-2: #202023;
+
+  --text-white: #ffffff;
+  --text-muted: #a7a7a7;
+}
+
+
+/* =========================================================
+   DESKTOP SIDEBAR
+========================================================= */
+
 .Hostel-sidebar {
   width: 16rem;
-  background-color: #1c1c1f;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
-  left: 0;
-  top: 110px;
+
   position: fixed;
-  height: calc(100vh - 110px);
-  transition: transform 0.3s ease-in-out;
-}
+  top: var(--header-height);
+  left: 0;
 
-/* Sidebar Content */
-.Hostel-sidebar-content {
-  padding: 1rem;
+  height: calc(100vh - var(--header-height));
+
+  background:
+    linear-gradient(
+      180deg,
+      #1e1e21 0%,
+      #171719 50%,
+      #111112 100%
+    );
+
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
-}
 
-.Hostel-sidebar-menu {
-  flex-grow: 1;
-  /* Pushes the Log Out button down */
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
+  z-index: 500;
 
-/* CSS for Scrollable Sidebar */
-/* Add this to your CSS */
-.scrollable {
-  overflow-y: auto;
-  max-height: calc(100vh - 200px);
-  /* Adjust based on your layout */
-}
+  box-shadow:
+    4px 0 25px rgba(0, 0, 0, 0.18);
 
-/* Optional: Add a scrollbar style */
-.scrollable::-webkit-scrollbar {
-  width: 8px;
-}
+  overflow: hidden;
 
-.scrollable::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 4px;
-}
-
-.scrollable::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
-}
-
-/* Sidebar Navigation Buttons */
-.Hostel-nav-button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: white;
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
-  /* transition: background-color 0.2s, transform 0.1s; */
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  background: transparent;
-  gap: 0.5rem;
+  animation: sidebarEntrance 0.45s ease both;
 }
 
 
-/* Button Hover Effects */
-.Hostel-nav-button:hover {
-  background-color: #fdcd03;
-  color: #000;
-  /* transform: translateX(5px); */
+/* =========================================================
+   SIDEBAR ACCENT
+========================================================= */
+
+.Hostel-sidebar::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  width: 2px;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      var(--hostel-gold),
+      transparent
+    );
+
+  opacity: 0.7;
 }
 
-.Hostel-nav-button:hover .Hostel-icon {
-  color: #000;
-}
 
-/* Active Button Styling */
-.Hostel-nav-active {
-  background-color: #fdcd03;
-  color: #000;
-  font-weight: bold;
-}
-
-.Hostel-nav-active .Hostel-icon {
-  color: #000;
-}
-
-/* Sidebar Icons */
-.Hostel-icon {
-  height: 1.5rem;
-  width: 1.5rem;
-  color: white;
-}
-
-.Logout-container:hover .Hostel-icon {
-  color: black;
-}
-
-/* Responsive Sidebar (for Mobile) */
-@media (max-width: 768px) {
-  .Hostel-sidebar {
-    width: 14rem;
-    transform: translateX(-100%);
-    position: absolute;
+@keyframes sidebarEntrance {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
   }
 
-  .Hostel-sidebar.open {
+  to {
+    opacity: 1;
     transform: translateX(0);
   }
 }
 
-.mobile-menu-button {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 1.5rem;
-  display: none;
-}
 
-/* Show button only in mobile */
-@media (max-width: 768px) {
-  .mobile-menu-button {
-    display: block;
-  }
-}
+/* =========================================================
+   WARDEN TOP SECTION
+========================================================= */
 
-/* Mobile Navigation Bar */
-.Hostel-mobile-nav {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: #2c3e50;
-  padding: 10px 10px;
-  overflow-x: auto;
-  white-space: nowrap;
-  gap: 20px;
-  z-index: 1000;
-}
-
-.Hostel-mobile-nav-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.Hostel-mobile-nav-button.active {
-  color: #1abc9c;
-  /* Active state color */
-}
-
-.Hostel-mobile-nav-icon {
-  margin-bottom: 5px;
-}
-
-.Hostel-mobile-nav-label {
-  font-size: 12px;
-}
-
-/* Warden Sidebar Top Section */
 .warden-sidebar-top {
+  position: relative;
+
   display: flex;
   align-items: center;
-  padding: 1rem;
-  background-color: #1c1c1f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+  padding: 1.1rem 1rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.015)
+    );
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.07);
 }
 
-/* Photo on the left */
+
 .warden-photo-container {
+  position: relative;
   flex-shrink: 0;
 }
 
+
+/* =========================================================
+   WARDEN PHOTO
+========================================================= */
+
 .warden-photo {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+
   object-fit: cover;
-  margin-right: 1rem;
+
+  border-radius: 50%;
+
+  margin-right: 0.85rem;
+
+  border: 2px solid var(--hostel-gold);
+
+  box-shadow:
+    0 0 0 3px rgba(253, 205, 3, 0.1);
 }
 
-/* Name & Years Handling on the Right */
+
+/* =========================================================
+   WARDEN INFO
+========================================================= */
+
 .warden-sidebar-info {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  color: white;
 }
+
+
+.warden-title {
+  font-size: 0.58rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  color: var(--hostel-gold);
+
+  margin-bottom: 0.2rem;
+}
+
 
 .sidebar-warden-name {
-  font-size: 1.2rem;
-  font-weight: bold;
+  margin: 0;
+
+  font-size: 0.98rem;
+
+  font-weight: 700;
+
   color: white;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
+
 
 .warden-years {
-  font-size: 0.9rem;
-  color: #fdcc03;
+  margin: 0.25rem 0 0;
+
+  font-size: 0.73rem;
+
+  color: #a8a8a8;
 }
 
-/* Below section (Mobile & Status) */
-.warden-contact {
-  padding: 0.75rem 1rem;
-  background-color: #1c1c1f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+.warden-years span {
+  color: #ffffff;
 }
+
+
+/* =========================================================
+   WARDEN CONTACT
+========================================================= */
+
+.warden-contact {
+  padding: 0.8rem 1rem;
+
+  background:
+    rgba(255, 255, 255, 0.018);
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.06);
+}
+
 
 .warden-mobile {
-  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  color: white;
+
   gap: 0.5rem;
+
+  text-decoration: none;
+
+  color: #d7d7d7;
+
+  font-size: 0.8rem;
+
+  margin-bottom: 0.65rem;
 }
+
+
+.warden-mobile svg {
+  color: var(--hostel-gold);
+}
+
+
+.warden-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 0.75rem;
+
+  color: #a8a8a8;
+}
+
 
 .warden-status {
-  font-size: 0.9rem;
-  font-weight: bold;
-  margin-top: 0.3rem;
-}
-
-.warden-status.active {
-  color: #4caf50;
-}
-
-.warden-status.inactive {
-  color: #f44336;
-}
-
-/* Mobile Profile Container */
-.Hostel-mobile-nav-profile {
-  position: relative;
-  display: inline-block;
-}
-
-/* Warden Profile Popup */
-.warden-profile-popup {
-  position: absolute;
-  bottom: 90px;
-  /* Adjust based on your navbar height */
-  right: 15px;
-  background-color: #2c3e50;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  width: 250px;
-}
-
-.warden-profile-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+
+  gap: 0.35rem;
+
+  font-weight: 600;
 }
 
-.warden-photo {
-  width: 50px;
-  height: 50px;
+
+.warden-status-dot {
+  width: 6px;
+  height: 6px;
+
   border-radius: 50%;
 }
 
-.sidebar-warden-name {
-  font-size: 16px;
-  margin: 0;
-  color: white;
-}
-
-.warden-years {
-  font-size: 14px;
-  color: #ccc;
-}
-
-.warden-mobile {
-  font-size: 14px;
-  color: white;
-  margin: 10px 0;
-}
-
-.warden-status {
-  font-weight: bold;
-}
 
 .warden-status.active {
-  color: #4caf50;
+  color: #4ade80;
 }
+
+
+.warden-status.active .warden-status-dot {
+  background: #4ade80;
+
+  box-shadow:
+    0 0 8px rgba(74, 222, 128, 0.8);
+}
+
 
 .warden-status.inactive {
-  color: #f44336;
+  color: #f87171;
 }
 
-/* Logout Button Inside Profile Popup */
-.warden-profile-logout-button {
+
+.warden-status.inactive .warden-status-dot {
+  background: #f87171;
+}
+
+
+/* =========================================================
+   SIDEBAR CONTENT
+========================================================= */
+
+.Hostel-sidebar-content {
+  flex: 1;
+
+  min-height: 0;
+
+  padding: 0.9rem;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+.Hostel-sidebar-menu {
+  flex: 1;
+
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    rgba(253, 205, 3, 0.35)
+    transparent;
+}
+
+
+.Hostel-sidebar-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+
+.Hostel-sidebar-menu::-webkit-scrollbar-thumb {
+  background:
+    rgba(253, 205, 3, 0.45);
+
+  border-radius: 20px;
+}
+
+
+.Hostel-sidebar-menu nav {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================================
+   DESKTOP NAVIGATION
+========================================================= */
+
+.Hostel-nav-button {
+  position: relative;
+
+  width: 100%;
+
   display: flex;
   align-items: center;
-  gap: 8px;
-  /* background-color: #e74c3c; */
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
+
+  gap: 0.75rem;
+
+  padding: 0.78rem 0.9rem;
+
+  margin-bottom: 0.35rem;
+
+  border-radius: 0.65rem;
+
+  text-decoration: none;
+
+  color: #cfcfcf;
+
+  font-size: 0.9rem;
+
+  font-weight: 500;
+
+  background:
+    transparent;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.warden-profile-logout-icon {
-  font-size: 16px;
+
+.Hostel-nav-button svg {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  transition:
+    transform 0.2s ease;
 }
+
+
+/* =========================================================
+   DESKTOP NAV HOVER
+========================================================= */
+
+.Hostel-nav-button:hover:not(.Hostel-nav-active) {
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  color: white;
+
+  transform: translateX(3px);
+}
+
+
+.Hostel-nav-button:hover:not(.Hostel-nav-active) svg {
+  color: var(--hostel-gold);
+
+  transform: scale(1.08);
+}
+
+
+/* =========================================================
+   ACTIVE NAVIGATION
+========================================================= */
+
+.Hostel-nav-active {
+  color: #1b1b1b !important;
+
+  font-weight: 700;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--hostel-gold),
+      #f5b900
+    );
+
+  box-shadow:
+    0 6px 18px rgba(253, 205, 3, 0.16);
+}
+
+
+.Hostel-nav-active svg {
+  color: var(--hostel-maroon);
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 .Logout-container {
   display: flex;
   align-items: center;
-  width: 100%;
-  padding: 0.75rem 0.75rem;
-  color: white;
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
-  /* transition: background-color 0.2s, transform 0.1s; */
-  border: none;
+
+  gap: 0.75rem;
+
+  padding: 0.78rem 0.9rem;
+
+  margin-top: 0.6rem;
+
+  border-radius: 0.65rem;
+
+  color: #cfcfcf;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
+
   cursor: pointer;
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  background: transparent;
-  gap: 0.5rem;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
+
 .Logout-container:hover {
-  background-color: #fdcd03;
-  color: #000;
-  /* transform: translateX(5px); */
+  background:
+    rgba(128, 0, 0, 0.45);
+
+  color: white;
+
+  transform: translateY(-2px);
+}
+
+
+.Hostel-icon {
+  width: 19px;
+  height: 19px;
+}
+
+
+.Logout-button {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: inherit;
+
+  font-size: 0.9rem;
+
+  font-family: inherit;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE NAVIGATION
+   FLOATING 7-ITEM APP DOCK
+========================================================= */
+
+.Hostel-mobile-dock {
+  display: none;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  /* Hide desktop sidebar */
+
+  .Hostel-sidebar {
+    display: none;
+  }
+
+
+  /* =============================================
+     FLOATING BOTTOM DOCK
+  ============================================= */
+
+  .Hostel-mobile-dock {
+    position: fixed;
+
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+
+    height: 76px;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(7, minmax(0, 1fr));
+
+    align-items: center;
+
+    padding: 5px;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(35, 35, 38, 0.98),
+        rgba(20, 20, 22, 0.98)
+      );
+
+    border:
+      1px solid rgba(255, 255, 255, 0.08);
+
+    border-radius: 20px;
+
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.32),
+      0 2px 0 rgba(253, 205, 3, 0.12) inset;
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+
+    z-index: 2000;
+
+    animation:
+      mobileDockEnter 0.45s ease both;
+  }
+
+
+  @keyframes mobileDockEnter {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
+  /* =============================================
+     DOCK ITEM
+  ============================================= */
+
+  .Hostel-mobile-dock-item {
+    position: relative;
+
+    min-width: 0;
+    height: 64px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    padding: 4px 1px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: transparent;
+
+    color: #9d9da2;
+
+    text-decoration: none;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+
+  /* =============================================
+     ICON
+  ============================================= */
+
+  .Hostel-mobile-dock-icon {
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .Hostel-mobile-dock-icon svg {
+    width: 20px;
+    height: 20px;
+
+    stroke-width: 1.8;
+
+    transition:
+      transform 0.25s ease;
+  }
+
+
+  /* =============================================
+     LABEL
+  ============================================= */
+
+  .Hostel-mobile-dock-label {
+    width: 100%;
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    letter-spacing: -0.01em;
+  }
+
+
+  /* =============================================
+     ACTIVE MOBILE ITEM
+  ============================================= */
+
+  .Hostel-mobile-dock-item.active {
+    color: var(--hostel-gold);
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(253, 205, 3, 0.15),
+        rgba(253, 205, 3, 0.04)
+      );
+
+    transform:
+      translateY(-7px);
+
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.22);
+  }
+
+
+  .Hostel-mobile-dock-item.active::before {
+    content: "";
+
+    position: absolute;
+
+    top: 4px;
+
+    width: 18px;
+    height: 3px;
+
+    border-radius: 20px;
+
+    background:
+      var(--hostel-gold);
+  }
+
+
+  .Hostel-mobile-dock-item.active .Hostel-mobile-dock-icon svg {
+    transform:
+      scale(1.08);
+  }
+
+
+  /* =============================================
+     WARDEN ACTIVE
+  ============================================= */
+
+  .Hostel-mobile-dock-item.warden-active {
+    color: var(--hostel-gold);
+
+    background:
+      rgba(253, 205, 3, 0.09);
+  }
+
+
+  /* =============================================
+     LOGOUT
+  ============================================= */
+
+  .Hostel-mobile-dock-item.logout-mobile:hover,
+  .Hostel-mobile-dock-item.logout-mobile:active {
+    color: #ff6b6b;
+  }
+
+
+  /* =============================================
+     MOBILE WARDEN POPUP BACKDROP
+  ============================================= */
+
+  .warden-popup-backdrop {
+    position: fixed;
+
+    inset: 0;
+
+    background:
+      rgba(0, 0, 0, 0.28);
+
+    backdrop-filter:
+      blur(2px);
+
+    z-index: 1900;
+
+    animation:
+      backdropFade 0.25s ease both;
+  }
+
+
+  @keyframes backdropFade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+
+  /* =============================================
+     WARDEN BOTTOM SHEET
+  ============================================= */
+
+  .warden-profile-popup {
+    position: fixed;
+
+    left: 14px;
+    right: 14px;
+
+    bottom: 98px;
+
+    width: auto;
+
+    padding: 1.1rem;
+
+    border-radius: 22px;
+
+    background:
+      linear-gradient(
+        145deg,
+        #28282c,
+        #171719
+      );
+
+    border:
+      1px solid rgba(253, 205, 3, 0.2);
+
+    box-shadow:
+      0 25px 70px rgba(0, 0, 0, 0.45);
+
+    z-index: 2001;
+
+    animation:
+      wardenPopupEnter 0.35s
+      cubic-bezier(0.22, 1, 0.36, 1)
+      both;
+  }
+
+
+  @keyframes wardenPopupEnter {
+    from {
+      opacity: 0;
+
+      transform:
+        translateY(30px)
+        scale(0.97);
+    }
+
+    to {
+      opacity: 1;
+
+      transform:
+        translateY(0)
+        scale(1);
+    }
+  }
+
+
+  /* =============================================
+     POPUP HANDLE
+  ============================================= */
+
+  .warden-popup-handle {
+    width: 38px;
+    height: 4px;
+
+    margin: 0 auto 1rem;
+
+    border-radius: 20px;
+
+    background:
+      rgba(255, 255, 255, 0.2);
+  }
+
+
+  /* =============================================
+     POPUP HEADER
+  ============================================= */
+
+  .warden-profile-header {
+    display: flex;
+    align-items: center;
+
+    gap: 0.85rem;
+  }
+
+
+  .warden-popup-image-wrapper {
+    position: relative;
+  }
+
+
+  .warden-popup-photo {
+    width: 62px;
+    height: 62px;
+
+    object-fit: cover;
+
+    border-radius: 18px;
+
+    border:
+      2px solid var(--hostel-gold);
+
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.3);
+  }
+
+
+  .warden-online-dot {
+    position: absolute;
+
+    right: -2px;
+    bottom: -2px;
+
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+
+    border:
+      3px solid #222225;
+  }
+
+
+  .warden-online-dot.online {
+    background: #4ade80;
+  }
+
+
+  .warden-online-dot.offline {
+    background: #f87171;
+  }
+
+
+  .warden-popup-info {
+    min-width: 0;
+  }
+
+
+  .warden-popup-small-title {
+    display: block;
+
+    font-size: 0.6rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+
+    color: var(--hostel-gold);
+
+    margin-bottom: 0.25rem;
+  }
+
+
+  .warden-popup-info h3 {
+    margin: 0;
+
+    font-size: 1.05rem;
+
+    color: white;
+  }
+
+
+  .warden-popup-info p {
+    margin: 0.3rem 0 0;
+
+    font-size: 0.76rem;
+
+    color: #a9a9ae;
+  }
+
+
+  /* =============================================
+     DIVIDER
+  ============================================= */
+
+  .warden-popup-divider {
+    height: 1px;
+
+    margin: 1rem 0;
+
+    background:
+      rgba(255, 255, 255, 0.08);
+  }
+
+
+  /* =============================================
+     CONTACT CARD
+  ============================================= */
+
+  .warden-contact-card {
+    display: flex;
+    align-items: center;
+
+    gap: 0.75rem;
+
+    padding: 0.8rem;
+
+    border-radius: 14px;
+
+    text-decoration: none;
+
+    background:
+      rgba(255, 255, 255, 0.045);
+
+    border:
+      1px solid rgba(255, 255, 255, 0.05);
+
+    color: white;
+  }
+
+
+  .warden-contact-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+      rgba(253, 205, 3, 0.13);
+
+    color: var(--hostel-gold);
+  }
+
+
+  .warden-contact-card div:last-child {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+  }
+
+
+  .warden-contact-card span {
+    font-size: 0.68rem;
+
+    color: #99999f;
+  }
+
+
+  .warden-contact-card strong {
+    font-size: 0.85rem;
+
+    font-weight: 600;
+  }
+
+
+  /* =============================================
+     STATUS ROW
+  ============================================= */
+
+  .warden-popup-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 1rem;
+
+    font-size: 0.8rem;
+
+    color: #a8a8ad;
+  }
+
+
+  .warden-popup-status {
+    display: flex;
+    align-items: center;
+
+    gap: 0.4rem;
+
+    font-weight: 600;
+  }
+
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+  }
+
+
+  .warden-popup-status.active {
+    color: #4ade80;
+  }
+
+
+  .warden-popup-status.active .status-dot {
+    background: #4ade80;
+  }
+
+
+  .warden-popup-status.inactive {
+    color: #f87171;
+  }
+
+
+  .warden-popup-status.inactive .status-dot {
+    background: #f87171;
+  }
+
+
+  /* =============================================
+     CLOSE BUTTON
+  ============================================= */
+
+  .warden-popup-close {
+    width: 100%;
+
+    margin-top: 1rem;
+
+    padding: 0.75rem;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background:
+      linear-gradient(
+        135deg,
+        var(--hostel-gold),
+        #eab308
+      );
+
+    color: #1a1a1a;
+
+    font-family: inherit;
+
+    font-size: 0.82rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE DEVICES
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .Hostel-mobile-dock {
+    left: 7px;
+    right: 7px;
+
+    height: 72px;
+
+    border-radius: 18px;
+
+    padding: 4px;
+  }
+
+
+  .Hostel-mobile-dock-item {
+    height: 60px;
+
+    border-radius: 12px;
+  }
+
+
+  .Hostel-mobile-dock-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+
+  .Hostel-mobile-dock-label {
+    font-size: 7px;
+  }
+
+
+  .Hostel-mobile-dock-item.active {
+    transform:
+      translateY(-5px);
+  }
+
+
+  .warden-profile-popup {
+    left: 10px;
+    right: 10px;
+
+    bottom: 90px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .Hostel-sidebar {
+    width: 14rem;
+  }
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.01ms !important;
+  }
 }
