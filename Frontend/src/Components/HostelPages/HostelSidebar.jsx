@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { ClipboardCheck, Users, FileText, BarChart3, User, Clock, PenSquare, Phone, ScrollText, BookOpen, BookOpenCheck, DoorOpen } from "lucide-react";
+import {
+  ClipboardCheck,
+  Users,
+  FileText,
+  BarChart3,
+  User,
+  Clock,
+  PenSquare,
+  Phone,
+  ScrollText,
+  BookOpen,
+  BookOpenCheck,
+  DoorOpen,
+} from "lucide-react";
 import { CiLogout } from "react-icons/ci";
 import { NavLink, useLocation } from "react-router-dom";
 import "./HostelSidebar.css";
@@ -9,26 +22,90 @@ import Swal from "sweetalert2";
 
 const navItems = {
   student: [
-    { path: "/hostel/student/request", label: "Request", icon: <PenSquare className="icon" /> },
-    { path: "/hostel/student/previousrequest", label: "Previous Request", icon: <Clock className="icon" /> },
-    { path: "/hostel/student/profile", label: "Profile", icon: <User className="icon" /> },
-    { path: "/hostel/student/tutorial", label: "Tutorial Page", icon: <BookOpenCheck className="icon" /> },
-    { path: "/hostel/student/vacate", label: "Vacate Form", icon: <DoorOpen className="icon" /> },
+    {
+      path: "/hostel/student/request",
+      label: "Request",
+      icon: <PenSquare className="icon" />,
+    },
+    {
+      path: "/hostel/student/previousrequest",
+      label: "Previous Request",
+      icon: <Clock className="icon" />,
+    },
+    {
+      path: "/hostel/student/profile",
+      label: "Profile",
+      icon: <User className="icon" />,
+    },
+    {
+      path: "/hostel/student/tutorial",
+      label: "Tutorial Page",
+      icon: <BookOpenCheck className="icon" />,
+    },
+    {
+      path: "/hostel/student/vacate",
+      label: "Vacate Form",
+      icon: <DoorOpen className="icon" />,
+    },
   ],
   warden: [
-    { path: "/hostel/warden/analytics", label: "Analytics", icon: <BarChart3 className="icon" /> },
-    { path: "/hostel/warden/attendance", label: "Attendance", icon: <ClipboardCheck className="icon" /> },
-    { path: "/hostel/warden/request", label: "Request", icon: <FileText className="icon" /> },
-    { path: "/hostel/warden/student", label: "Student", icon: <Users className="icon" /> },
-    { path: "/hostel/warden/tutorial", label: "Tutorial Page", icon: <BookOpenCheck className="icon" /> },
+    {
+      path: "/hostel/warden/analytics",
+      label: "Analytics",
+      icon: <BarChart3 className="icon" />,
+    },
+    {
+      path: "/hostel/warden/attendance",
+      label: "Attendance",
+      icon: <ClipboardCheck className="icon" />,
+    },
+    {
+      path: "/hostel/warden/request",
+      label: "Request",
+      icon: <FileText className="icon" />,
+    },
+    {
+      path: "/hostel/warden/student",
+      label: "Student",
+      icon: <Users className="icon" />,
+    },
+    {
+      path: "/hostel/warden/tutorial",
+      label: "Tutorial Page",
+      icon: <BookOpenCheck className="icon" />,
+    },
   ],
   superior: [
-    { path: "/hostel/superior/wardens", label: "Wardens", icon: <Users className="icon" /> },
-    { path: "/hostel/superior/analytics", label: "Analytics", icon: <BarChart3 className="icon" /> },
-    { path: "/hostel/superior/attendance", label: "Attendance", icon: <ClipboardCheck className="icon" /> },
-    { path: "/hostel/superior/requests", label: "Requests", icon: <FileText className="icon" /> },
-    { path: "/hostel/superior/students", label: "Students", icon: <Users className="icon" /> },
-    { path: "/hostel/superior/wardenlogs", label: "Warden Logs", icon: <ScrollText className="icon" /> },
+    {
+      path: "/hostel/superior/wardens",
+      label: "Wardens",
+      icon: <Users className="icon" />,
+    },
+    {
+      path: "/hostel/superior/analytics",
+      label: "Analytics",
+      icon: <BarChart3 className="icon" />,
+    },
+    {
+      path: "/hostel/superior/attendance",
+      label: "Attendance",
+      icon: <ClipboardCheck className="icon" />,
+    },
+    {
+      path: "/hostel/superior/requests",
+      label: "Requests",
+      icon: <FileText className="icon" />,
+    },
+    {
+      path: "/hostel/superior/students",
+      label: "Students",
+      icon: <Users className="icon" />,
+    },
+    {
+      path: "/hostel/superior/wardenlogs",
+      label: "Warden Logs",
+      icon: <ScrollText className="icon" />,
+    },
   ],
 };
 
@@ -39,36 +116,29 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [wardenSlidebar, setWardenSlidebar] = useState(null);
-  const [message, setMessage] = useState(null)
-  const BASE_URL = process.env.REACT_APP_QR_URL;
-  const UrlParser = (path) => {
-    console.log("😂😂",path,path?.startsWith("http") ? path : `${BASE_URL}${path}`);
-    
-    return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
-  };
+  const [message, setMessage] = useState(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchData = async () => {
-        try{
-          const response = await axios.get('/api/sidebar_warden');
-          setWardenSlidebar(response.data); 
-        }
-        catch(err){
-          console.error("Failed to fetch",err);
-        }
+      try {
+        const response = await axios.get("/api/sidebar_warden");
+        setWardenSlidebar(response.data);
+      } catch (err) {
+        console.error("Failed to fetch", err);
       }
-      if(role === "student"){
-        fetchData();
-      }
-  },[items]);
+    };
+    if (role === "student") {
+      fetchData();
+    }
+  }, [items]);
 
   const navigate = useNavigate();
 
-  const handleLogout = async ()=>{
+  const handleLogout = async () => {
     try {
       const response = await fetch("/api/logout", {
         method: "GET",
-        credentials: "include", 
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -80,7 +150,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           title: "Log out",
           text: data.message,
           icon: "success",
-          timer: 2000, 
+          timer: 2000,
           showConfirmButton: false,
           willClose: () => {
             Swal.close();
@@ -88,13 +158,13 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           },
         });
       } else {
-        setMessage(`Error: ${data.error || data.message}`);        
+        setMessage(`Error: ${data.error || data.message}`);
       }
     } catch (error) {
       setMessage("Error connecting to the server");
       console.error("Logout Error:", error);
     }
-  }
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -102,17 +172,23 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
+
   const toRoman = (num) => {
     const romanMap = {
-        1: "I", 2: "II", 3: "III", 4: "IV"
+      1: "I",
+      2: "II",
+      3: "III",
+      4: "IV",
     };
-    return romanMap[num] || num; 
+    return romanMap[num] || num;
   };
 
-  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary batch"]) ? wardenSlidebar["primary batch"] : (Array.isArray(wardenSlidebar?.["primary year"]) ? wardenSlidebar["primary year"] : []);
+  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary batch"])
+    ? wardenSlidebar["primary batch"]
+    : Array.isArray(wardenSlidebar?.["primary year"])
+      ? wardenSlidebar["primary year"]
+      : [];
   const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
-
 
   const yearLabel = primaryYearArray.length === 1 ? "year" : "years";
 
@@ -120,7 +196,9 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     <>
       {/* Mobile Navbar */}
       {isMobile ? (
-        <nav className={`Hostel-mobile-nav ${role === "superior" ? "scrollable" : ""}`} >
+        <nav
+          className={`Hostel-mobile-nav ${role === "superior" ? "scrollable" : ""}`}
+        >
           {/* Navigation Buttons */}
           {items.map((item) => (
             <NavLink
@@ -137,7 +215,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           ))}
 
           {/* Logout Button in Mobile Navbar */}
-          {role !== 'warden' && (
+          {role !== "warden" && (
             <button className="Hostel-mobile-nav-button" onClick={handleLogout}>
               <CiLogout size={19} className="Hostel-mobile-nav-icon" />
               <span className="Hostel-mobile-nav-label">Logout</span>
@@ -162,7 +240,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
           {/* Desktop Sidebar Content */}
           {role === "student" && (
             <>
-              <div className="warden-sidebar-top m-2">
+             <div className="warden-sidebar-top">
                 <div className="warden-photo-container">
                   <img
                     src={UrlParser(wardenSlidebar?.image_path) }
@@ -172,16 +250,34 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                   />
                 </div>
                 <div className="warden-sidebar-info">
-                  <h3 className="sidebar-warden-name">{wardenSlidebar?.name}</h3>
-                  <p className="warden-years">Handling: <span className="text-white">{primaryYears} {yearLabel}</span></p>
+                  <h3 className="sidebar-warden-name">
+                    {wardenSlidebar?.name}
+                  </h3>
+                  <p className="warden-years">
+                    Handling:{" "}
+                    <span className="text-white">
+                      {primaryYears} {yearLabel}
+                    </span>
+                  </p>
                 </div>
               </div>
               <div className="warden-contact">
                 <p className="warden-mobile">
-                  <Phone size={16} /> <a href={`tel:${wardenSlidebar?.["Phone number"]}`} className="no-underline text-white">{wardenSlidebar?.["Phone number"]}</a>
+                  <Phone size={16} />{" "}
+                  <a
+                    href={`tel:${wardenSlidebar?.["Phone number"]}`}
+                    className="no-underline text-white"
+                  >
+                    {wardenSlidebar?.["Phone number"]}
+                  </a>
                 </p>
                 <p className="text-white">
-                  Status: <span className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}>{wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}</span>
+                  Status:{" "}
+                  <span
+                    className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}
+                  >
+                    {wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}
+                  </span>
                 </p>
               </div>
             </>
@@ -196,17 +292,23 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                     key={item.path}
                     to={item.path}
                     className={`Hostel-nav-button ${
-                      location.pathname.startsWith(item.path) ? "Hostel-nav-active" : ""
+                      location.pathname.startsWith(item.path)
+                        ? "Hostel-nav-active"
+                        : ""
                     }`}
                   >
                     {item.icon} {item.label}
                   </NavLink>
                 ))}
+
+                {/* Logout directly below the last navigation item */}
+                <div className="Logout-container" onClick={handleLogout}>
+                  <CiLogout className="Hostel-icon" />
+                  <button className="Logout-button" type="button">
+                    Logout
+                  </button>
+                </div>
               </nav>
-            </div>
-            <div className="Logout-container">
-              <CiLogout className="Hostel-icon" />
-              <button className="Logout-button" onClick={handleLogout}>Logout</button>
             </div>
           </div>
         </div>
@@ -226,20 +328,35 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                 <p className="warden-years">Handling: <span className="text-white">{primaryYears} {yearLabel}</span></p>
               </div>
             </div>
-            <p className="warden-mobile">
-              <Phone size={16} /> <a href={`tel:${wardenSlidebar?.["Phone number"]}`} className="no-underline text-white">{wardenSlidebar?.["Phone number"]}</a>
-            </p>
-            <p className="text-white">
-              Status: <span className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}>{wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}</span>
-            </p>
-
-            {/* Logout Button Inside Profile Popup */}
-            <button className="warden-profile-logout-button" onClick={handleLogout}>
-              <CiLogout className="warden-profile-logout-icon" />
-              <span>Logout</span>
-            </button>
           </div>
-        )}
+          <p className="warden-mobile">
+            <Phone size={16} />{" "}
+            <a
+              href={`tel:${wardenSlidebar?.["Phone number"]}`}
+              className="no-underline text-white"
+            >
+              {wardenSlidebar?.["Phone number"]}
+            </a>
+          </p>
+          <p className="text-white">
+            Status:{" "}
+            <span
+              className={`warden-status ${wardenSlidebar?.["Active Status"] ? "active" : "inactive"}`}
+            >
+              {wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}
+            </span>
+          </p>
+
+          {/* Logout Button Inside Profile Popup */}
+          <button
+            className="warden-profile-logout-button"
+            onClick={handleLogout}
+          >
+            <CiLogout className="warden-profile-logout-icon" />
+            <span>Logout</span>
+          </button>
+        </div>
+      )}
     </>
   );
 }
