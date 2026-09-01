@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { User, Printer, Download } from 'lucide-react';
-import './Vacate.css';
-import showSweetAlert from '../Alert';
-import axiosInstance from '../../../api/axios';
+import React, { useEffect, useState } from "react";
+import { User, Printer, Download } from "lucide-react";
+import "./Vacate.css";
+import showSweetAlert from "../Alert";
+import axiosInstance from "../../../api/axios";
 
 function Vacate() {
-  const [phone_number_student, setMobileno] = useState('');
+  const [phone_number_student, setMobileno] = useState("");
   const [studentData, setStudentData] = useState({});
   const [vacateData, setVacateData] = useState({
-    date_time: '',
-    Address: '',
-    Reason: '',
+    date_time: "",
+    Address: "",
+    Reason: "",
   });
   const [isApproved, setIsApproved] = useState(false);
   const [vacateCount, setVacateCount] = useState(null);
@@ -24,7 +24,9 @@ function Vacate() {
     }
 
     try {
-      const response = await axiosInstance.post("/api/verify_student", { phone_number_student });
+      const response = await axiosInstance.post("/api/verify_student", {
+        phone_number_student,
+      });
       const data = response.data;
 
       setStudentData(data);
@@ -40,28 +42,33 @@ function Vacate() {
   const handleSuperiorRequest = async () => {
     // Validate required fields
     if (!vacateData.date_time || !vacateData.Address || !vacateData.Reason) {
-      showSweetAlert("Validation Error!", "Please fill in all required fields (Date, Address, Reason).", "warning");
+      showSweetAlert(
+        "Validation Error!",
+        "Please fill in all required fields (Date, Address, Reason).",
+        "warning",
+      );
       return;
     }
 
     try {
-      const response = await axiosInstance.post('/api/submit_vacate_form',
-        {
-          student_id: studentData?.registration_number,
-          Reason: vacateData?.Reason,
-          Address: vacateData?.Address,
-          date_time: vacateData?.date_time
-        }
-      );
+      const response = await axiosInstance.post("/api/submit_vacate_form", {
+        student_id: studentData?.registration_number,
+        Reason: vacateData?.Reason,
+        Address: vacateData?.Address,
+        date_time: vacateData?.date_time,
+      });
 
       const data = response.data;
 
       setVacateCount(data.count);
-      showSweetAlert("Submitted Successfully!", "✅ Vacate Form Submitted. Superior Warden Notified.", "success");
+      showSweetAlert(
+        "Submitted Successfully!",
+        "✅ Vacate Form Submitted. Superior Warden Notified.",
+        "success",
+      );
       setTimeout(() => {
         setIsApproved(true);
       }, 2000);
-
     } catch (error) {
       console.error("Error updating data:", error);
     }
@@ -87,9 +94,16 @@ function Vacate() {
             )}
 
             <div className="v-section">
-              <div className="v-mobile-verify">
+              <form
+                className="v-mobile-verify"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleVerify();
+                }}
+              >
                 <div className="v-input-group">
                   <label className="v-label">Mobile Number</label>
+
                   <input
                     type="tel"
                     className="v-input"
@@ -98,10 +112,11 @@ function Vacate() {
                     value={phone_number_student}
                   />
                 </div>
-                <button onClick={handleVerify} className="v-button HS-button-verify">
+
+                <button type="submit" className="v-button HS-button-verify">
                   Verify
                 </button>
-              </div>
+              </form>
             </div>
 
             {/* Show personal information only if vacate_status is true */}
@@ -113,38 +128,77 @@ function Vacate() {
                     <div className="v-grid">
                       <div className="v-input-group">
                         <label className="v-label">Name</label>
-                        <input type="text" className="v-input" value={studentData?.name} readOnly />
-                      </div>
-                      <div className="v-input-group">
-                        <label className="v-label">Department</label>
-                        <input type="text" className="v-input" value={studentData?.department} readOnly />
-                      </div>
-                      <div className="v-input-group">
-                        <label className="v-label">Hostel Block</label>
-                        <input type="text" className="v-input" value={studentData?.block_name} readOnly />
-                      </div>
-                      <div className="v-input-group">
-                        <label className="v-label">Hostel Room No</label>
-                        <input type="text" className="v-input" value={studentData?.room_number} readOnly />
-                      </div>
-                      <div className="v-input-group">
-                        <label className="v-label">Year</label>
-                        <input type="text" className="v-input" value={studentData?.year} readOnly />
-                      </div>
-                      <div className="v-input-group">
-                        <label className="v-label">Date & Time of Vacating</label>
                         <input
-                          type="datetime-local"
+                          type="text"
                           className="v-input"
-                          onChange={(e) => setVacateData({ ...vacateData, date_time: e.target.value })}
+                          value={studentData?.name}
+                          readOnly
                         />
                       </div>
                       <div className="v-input-group">
-                        <label className="v-label">Address With Mobile Number (Parent/Spouse)</label>
+                        <label className="v-label">Department</label>
+                        <input
+                          type="text"
+                          className="v-input"
+                          value={studentData?.department}
+                          readOnly
+                        />
+                      </div>
+                      <div className="v-input-group">
+                        <label className="v-label">Hostel Block</label>
+                        <input
+                          type="text"
+                          className="v-input"
+                          value={studentData?.block_name}
+                          readOnly
+                        />
+                      </div>
+                      <div className="v-input-group">
+                        <label className="v-label">Hostel Room No</label>
+                        <input
+                          type="text"
+                          className="v-input"
+                          value={studentData?.room_number}
+                          readOnly
+                        />
+                      </div>
+                      <div className="v-input-group">
+                        <label className="v-label">Year</label>
+                        <input
+                          type="text"
+                          className="v-input"
+                          value={studentData?.year}
+                          readOnly
+                        />
+                      </div>
+                      <div className="v-input-group">
+                        <label className="v-label">
+                          Date & Time of Vacating
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className="v-input"
+                          onChange={(e) =>
+                            setVacateData({
+                              ...vacateData,
+                              date_time: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="v-input-group">
+                        <label className="v-label">
+                          Address With Mobile Number (Parent/Spouse)
+                        </label>
                         <textarea
                           type="text"
                           className="v-input"
-                          onChange={(e) => setVacateData({ ...vacateData, Address: e.target.value })}
+                          onChange={(e) =>
+                            setVacateData({
+                              ...vacateData,
+                              Address: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div className="v-input-group">
@@ -152,35 +206,105 @@ function Vacate() {
                         <input
                           type="text"
                           className="v-input"
-                          onChange={(e) => setVacateData({ ...vacateData, Reason: e.target.value })}
+                          onChange={(e) =>
+                            setVacateData({
+                              ...vacateData,
+                              Reason: e.target.value,
+                            })
+                          }
                         />
                       </div>
                     </div>
                   </div>
                 ) : studentData?.vacate_form === "submitted" ? (
                   studentData?.superior_wardern_approval === true ? (
-                    <div className="v-section">
-                      <h1>✅ Vacate Form Accepted</h1>
-                      <p>Your vacate request has been approved by the Superior Warden.</p>
+                    <div
+                      className="v-section"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        borderRadius: "16px",
+                        background: "#f0fdf4",
+                        border: "1px solid #86efac",
+                        boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+                      }}
+                    >
+                      <h1
+                        style={{
+                          color: "#15803d",
+                          fontSize: "1.5rem",
+                          marginBottom: "0.75rem",
+                          fontWeight: "700",
+                        }}
+                      >
+                        ✅ Vacate Request Approved
+                      </h1>
+
+                      <p
+                        style={{
+                          color: "#475569",
+                          fontSize: "1rem",
+                          lineHeight: "1.7",
+                          margin: 0,
+                        }}
+                      >
+                        Your vacate request has been successfully approved by
+                        the Superior Warden. You may now proceed with the
+                        remaining vacate formalities.
+                      </p>
                     </div>
                   ) : studentData?.superior_wardern_approval === false ? (
-                    <div className="v-section">
-                      <h1>❌ Vacate Form Rejected</h1>
-                      <p>
-                        Your vacate request has been rejected by the Superior Warden.
-                        Kindly contact your Warden for approval and then submit a new vacate request.
+                    <div
+                      className="v-section"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        borderRadius: "16px",
+                        background: "#fef2f2",
+                        border: "1px solid #fca5a5",
+                        boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+                      }}
+                    >
+                      <h1
+                        style={{
+                          color: "#b91c1c",
+                          fontSize: "1.5rem",
+                          marginBottom: "0.75rem",
+                          fontWeight: "700",
+                        }}
+                      >
+                        ❌ Vacate Request Rejected
+                      </h1>
+
+                      <p
+                        style={{
+                          color: "#475569",
+                          fontSize: "1rem",
+                          lineHeight: "1.7",
+                          margin: 0,
+                        }}
+                      >
+                        Your vacate request has been rejected by the Superior
+                        Warden. Please contact your Warden for further
+                        clarification and obtain the necessary approval before
+                        submitting a new request.
                       </p>
                     </div>
                   ) : (
                     <div className="v-section">
                       <h1>⏳ Vacate Form Submitted</h1>
-                      <p>Your request is under review by the Superior Warden.</p>
+                      <p>
+                        Your request is under review by the Superior Warden.
+                      </p>
                     </div>
                   )
                 ) : (
                   <div className="v-section">
                     <h1>⚠️ Ask your Warden to give permission</h1>
-                    <p>You cannot submit the vacate form until your warden grants permission.</p>
+                    <p>
+                      You cannot submit the vacate form until your warden grants
+                      permission.
+                    </p>
                   </div>
                 )}
               </>
@@ -246,11 +370,17 @@ function Vacate() {
       {studentData?.vacate_status && (
         <div className="v-section v-actions-centered no-print">
           {!isApproved ? (
-            <button className="v-button v-button-parent" onClick={handleSuperiorRequest}>
+            <button
+              className="v-button v-button-parent"
+              onClick={handleSuperiorRequest}
+            >
               Superior Request
             </button>
           ) : (
-            <button className="v-button v-button-parent print flex justify-center items-center gap-2" onClick={handlePrint}>
+            <button
+              className="v-button v-button-parent print flex justify-center items-center gap-2"
+              onClick={handlePrint}
+            >
               <Printer size={15} /> Print
             </button>
           )}

@@ -66,12 +66,25 @@ const StudentHistory = () => {
           return;
         }
 
-        const currentPasses = passes.filter(
-          (pass) =>
-            pass.re_entry_time === null &&
+        // CURRENT PASSES
+        // Show only active passes:
+        // 1. Pending approval
+        // 2. Parent approved / Warden approved
+        // 3. Fully approved passes
+        // Exclude rejected and completed (re-entered) passes
+        const currentPasses = passes.filter((pass) => {
+          const isNotCompleted = pass.re_entry_time === null;
+
+          const isNotRejected =
+            pass.parent_approval !== false &&
             pass.wardern_approval !== false &&
-            pass.superior_wardern_approval !== false,
-        );
+            pass.superior_wardern_approval !== false;
+
+          return isNotCompleted && isNotRejected;
+        });
+
+        // HISTORY GROUPING
+        // Keep ALL non-current/completed passes grouped by month
         const completedPasses = passes.filter(
           (pass) => pass.re_entry_time !== null,
         );
@@ -304,117 +317,139 @@ const StudentHistory = () => {
       ) : (
         <div className="student-history-cards">
           {filteredHistory.map((val) => (
-            <div key={val.year} className="mb-8 flex flex-col gap-4">
-              <h3 className="header">{val.year}</h3>
-              <div className="space-y-4 w-full">
+            <section key={val.year} className="history-section">
+              <div className="history-section-heading">
+                <div className="section-line"></div>
+                <h3 className="header">{val.year}</h3>
+                <div className="section-count">
+                  {val.data.length} {val.data.length === 1 ? "Pass" : "Passes"}
+                </div>
+              </div>
+
+              <div className="history-list">
                 {val.data.map((info, index) => (
                   <div
                     key={index}
                     className="student-history-card"
                     onClick={() => handleCardClick(info, val.year)}
                   >
-                    <div className="one">
-                      <div className="history-info">
-                        <p className="text-secondary">
-                          <strong className="text">
-                            <Calendar size={16} className="inline mr-1" />{" "}
-                            Requested:
-                          </strong>{" "}
-                          {formatDate(info.request_date_time)}
-                        </p>
-                      </div>
-                      <div className="history-info">
-                        <p className="text-secondary">
-                          <strong className="text">
-                            <MapPin size={16} className="inline mr-1" />{" "}
-                            Destination:
-                          </strong>{" "}
-                          {info.place_to_visit}
-                        </p>
-                      </div>
-                      <div className="history-info">
-                        {info.reason_for_visit ? (
-                          <p className="text-secondary">
-                            <strong className="text">
-                              <FileText size={16} className="inline mr-1" />{" "}
-                              Reason:
-                            </strong>{" "}
-                            {info.reason_for_visit}
-                          </p>
-                        ) : (
-                          <p className="text-secondary">
-                            <strong className="text">
-                              <FileText size={16} className="inline mr-1" />{" "}
-                              Reason:
-                            </strong>{" "}
-                            {info.reason_type}
-                          </p>
+                    {/* DATE BLOCK */}
+                    <div className="pass-date-block">
+                      <Calendar size={20} />
+                      <span className="date-label">REQUESTED</span>
+                      <strong>
+                        {new Date(info.request_date_time).toLocaleDateString(
+                          "en-US",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                          },
                         )}
+                      </strong>
+                      <small>
+                        {new Date(info.request_date_time).getFullYear()}
+                      </small>
+                    </div>
+
+                    {/* MAIN INFORMATION */}
+                    <div className="pass-main-content">
+                      <div className="pass-title-row">
+                        <div>
+                          <span className="pass-label">DESTINATION</span>
+                          <h3>{info.place_to_visit}</h3>
+                        </div>
+
+                        <span
+                          className={`status ${
+                            info.request_completed ? "completed" : "pending"
+                          }`}
+                        >
+                          {info.request_completed ? "Completed" : "Active"}
+                        </span>
+                      </div>
+
+                      <div className="pass-reason">
+                        <FileText size={16} />
+                        <span>{info.reason_for_visit || info.reason_type}</span>
+                      </div>
+
+                      <div className="pass-journey">
+                        <div className="journey-item">
+                          <div className="journey-icon out">
+                            <LogOut size={16} />
+                          </div>
+
+                          <div>
+                            <span>OUT DATE</span>
+                            <strong>{formatDate(info.from)}</strong>
+                          </div>
+                        </div>
+
+                        <div className="journey-divider"></div>
+
+                        <div className="journey-item">
+                          <div className="journey-icon in">
+                            <LogIn size={16} />
+                          </div>
+
+                          <div>
+                            <span>RETURN DATE</span>
+                            <strong>{formatDate(info.to)}</strong>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="two">
-                      <div className="history-info in-out">
-                        <p className="text-secondary">
-                          <strong className="text">
-                            <LogOut size={16} className="inline mr-1" /> OUT:
-                          </strong>
-                          <span className="text-danger">
-                            {formatDate(info.from)}
-                          </span>
-                        </p>
-                        <p className="text-secondary">
-                          <strong className="text">
-                            <LogIn size={16} className="inline mr-1" /> IN:
-                          </strong>
-                          <span className="text-success">
-                            {formatDate(info.to)}
-                          </span>
-                        </p>
-                      </div>
-                      <div className="history-info approve-status">
-                        <p className="text-secondary">
-                          <strong className="text">Parent Status:</strong>{" "}
+
+                    {/* RIGHT SIDE */}
+                    <div className="pass-right-panel">
+                      <div className="approval-statuses">
+                        <div className="approval-item">
+                          <span>Parent</span>
                           {getStatusBadge(info.parent_approval, "parent")}
-                        </p>
-                        {info.notify_superior ? (
-                          <p className="text-secondary">
-                            <strong className="text">
-                              Superior Warden Status:
-                            </strong>{" "}
-                            {getStatusBadge(
-                              info.superior_wardern_approval,
-                              "superior",
-                            )}
-                          </p>
-                        ) : (
-                          <p className="text-secondary">
-                            <strong className="text">Warden Status:</strong>{" "}
-                            {getStatusBadge(info.wardern_approval, "warden")}
-                          </p>
-                        )}
+                        </div>
+
+                        <div className="approval-item">
+                          <span>
+                            {info.notify_superior
+                              ? "Superior Warden"
+                              : "Warden"}
+                          </span>
+
+                          {info.notify_superior
+                            ? getStatusBadge(
+                                info.superior_wardern_approval,
+                                "superior",
+                              )
+                            : getStatusBadge(info.wardern_approval, "warden")}
+                        </div>
                       </div>
-                    </div>
-                    <div className="card-action-buttons">
-                      <button
-                        className="view-details-button"
-                        onClick={() => handleCardClick(info, val.year)}
-                      >
-                        <span>View Details</span>
-                      </button>
-                      {!info.wardern_approval &&
-                        !info.superior_wardern_approval && (
-                          <button
-                            className="stu-edit-button"
-                            onClick={(e) => handleEditClick(info.pass_id, e)}
-                          >
-                            <span>Edit Request</span>
-                          </button>
-                        )}
+
+                      <div className="card-action-buttons">
+                        <button
+                          className="view-details-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCardClick(info, val.year);
+                          }}
+                        >
+                          View Details
+                        </button>
+
+                        {!info.wardern_approval &&
+                          !info.superior_wardern_approval && (
+                            <button
+                              className="stu-edit-button"
+                              onClick={(e) => handleEditClick(info.pass_id, e)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           ))}
         </div>
       )}
