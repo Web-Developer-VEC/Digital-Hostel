@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react"
 
 const HostelHeader = () => {
   const [scroll, setScroll] = useState(0)
   const [hdr, setHdr] = useState("")
+   const headerRef = useRef(null)
 
   const hndlScrll = useCallback(() => {
     const pos = window.scrollY
@@ -15,7 +16,7 @@ const HostelHeader = () => {
     setScroll(pos)
   }, [])
 
-  useEffect(() => {
+    useEffect(() => {
     window.addEventListener("scroll", hndlScrll, { passive: true })
 
     return () => {
@@ -23,9 +24,40 @@ const HostelHeader = () => {
     }
   }, [hndlScrll])
 
+   useLayoutEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+
+    const setHeightVar = () => {
+      document.documentElement.style.setProperty(
+        "--header-height",
+        `${el.offsetHeight}px`
+      )
+    }
+
+    setHeightVar()
+
+    const observer = new ResizeObserver(setHeightVar)
+    observer.observe(el)
+
+    window.addEventListener("resize", setHeightVar)
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", setHeightVar)
+    }
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", setHeightVar)
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", setHeightVar)
+      }
+    }
+  }, [])
+
   return (
     <>
-      <nav className="fixed z-[100] w-full">
+                  <nav ref={headerRef} className="fixed z-[1000] w-full">
         <div
           className={
             "flex items-center font-popp group bg-white text-slate-200 transition-all ease-in-out duration-300 w-full h-auto h-20"
@@ -60,8 +92,8 @@ const HostelHeader = () => {
             </h1>
           </div>
           </div>
-            <div className='hidden lg:flex px-4 pb-1.5 font-popp bg-secd dark:bg-drks text-text dark:text-drkt
-                     z-10 w-full h-[0.75rem] rounded-b-lg transition-all'></div>
+                        <div className='hidden lg:flex px-4 pb-1.5 font-popp bg-secd dark:bg-drks text-text dark:text-drkt
+                     z-10 w-full h-[0.75rem] transition-all'></div>
       </nav>
     </>
   )
