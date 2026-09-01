@@ -1,23 +1,18 @@
 /* =========================================================
-   STUDENT HISTORY — YELLOW + MAROON PREMIUM THEME
-   Primary: #800000
-   Accent: Yellow
-   UI ONLY — NO FUNCTIONALITY CHANGES
-   ========================================================= */
+   STUDENT HISTORY — RESPONSIVE MAROON + YELLOW THEME
+   FULL CSS
+========================================================= */
 
 :root {
-  /* MAIN BRAND */
   --primary: #800000;
   --primary-dark: #5f0000;
   --primary-light: #a00000;
 
-  /* YELLOW */
   --yellow: #ffd400;
   --yellow-light: #fff7cc;
   --yellow-soft: #fffbea;
   --yellow-dark: #d9ad00;
 
-  /* STATUS */
   --green: #087f5b;
   --green-soft: #ecfdf5;
 
@@ -27,402 +22,295 @@
   --red: #b91c1c;
   --red-soft: #fef2f2;
 
-  /* TEXT */
   --text: #211818;
-  --text-secondary: #716565;
+  --text-secondary: #766666;
 
-  /* SURFACES */
-  --page: #ffffff;
-  --surface: #ffffff;
-  --surface-soft: #fffdf5;
-
-  /* BORDERS */
-  --border: #eadfdf;
+  --border: #e9dfdf;
+  --soft-border: #f0e8e8;
 }
 
 
 /* =========================================================
-   PAGE
-   ========================================================= */
+   GLOBAL RESET FOR THIS PAGE
+========================================================= */
+
+.student-history-container,
+.student-history-container * {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
 
 .student-history-container {
-  position: relative;
-
+  width: calc(100% - 16rem);
   min-height: 100vh;
+  min-width: 0;
 
   margin-left: 16rem;
-
   padding: 2.5rem 3.5rem;
 
   background: #ffffff;
-
   color: var(--text);
 
   font-family:
     Inter,
-    "DM Sans",
+    "Segoe UI",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI",
     sans-serif;
 
   overflow-x: hidden;
 }
 
 
-/* NO BACKGROUND GOLDEN GLOW */
-
-.student-history-container::before,
-.student-history-container::after {
-  display: none !important;
-}
-
-
 /* =========================================================
-   HEADER
-   ========================================================= */
+   PAGE HEADER
+========================================================= */
 
-.mb-8 {
-  position: relative;
-
-  z-index: 2;
-
+.student-history-container .mb-8 {
+  width: 100%;
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
   gap: 2rem;
-
-  margin-bottom: 3rem;
-
-  animation:
-    headerIn 0.6s ease both;
-}
-
-@keyframes headerIn {
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(-12px);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0);
-  }
+  margin-bottom: 2.5rem;
 }
 
 
 /* =========================================================
    STUDENT HISTORY TITLE
-   ========================================================= */
+========================================================= */
 
 .student-history-header {
-  position: relative;
-
   display: flex;
-
   align-items: center;
 
-  gap: 0.85rem;
-
+  min-width: 0;
+  gap: 0.8rem;
   margin: 0;
 
-  font-family:
-    Inter,
-    "Segoe UI",
-    sans-serif;
+  color: var(--primary);
 
-  font-size: 2.2rem;
-
+  font-size: 2.1rem;
   font-weight: 800;
-
   letter-spacing: -0.04em;
+}
+
+.student-history-header svg {
+  flex-shrink: 0;
 
   color: var(--primary);
-}
 
-
-/* YELLOW UNDERLINE */
-
-/* REMOVE STUDENT HISTORY UNDERLINE */
-
-.student-history-header::after {
-  display: none !important;
-}
-
-
-
-
-/* =========================================================
-   HISTORY ICON
-   ========================================================= */
-
-.history-icon {
-  width: 48px;
-
-  height: 48px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  flex-shrink: 0;
+  padding: 0.55rem;
+  width: 52px;
+  height: 52px;
 
   border-radius: 14px;
 
-  color: var(--primary);
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--yellow),
-      #ffe45c
-    );
-
-  border:
-    1px solid var(--yellow-dark);
-
-  box-shadow: none;
-
-  animation:
-    iconFloat 4s ease-in-out infinite;
-
-  transition:
-    transform 0.3s ease;
-}
-
-.history-icon:hover {
-  transform:
-    translateY(-3px)
-    rotate(-4deg);
-}
-
-@keyframes iconFloat {
-  0%,
-  100% {
-    transform:
-      translateY(0);
-  }
-
-  50% {
-    transform:
-      translateY(-3px);
-  }
+  background: var(--yellow);
+  border: 1px solid var(--yellow-dark);
 }
 
 
 /* =========================================================
-   CURRENT PASSES DROPDOWN
-   ========================================================= */
-
-/*
-   PURE WHITE.
-   NO GOLDEN SHADOW.
-   NO GOLDEN GLOW.
-*/
+   DROPDOWN
+========================================================= */
 
 .select-dropdown {
-  position: relative;
-
-  min-width: 235px;
-
-  height: 52px;
-
-  padding:
-    0 3rem 0 1.15rem;
+  min-width: 220px;
+  height: 50px;
+  padding: 0 3.2rem 0 1.1rem;
 
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 
   cursor: pointer;
-
-  border:
-    1px solid #ded2d2 !important;
-
-  border-radius: 13px;
-
-  outline: none !important;
-
-  background-color:
-    #ffffff !important;
-
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23800000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-
-  background-repeat: no-repeat;
-
-  background-position:
-    right 1rem center;
-
   color: var(--text);
+  background-color: #ffffff;
+
+  border: 1px solid #ded4d4;
+  border-radius: 12px;
+  outline: none;
 
   font-family: inherit;
-
-  font-size: 0.9rem;
-
+  font-size: 0.88rem;
   font-weight: 700;
 
-  box-shadow:
-    none !important;
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23800000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 20px;
 
   transition:
     border-color 0.25s ease,
-    transform 0.25s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
-
-
-/* NORMAL WHITE */
+.select-dropdown::-ms-expand {
+  display: none;
+}
 
 .select-dropdown:hover {
-  background-color:
-    #ffffff !important;
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
 
-  border-color:
-    var(--primary) !important;
+.select-dropdown:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.08);
+}
+.select-dropdown:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
 
-  transform:
-    translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.select-dropdown:focus {
+  border-color: var(--primary);
 
   box-shadow:
-    none !important;
+    0 0 0 3px rgba(128, 0, 0, 0.08);
 }
-
-
-/* FOCUS */
-
-.select-dropdown:focus,
-.select-dropdown:focus-visible {
-  outline: none !important;
-
-  background-color:
-    #ffffff !important;
-
-  border-color:
-    var(--primary) !important;
-
-  box-shadow:
-    0 0 0 3px
-    rgba(128, 0, 0, 0.08) !important;
-}
-
-
-/* =========================================================
-   SECTION TITLE
-   ========================================================= */
-
-.header {
-  position: relative;
-
-  width: fit-content;
-
-  margin:
-    0 auto 1.8rem;
-
-  padding-bottom:
-    0.7rem;
-
-  color:
-    var(--primary);
-
-  font-size:
-    1.55rem;
-
-  font-weight:
-    800;
-
-  letter-spacing:
-    -0.02em;
-}
-
-/* REMOVE CONTENT WORD UNDERLINE */
-
-.header::after {
-  display: none !important;
-}
-
-.header:hover::after {
-  display: none !important;
-}
-
 
 
 /* =========================================================
    HISTORY SECTION
-   ========================================================= */
+========================================================= */
 
 .student-history-cards {
-  position: relative;
-
-  z-index: 1;
+  width: 100%;
 
   display: flex;
-
   flex-direction: column;
 
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
-.space-y-4 {
-  display: flex;
+.history-section {
+  width: 100%;
+  min-width: 0;
+}
 
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
+.history-section-heading {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.section-line {
+  flex: 1;
+
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #e6d8d8
+  );
+}
+
+.header {
+  margin: 0;
+  padding: 0;
+
+  color: var(--primary);
+
+  font-size: 1.35rem;
+  font-weight: 800;
+
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.section-count {
+  flex-shrink: 0;
+
+  padding: 0.4rem 0.85rem;
+
+  color: var(--primary);
+  background: var(--yellow-soft);
+
+  border: 1px solid #ecd66c;
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   HISTORY LIST
+========================================================= */
+
+.history-list {
+  width: 100%;
+
+  display: flex;
   flex-direction: column;
 
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 
 /* =========================================================
    MAIN CARD
-   ========================================================= */
+========================================================= */
 
 .student-history-card {
   position: relative;
+
   width: 100%;
-  padding: 1.25rem;
-  overflow: hidden;
+  min-width: 0;
 
-  background: #ffffff !important;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 270px;
 
-  border: 1px solid #e8e2e2;
+  gap: 1.5rem;
+  padding: 1.2rem;
+
+  background: #ffffff;
+
+  border: 1px solid var(--border);
   border-radius: 18px;
 
-  /* NORMAL WHITE/NEUTRAL SHADOW */
+  cursor: pointer;
+
   box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.06) !important;
+    0 3px 12px rgba(0, 0, 0, 0.05);
+
+  overflow: hidden;
 
   transition:
-    transform 0.35s ease,
-    border-color 0.3s ease,
-    box-shadow 0.35s ease;
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+
+  animation: cardIn 0.45s ease both;
 }
 
 
-/* GOLDEN EFFECT ONLY WHEN TOUCH/HOVER */
-
-.student-history-card:hover {
-  transform: translateY(-5px);
-
-  border-color: #e0b900;
-
-  background: #ffffff !important;
-
-  /* GOLDEN SHADOW ONLY ON HOVER */
-  box-shadow:
-    0 10px 28px rgba(128, 0, 0, 0.10),
-    0 0 0 2px rgba(255, 212, 0, 0.20),
-    0 8px 30px rgba(255, 212, 0, 0.18) !important;
-}
-
-
-/* MAROON + YELLOW ACCENT */
+/* LEFT ACCENT */
 
 .student-history-card::before {
   content: "";
@@ -430,382 +318,364 @@
   position: absolute;
 
   left: 0;
-
   top: 18px;
-
   bottom: 18px;
 
   width: 4px;
 
-  border-radius:
-    0 5px 5px 0;
+  border-radius: 0 6px 6px 0;
 
-  background:
-    linear-gradient(
-      180deg,
-      var(--yellow),
-      var(--primary)
-    );
+  background: linear-gradient(
+    180deg,
+    var(--yellow),
+    var(--primary)
+  );
 
-  transform:
-    scaleY(0.25);
+  transform: scaleY(0.45);
 
-  transform-origin:
-    center;
-
-  transition:
-    transform 0.4s
-    cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.35s ease;
 }
 
 
-/* TOP LINE */
-
-.student-history-card::after {
-  content: "";
-
-  position: absolute;
-
-  top: 0;
-  left: 25px;
-  right: 25px;
-
-  height: 2px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      var(--yellow),
-      transparent
-    );
-
-  opacity: 0;
-
-  transition: opacity 0.3s ease;
-}
-
-
-/* HOVER */
+/* CARD HOVER */
 
 .student-history-card:hover {
-  transform:
-    translateY(-4px);
+  transform: translateY(-4px);
 
-  border-color:
-    #d8c4c4;
-
-  background:
-    #ffffff !important;
+  border-color: #dfcccc;
 
   box-shadow:
-    none !important;
+    0 12px 30px rgba(0, 0, 0, 0.10);
 }
 
 .student-history-card:hover::before {
-  transform:
-    scaleY(1);
-}
-
-.student-history-card:hover::after {
-  opacity: 1;
+  transform: scaleY(1);
 }
 
 
 /* =========================================================
-   TOP CONTENT
-   ========================================================= */
+   DATE BLOCK
+========================================================= */
 
-.one {
-  position: relative;
+.pass-date-block {
+  min-width: 0;
+  min-height: 150px;
 
-  display: grid;
+  display: flex;
+  flex-direction: column;
 
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 1rem;
-
-  padding-bottom:
-    1.2rem;
-
-  margin-bottom:
-    1.2rem;
-
-  border-bottom:
-    1px solid #eee4e4;
-}
-
-.two {
-  position: relative;
-
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 1rem;
-}
-
-
-/* =========================================================
-   INFORMATION BOX
-   ========================================================= */
-
-.history-info {
-  position: relative;
+  align-items: center;
+  justify-content: center;
 
   padding: 1rem;
 
-  border: 1px solid #eee7e7;
-  border-radius: 13px;
+  color: var(--primary);
 
-  background: #ffffff;
+  background: linear-gradient(
+    135deg,
+    #fffdf5,
+    var(--yellow-soft)
+  );
 
-  /* NORMAL WHITE SHADOW */
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.035);
+  border: 1px solid #eddb85;
+  border-radius: 14px;
 
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    background-color 0.3s ease;
+  text-align: center;
 }
 
+.pass-date-block svg {
+  flex-shrink: 0;
 
-/* GOLD ONLY ON HOVER */
+  margin-bottom: 0.5rem;
+
+  color: var(--primary);
+}
+
+.date-label {
+  margin-bottom: 0.25rem;
+
+  color: #8b7777;
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+}
+
+.pass-date-block strong {
+  color: var(--primary);
+
+  font-size: 1.35rem;
+  font-weight: 800;
+
+  word-break: break-word;
+}
+
+.pass-date-block small {
+  margin-top: 0.2rem;
+
+  color: var(--text-secondary);
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 
 /* =========================================================
-   INFORMATION BOX HOVER
-   LIGHT GOLD BOX + NEUTRAL GREY SHADOW
-   ========================================================= */
+   MAIN CONTENT
+========================================================= */
 
-.history-info:hover {
-  /* Keep slight gold colour inside the box */
-  background: var(--yellow-soft);
+.pass-main-content {
+  min-width: 0;
 
-  /* Gold border */
-  border-color: #e4c52f;
-
-  /* Slight lift */
-  transform: translateY(-3px);
-
-  /* Neutral grey shadow behind — NO GOLD GLOW */
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.14),
-    0 3px 8px rgba(0, 0, 0, 0.08);
-}
-
-
-/* LABEL */
-
-.history-info .text {
   display: flex;
-
-  align-items: center;
-
-  gap: 0.45rem;
-
-  margin-bottom:
-    0.45rem;
-
-  color:
-    #766666;
-
-  font-size:
-    0.67rem;
-
-  font-weight:
-    800;
-
-  letter-spacing:
-    0.08em;
-
-  text-transform:
-    uppercase;
-}
-
-
-/* ICON */
-
-.history-info .text svg {
-  color:
-    var(--primary);
-
-  transition:
-    transform 0.3s ease;
-}
-
-.history-info:hover .text svg {
-  transform:
-    scale(1.15)
-    rotate(-5deg);
-}
-
-
-/* VALUE */
-
-.text-secondary {
-  display: block;
-
-  color:
-    #291d1d;
-
-  font-size:
-    0.95rem;
-
-  line-height:
-    1.5;
-
-  font-weight:
-    700;
-}
-
-
-/* =========================================================
-   IN / OUT
-   ========================================================= */
-
-.in-out {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap:
-    0.7rem;
-}
-
-.in-out:hover {
-  transform:
-    none;
-
-  background:
-    transparent;
-}
-
-.in-out p {
-  margin:
-    0;
-
-  padding:
-    0.75rem;
-
-  border-radius:
-    10px;
-
-  background:
-    #ffffff;
-
-  border:
-    1px solid #eee7e7;
-
-  transition:
-    border-color 0.25s ease,
-    transform 0.25s ease;
-}
-
-.in-out p:hover {
-  transform:
-    translateY(-2px);
-
-  border-color:
-    #e7cd57;
-}
-
-
-/* =========================================================
-   DATE BADGES
-   ========================================================= */
-
-.text-danger {
-  display: inline-block;
-
-  padding:
-    0.32rem 0.65rem;
-
-  border-radius:
-    7px;
-
-  color:
-    var(--red);
-
-  background:
-    var(--red-soft);
-
-  font-size:
-    0.78rem;
-
-  font-weight:
-    800;
-}
-
-.text-success {
-  display: inline-block;
-
-  padding:
-    0.32rem 0.65rem;
-
-  border-radius:
-    7px;
-
-  color:
-    var(--green);
-
-  background:
-    var(--green-soft);
-
-  font-size:
-    0.78rem;
-
-  font-weight:
-    800;
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-.status {
-  display: inline-flex;
-
-  align-items: center;
+  flex-direction: column;
 
   justify-content: center;
 
-  gap:
-    0.4rem;
-
-  width:
-    fit-content;
-
-  padding:
-    0.45rem 0.8rem;
-
-  border-radius:
-    999px;
-
-  font-size:
-    0.7rem;
-
-  font-weight:
-    800;
-
-  letter-spacing:
-    0.04em;
-
-  text-transform:
-    uppercase;
-
-  transition:
-    transform 0.25s ease;
+  padding: 0.3rem 0;
 }
 
-.status:hover {
-  transform:
-    scale(1.04);
+
+/* =========================================================
+   TITLE ROW
+========================================================= */
+
+.pass-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  min-width: 0;
+
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.pass-label {
+  display: block;
+
+  margin-bottom: 0.3rem;
+
+  color: var(--text-secondary);
+
+  font-size: 0.62rem;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+}
+
+.pass-title-row h3 {
+  margin: 0;
+
+  max-width: 100%;
+
+  color: var(--text);
+
+  font-size: 1.15rem;
+  font-weight: 800;
+
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   REASON
+========================================================= */
+
+.pass-reason {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+
+  color: var(--text-secondary);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  overflow-wrap: anywhere;
+}
+
+.pass-reason svg {
+  flex-shrink: 0;
+
+  color: var(--primary);
+}
+
+
+/* =========================================================
+   JOURNEY SECTION
+========================================================= */
+
+.pass-journey {
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  gap: 1rem;
+
+  padding-top: 1rem;
+
+  border-top: 1px solid var(--soft-border);
+}
+
+.journey-item {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+}
+
+.journey-icon {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 10px;
+}
+
+.journey-icon.out {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.journey-icon.in {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.journey-item div:last-child {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.journey-item span {
+  display: block;
+
+  margin-bottom: 0.2rem;
+
+  color: var(--text-secondary);
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+.journey-item strong {
+  display: block;
+
+  color: var(--text);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.journey-divider {
+  flex-shrink: 0;
+
+  width: 1px;
+  height: 38px;
+
+  background: #eadfdf;
+}
+
+
+/* =========================================================
+   RIGHT PANEL
+========================================================= */
+
+.pass-right-panel {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: space-between;
+
+  padding-left: 1.3rem;
+
+  border-left: 1px solid var(--soft-border);
+}
+
+
+/* =========================================================
+   APPROVAL STATUS
+========================================================= */
+
+.approval-statuses {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.75rem;
+}
+
+.approval-item {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 0.8rem;
+}
+
+.approval-item > span:first-child {
+  min-width: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
+.status {
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.35rem;
+
+  width: fit-content;
+
+  padding: 0.38rem 0.7rem;
+
+  border-radius: 999px;
+
+  font-size: 0.65rem;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.status svg {
+  width: 13px;
+  height: 13px;
 }
 
 
@@ -813,730 +683,558 @@
 
 .status.completed,
 .status.approved {
-  color:
-    var(--green);
+  color: var(--green);
+  background: var(--green-soft);
 
-  background:
-    var(--green-soft);
-
-  border:
-    1px solid #a7f3d0;
+  border: 1px solid #a7f3d0;
 }
 
 
 /* PENDING */
 
 .status.pending {
-  color:
-    var(--orange);
+  color: var(--orange);
+  background: var(--orange-soft);
 
-  background:
-    var(--orange-soft);
-
-  border:
-    1px solid #fed7aa;
+  border: 1px solid #fed7aa;
 }
 
 
 /* REJECTED */
 
 .status.rejected {
-  color:
-    var(--red);
+  color: var(--red);
+  background: var(--red-soft);
 
-  background:
-    var(--red-soft);
-
-  border:
-    1px solid #fecaca;
+  border: 1px solid #fecaca;
 }
 
 
 /* =========================================================
    ACTION BUTTONS
-   ========================================================= */
+========================================================= */
 
 .card-action-buttons {
-  position: relative;
-
-  z-index: 5;
-
   display: flex;
 
-  justify-content:
-    flex-end;
+  justify-content: flex-end;
 
-  gap:
-    0.7rem;
+  gap: 0.6rem;
 
-  margin-top:
-    1.2rem;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
 
-  padding-top:
-    1.1rem;
-
-  border-top:
-    1px solid #eee4e4;
+  border-top: 1px solid var(--soft-border);
 }
 
 
 /* =========================================================
    BUTTON BASE
-   ========================================================= */
+========================================================= */
 
 .view-details-button,
 .stu-edit-button {
-  position: relative;
+  min-width: 0;
 
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
 
-  gap:
-    0.45rem;
+  min-height: 40px;
 
-  min-height:
-    43px;
+  padding: 0.65rem 0.9rem;
 
-  padding:
-    0.7rem 1.3rem;
+  border-radius: 9px;
 
-  overflow:
-    hidden;
+  cursor: pointer;
 
-  border-radius:
-    10px;
+  font-family: inherit;
 
-  cursor:
-    pointer;
+  font-size: 0.68rem;
+  font-weight: 800;
 
-  font-family:
-    inherit;
-
-  font-size:
-    0.76rem;
-
-  font-weight:
-    800;
-
-  letter-spacing:
-    0.04em;
-
-  text-transform:
-    uppercase;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 
   transition:
     transform 0.25s ease,
-    background-color 0.25s ease,
-    border-color 0.25s ease;
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
 
-/* =========================================================
-   VIEW DETAILS
-   ========================================================= */
+/* VIEW DETAILS */
 
 .view-details-button {
-  color: #800000;
+  flex: 1;
 
-  background: #FFD400;
+  color: var(--primary);
+  background: var(--yellow);
 
-  border: 1px solid #d6ae00;
-
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.06);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.3s ease,
-    background-color 0.25s ease;
+  border: 1px solid var(--yellow-dark);
 }
 
 .view-details-button:hover {
-  background: #FFD400;
-
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 
   box-shadow:
-    0 7px 20px rgba(255, 212, 0, 0.30),
-    0 0 0 2px rgba(255, 212, 0, 0.15);
+    0 7px 18px rgba(255, 212, 0, 0.28);
 }
 
 
-/* =========================================================
-   EDIT
-   ========================================================= */
+/* EDIT */
 
 .stu-edit-button {
-  color: #800000;
-
+  color: var(--primary);
   background: #ffffff;
 
-  border: 1px solid #ddd3d3;
-
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.05);
-
-  transition:
-    transform 0.25s ease,
-    background-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.3s ease;
+  border: 1px solid #ddd2d2;
 }
 
 .stu-edit-button:hover {
-  color: #800000;
+  transform: translateY(-2px);
 
-  background: #fffdf2;
-
-  border-color: #e0bd22;
-
-  transform: translateY(-3px);
+  background: var(--yellow-soft);
+  border-color: var(--yellow-dark);
 
   box-shadow:
-    0 7px 20px rgba(255, 212, 0, 0.22);
+    0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 
 /* =========================================================
-   BUTTON SHINE
-   ========================================================= */
+   LOADING / ERROR / EMPTY
+========================================================= */
 
-.view-details-button::before,
-.stu-edit-button::before {
-  content: "";
+.loading-message,
+.error-message,
+.no-data-message {
+  width: 100%;
 
-  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  top: 0;
+  gap: 0.7rem;
 
-  left: -120%;
+  min-height: 160px;
 
-  width: 60%;
+  padding: 2rem;
 
-  height: 100%;
+  text-align: center;
 
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.35),
-      transparent
-    );
+  border: 1px solid var(--border);
+  border-radius: 16px;
 
-  transform:
-    skewX(-20deg);
+  background: #ffffff;
 
-  transition:
-    left 0.6s ease;
+  font-weight: 700;
 }
 
-.view-details-button:hover::before,
-.stu-edit-button:hover::before {
-  left:
-    150%;
+.loading-message {
+  color: var(--primary);
+}
+
+.loading-message svg {
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  color: var(--red);
+  border-left: 4px solid var(--red);
+}
+
+.no-data-message {
+  color: var(--text-secondary);
+  border-left: 4px solid var(--yellow);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 
 /* =========================================================
    MODAL OVERLAY
-   ========================================================= */
+========================================================= */
 
 .modal-overlay {
   position: fixed;
-
   inset: 0;
 
   z-index: 9999;
 
+  width: 100vw;
+  height: 100dvh;
+
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   padding: 1.5rem;
 
-  /*
-     NEUTRAL DARK OVERLAY
-     NOT GOLD
-  */
+  background: rgba(20, 10, 10, 0.68);
 
-  background:
-    rgba(25, 15, 15, 0.64);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
 
-  backdrop-filter:
-    blur(8px);
-
-  -webkit-backdrop-filter:
-    blur(8px);
-
-  animation:
-    overlayIn 0.3s ease both;
+  animation: overlayIn 0.25s ease;
 }
 
 @keyframes overlayIn {
   from {
-    opacity:
-      0;
+    opacity: 0;
   }
 
   to {
-    opacity:
-      1;
+    opacity: 1;
   }
 }
 
 
 /* =========================================================
-   MODAL
-   ========================================================= */
+   MODAL CONTENT
+========================================================= */
 
 .modal-content {
   position: relative;
 
-  width:
-    min(720px, 95vw);
+  width: min(760px, 100%);
+  max-height: calc(100dvh - 3rem);
 
-  max-height:
-    88vh;
+  padding: 2rem;
 
-  padding:
-    2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
 
-  overflow-y:
-    auto;
+  background: #ffffff;
 
-  border:
-    1px solid #eadfdf;
-
-  border-radius:
-    20px;
-
-  background:
-    #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
 
   box-shadow:
-    0 25px 70px
-    rgba(40, 10, 10, 0.25);
+    0 30px 80px rgba(0, 0, 0, 0.28);
 
-  animation:
-    modalIn
-    0.45s
-    cubic-bezier(0.22, 1, 0.36, 1)
-    both;
+  animation: modalIn 0.35s ease;
 }
 
 @keyframes modalIn {
   from {
-    opacity:
-      0;
-
-    transform:
-      translateY(25px)
-      scale(0.97);
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
   }
 
   to {
-    opacity:
-      1;
-
-    transform:
-      translateY(0)
-      scale(1);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
 
 /* =========================================================
    MODAL TITLE
-   ========================================================= */
+========================================================= */
 
 .modal-content h2 {
-  position:
-    relative;
+  margin: 0 3rem 1.5rem 0 !important;
 
-  margin:
-    0 3rem 1.5rem 0;
+  padding-bottom: 0.9rem;
 
-  padding-bottom:
-    0.9rem;
+  color: var(--primary) !important;
 
-  color:
-    var(--primary);
+  font-size: 1.6rem !important;
+  font-weight: 800;
 
-  font-size:
-    1.7rem;
+  overflow-wrap: anywhere;
 
-  font-weight:
-    800;
-
-  letter-spacing:
-    -0.03em;
-
-  border-bottom:
-    1px solid #eee4e4;
-}
-
-.modal-content h2::after {
-  content:
-    "";
-
-  position:
-    absolute;
-
-  left:
-    0;
-
-  bottom:
-    -2px;
-
-  width:
-    55px;
-
-  height:
-    4px;
-
-  border-radius:
-    50px;
-
-  background:
-    linear-gradient(
-      90deg,
-      var(--primary),
-      var(--yellow)
-    );
+  border-bottom: 1px solid var(--soft-border);
 }
 
 
 /* =========================================================
-   MODAL CLOSE
-   ========================================================= */
+   MODAL CLOSE BUTTON
+========================================================= */
 
 .popup-x {
-  position:
-    absolute;
+  position: absolute;
 
-  top:
-    1rem;
+  top: 1.2rem;
+  right: 1.2rem;
 
-  right:
-    1rem;
+  z-index: 2;
 
-  width:
-    40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  height:
-    40px;
+  width: 40px;
+  height: 40px;
 
-  display:
-    flex;
+  color: var(--primary);
+  background: #ffffff;
 
-  align-items:
-    center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
 
-  justify-content:
-    center;
-
-  border:
-    1px solid #eadfdf;
-
-  border-radius:
-    10px;
-
-  background:
-    #ffffff;
-
-  color:
-    var(--primary);
-
-  cursor:
-    pointer;
-
-  box-shadow:
-    none !important;
+  cursor: pointer;
 
   transition:
     transform 0.3s ease,
-    background-color 0.25s ease,
-    color 0.25s ease;
+    background 0.25s ease;
 }
 
 .popup-x:hover {
-  transform:
-    rotate(90deg);
+  transform: rotate(90deg);
 
-  color:
-    var(--primary);
-
-  background:
-    var(--yellow);
-
-  border-color:
-    var(--yellow-dark);
+  background: var(--yellow);
+  border-color: var(--yellow-dark);
 }
 
 
 /* =========================================================
-   MODAL DETAILS
-   ========================================================= */
+   DETAILS GRID
+========================================================= */
 
 .details-row {
-  display:
-    grid;
+  width: 100%;
 
-  grid-template-columns:
-    repeat(2, 1fr);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  gap:
-    0.8rem;
+  gap: 1rem;
 
-  margin-bottom:
-    1.3rem;
+  padding: 0.9rem;
 
-  padding:
-    0.8rem;
+  background: #fffdf8;
 
-  border:
-    1px solid #eee4e4;
+  border: 1px solid var(--soft-border);
+  border-radius: 15px;
+}
 
-  border-radius:
-    14px;
+.details-column {
+  min-width: 0;
 
-  background:
-    #fffdf8;
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.7rem;
 }
 
 .details-column p {
-  margin:
-    0 0 0.6rem;
+  width: 100%;
 
-  padding:
-    0.8rem;
+  margin: 0;
+  padding: 0.9rem;
 
-  border-radius:
-    9px;
+  color: var(--text);
+  background: #ffffff;
 
-  background:
-    #ffffff;
+  border: 1px solid #eee6e6;
+  border-radius: 10px;
 
-  border:
-    1px solid #eee7e7;
-}
+  font-size: 0.85rem;
+  font-weight: 600;
 
-.details-column p:last-child {
-  margin-bottom:
-    0;
+  overflow-wrap: anywhere;
 }
 
 .details-column p strong {
-  display:
-    block;
+  display: block;
 
-  margin-bottom:
-    0.25rem;
+  margin-bottom: 0.4rem;
 
-  color:
-    #766666;
+  color: var(--text-secondary);
 
-  font-size:
-    0.65rem;
+  font-size: 0.62rem;
+  font-weight: 800;
 
-  font-weight:
-    800;
-
-  letter-spacing:
-    0.07em;
-
-  text-transform:
-    uppercase;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 
 /* =========================================================
-   QR
-   ========================================================= */
+   DOCUMENT IMAGE
+========================================================= */
+
+.modal-image {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  max-height: 500px;
+
+  margin-top: 0.8rem;
+
+  object-fit: contain;
+
+  background: #f8f8f8;
+
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+
+/* PDF */
+
+.modal-content iframe {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  min-height: 400px;
+
+  margin-top: 0.6rem;
+
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+}
+
 
 /* =========================================================
-   QR CODE SECTION
-   ========================================================= */
+   QR CONTAINER
+========================================================= */
 
 .qr-container {
   position: relative;
 
-  display: flex;
+  width: 100%;
+  min-width: 0;
 
+  display: flex;
   flex-direction: column;
 
   align-items: center;
-
   justify-content: center;
 
   gap: 1rem;
 
-  margin: 1.8rem 0;
+  min-height: 300px;
 
-  padding: 2rem 1.5rem;
-
-  min-height: 290px;
-
-  border: 1px solid #e0c75a;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #fffdf5,
-      var(--yellow-soft)
-    );
+  margin: 1.5rem 0;
+  padding: 2rem;
 
   overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    #fffdf5,
+    var(--yellow-soft)
+  );
+
+  border: 1px solid #e5cf69;
+  border-radius: 18px;
 }
 
 
 /* =========================================================
    QR TITLE
-   ========================================================= */
+========================================================= */
 
 .qr-title {
-  position: relative;
-
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
 
   color: var(--primary);
 
   font-size: 1rem;
-
   font-weight: 800;
-
-  letter-spacing: 0.02em;
 
   text-align: center;
 }
 
 
 /* =========================================================
-   QR IMAGE WRAPPER
-   ========================================================= */
+   QR WRAPPER
+========================================================= */
 
 .qr-code-wrapper {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  padding: 8px;
+  max-width: 100%;
 
-  border: 3px solid var(--yellow);
-
-  border-radius: 15px;
+  padding: 9px;
 
   background: #ffffff;
 
+  border: 3px solid var(--yellow);
+  border-radius: 15px;
+
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .qr-code-wrapper:hover {
   transform: scale(1.03);
 
   box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.12);
+    0 10px 24px rgba(0, 0, 0, 0.12);
 }
-
-
-/* =========================================================
-   QR IMAGE
-   ========================================================= */
 
 .qr-image {
   display: block;
 
-  width: 170px;
+  width: 175px;
+  max-width: 100%;
 
-  height: 170px;
+  height: auto;
+  aspect-ratio: 1 / 1;
 
   object-fit: contain;
 
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 
 /* =========================================================
-   DOWNLOAD BUTTON — TOP RIGHT CORNER
-   ========================================================= */
+   QR DOWNLOAD BUTTON
+========================================================= */
 
 .qr-download-button {
   position: absolute;
 
   top: 18px;
-
   right: 18px;
 
-  width: 54px;
-
-  height: 54px;
+  z-index: 3;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
-  border: 1px solid #d9ad00;
-
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
 
   color: var(--primary);
+  background: var(--yellow);
 
-  background:
-    linear-gradient(
-      135deg,
-      #ffd400,
-      #ffe76a
-    );
+  border: 1px solid var(--yellow-dark);
+  border-radius: 13px;
 
   cursor: pointer;
 
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.12);
+    0 5px 15px rgba(0, 0, 0, 0.10);
 
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
-
-  z-index: 5;
+    box-shadow 0.25s ease;
 }
 
-
 .qr-download-button:hover {
-  transform:
-    translateY(-3px)
-    scale(1.05);
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffe76a,
-      #ffd400
-    );
+  transform: translateY(-3px) scale(1.04);
 
   box-shadow:
     0 10px 22px rgba(255, 212, 0, 0.35);
 }
 
-
 .qr-download-button:active {
-  transform:
-    scale(0.95);
+  transform: scale(0.95);
 }
-
 
 .qr-download-button svg {
   stroke-width: 2.5;
@@ -1544,576 +1242,634 @@
 
 
 /* =========================================================
-   MODAL CLOSE BUTTON
-   ========================================================= */
+   MODAL CLOSE DETAILS BUTTON
+========================================================= */
 
 .modal-close-button {
-  width:
-    100%;
+  width: 100%;
 
-  margin-top:
-    1.3rem;
+  margin-top: 1.2rem;
+  padding: 0.9rem;
 
-  padding:
-    0.9rem;
+  color: var(--yellow);
+  background: var(--primary);
 
-  border:
-    1px solid var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 10px;
 
-  border-radius:
-    10px;
+  cursor: pointer;
 
-  color:
-    var(--yellow);
+  font-family: inherit;
 
-  background:
-    var(--primary);
+  font-size: 0.8rem;
+  font-weight: 800;
 
-  cursor:
-    pointer;
-
-  font-family:
-    inherit;
-
-  font-weight:
-    800;
-
-  font-size:
-    0.8rem;
-
-  letter-spacing:
-    0.04em;
-
-  text-transform:
-    uppercase;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 
   transition:
     transform 0.25s ease,
-    background-color 0.25s ease;
+    background 0.25s ease;
 }
 
 .modal-close-button:hover {
-  transform:
-    translateY(-2px);
+  transform: translateY(-2px);
 
-  background:
-    var(--primary-dark);
+  background: var(--primary-dark);
 }
 
 
 /* =========================================================
-   LOADING / ERROR / EMPTY
-   ========================================================= */
+   MODAL SCROLLBAR
+========================================================= */
 
-.loading-message,
-.error-message,
-.no-data-message {
-  min-height:
-    150px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  padding:
-    2rem;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:
-    16px;
-
-  background:
-    #ffffff;
-
-  box-shadow:
-    none !important;
-
-  animation:
-    fadeUp 0.5s ease both;
+.modal-content::-webkit-scrollbar {
+  width: 7px;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity:
-      0;
-
-    transform:
-      translateY(10px);
-  }
-
-  to {
-    opacity:
-      1;
-
-    transform:
-      translateY(0);
-  }
+.modal-content::-webkit-scrollbar-track {
+  background: #f7f3f3;
 }
 
-.loading-message {
-  color:
-    var(--primary);
-
-  font-weight:
-    700;
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c9baba;
+  border-radius: 10px;
 }
 
-.error-message {
-  color:
-    var(--red);
-
-  border-left:
-    4px solid var(--red);
-}
-
-.no-data-message {
-  color:
-    var(--text-secondary);
-
-  border-left:
-    4px solid var(--yellow);
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 
 /* =========================================================
-   CARD ENTRANCE ANIMATION
-   ========================================================= */
-
-.student-history-card {
-  animation:
-    cardIn
-    0.5s
-    cubic-bezier(0.22, 1, 0.36, 1)
-    both;
-}
-
-.student-history-card:nth-child(1) {
-  animation-delay:
-    0.05s;
-}
-
-.student-history-card:nth-child(2) {
-  animation-delay:
-    0.10s;
-}
-
-.student-history-card:nth-child(3) {
-  animation-delay:
-    0.15s;
-}
-
-.student-history-card:nth-child(4) {
-  animation-delay:
-    0.20s;
-}
-
-.student-history-card:nth-child(5) {
-  animation-delay:
-    0.25s;
-}
-
-.student-history-card:nth-child(6) {
-  animation-delay:
-    0.30s;
-}
+   CARD ANIMATION
+========================================================= */
 
 @keyframes cardIn {
   from {
-    opacity:
-      0;
-
-    transform:
-      translateY(20px);
+    opacity: 0;
+    transform: translateY(15px);
   }
 
   to {
-    opacity:
-      1;
-
-    transform:
-      translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 
 /* =========================================================
    TABLET
-   ========================================================= */
+========================================================= */
 
-@media (max-width: 1100px) {
+@media (max-width: 1150px) {
 
   .student-history-container {
-    margin-left:
-      0;
+    width: 100%;
+    margin-left: 0;
 
-    padding:
-      2rem;
+    padding: 2rem;
   }
 
-  .one {
-    grid-template-columns:
-      repeat(2, 1fr);
+  .student-history-card {
+    grid-template-columns: 105px minmax(0, 1fr);
+  }
+
+  .pass-right-panel {
+    grid-column: 1 / -1;
+
+    padding-left: 0;
+    padding-top: 1rem;
+
+    border-left: none;
+    border-top: 1px solid var(--soft-border);
+  }
+
+  .approval-statuses {
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    justify-content: space-between;
+  }
+
+  .approval-item {
+    flex: 1;
+    min-width: 180px;
+
+    justify-content: flex-start;
   }
 }
 
 
 /* =========================================================
    MOBILE
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 768px) {
 
-  .student-history-container {
-    margin-left:
-      0;
-
-    padding:
-      1rem;
-
-    background:
-      #ffffff;
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  .mb-8 {
-    flex-direction:
-      column;
+  .student-history-container {
+    width: 100%;
+    max-width: 100%;
 
-    align-items:
-      stretch;
+    margin-left: 0;
+    padding: 1rem;
 
-    gap:
-      1rem;
+    overflow-x: hidden;
+  }
 
-    margin-bottom:
-      2rem;
+
+  /* HEADER */
+
+  .student-history-container .mb-8 {
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 1rem;
+
+    margin-bottom: 2rem;
   }
 
   .student-history-header {
-    font-size:
-      1.65rem;
+    width: 100%;
+
+    font-size: 1.65rem;
+
+    line-height: 1.2;
+
+    overflow-wrap: anywhere;
   }
 
-  .history-icon {
-    width:
-      43px;
+  .student-history-header svg {
+    width: 45px;
+    height: 45px;
 
-    height:
-      43px;
+    padding: 0.45rem;
 
-    border-radius:
-      12px;
+    border-radius: 12px;
   }
 
- .select-dropdown {
-  min-width: 235px;
-  height: 52px;
-
-  padding: 0 3rem 0 1.15rem;
-
-  appearance: none;
-  cursor: pointer;
-
-  color: #211818;
-
-  background-color: #ffffff !important;
-
-  border: 1px solid #ded7d7 !important;
-  border-radius: 13px;
-
-  outline: none !important;
-
-  /* NORMAL WHITE SHADOW */
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.05) !important;
-
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.3s ease;
-}
+  .select-dropdown {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
 
 
-/* GOLD EFFECT ONLY WHEN TOUCHED/HOVERED */
+  /* SECTION */
 
-.select-dropdown:hover {
-  background-color: #ffffff !important;
-
-  border-color: #d4ad00 !important;
-
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 6px 18px rgba(255, 212, 0, 0.20),
-    0 0 0 2px rgba(255, 212, 0, 0.12) !important;
-}
-
-
-/* WHEN CLICKED */
-
-.select-dropdown:focus {
-  background-color: #ffffff !important;
-
-  border-color: #800000 !important;
-
-  outline: none !important;
-
-  box-shadow:
-    0 5px 18px rgba(128, 0, 0, 0.10),
-    0 0 0 3px rgba(255, 212, 0, 0.20) !important;
-}
+  .history-section-heading {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
 
   .header {
-    font-size:
-      1.35rem;
+    font-size: 1.15rem;
 
-    margin-bottom:
-      1.4rem;
+    white-space: normal;
   }
+
+  .section-line {
+    display: none;
+  }
+
+  .section-count {
+    margin-left: auto;
+  }
+
+
+  /* CARD */
 
   .student-history-card {
-    padding:
-      0.95rem;
+    width: 100%;
 
-    border-radius:
-      15px;
+    grid-template-columns: minmax(0, 1fr);
+
+    gap: 1rem;
+    padding: 1rem;
+
+    border-radius: 15px;
   }
 
-  .one,
-  .two {
-    grid-template-columns:
-      1fr;
+  .student-history-card::before {
+    top: 0;
+    bottom: auto;
 
-    gap:
-      0.7rem;
+    left: 20px;
+    right: 20px;
+
+    width: auto;
+    height: 3px;
+
+    border-radius: 0 0 6px 6px;
+
+    transform: scaleX(0.4);
   }
 
-  .one {
-    padding-bottom:
-      0.9rem;
-
-    margin-bottom:
-      0.9rem;
+  .student-history-card:hover::before {
+    transform: scaleX(1);
   }
 
-  .history-info {
-    padding:
-      0.85rem;
+
+  /* DATE */
+
+  .pass-date-block {
+    min-height: auto;
+
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    justify-content: flex-start;
+
+    gap: 0.65rem;
+
+    padding: 0.8rem 1rem;
+
+    text-align: left;
   }
 
-  .text-secondary {
-    font-size:
-      0.87rem;
+  .pass-date-block svg {
+    margin-bottom: 0;
   }
+
+  .date-label {
+    margin: 0;
+  }
+
+  .pass-date-block strong {
+    margin-left: auto;
+
+    font-size: 1rem;
+  }
+
+  .pass-date-block small {
+    width: 100%;
+    margin: 0;
+  }
+
+
+  /* MAIN */
+
+  .pass-main-content {
+    width: 100%;
+  }
+
+  .pass-title-row {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 0.7rem;
+  }
+
+  .pass-title-row h3 {
+    font-size: 1.05rem;
+  }
+
+  .pass-journey {
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 0.8rem;
+  }
+
+  .journey-item {
+    width: 100%;
+  }
+
+  .journey-divider {
+    width: 100%;
+    height: 1px;
+  }
+
+
+  /* RIGHT PANEL */
+
+  .pass-right-panel {
+    grid-column: auto;
+
+    width: 100%;
+
+    padding: 1rem 0 0;
+
+    border-top: 1px solid var(--soft-border);
+  }
+
+  .approval-statuses {
+    flex-direction: column;
+  }
+
+  .approval-item {
+    width: 100%;
+    min-width: 0;
+
+    justify-content: space-between;
+  }
+
+
+  /* BUTTONS */
 
   .card-action-buttons {
-    flex-direction:
-      column;
+    flex-direction: column;
 
-    gap:
-      0.6rem;
+    width: 100%;
   }
 
   .view-details-button,
   .stu-edit-button {
-    width:
-      100%;
-
-    min-height:
-      46px;
+    width: 100%;
+    min-height: 45px;
   }
 
 
-  /* MOBILE MODAL */
+  /* MODAL */
 
   .modal-overlay {
-    align-items:
-      flex-end;
+    align-items: flex-end;
 
-    padding:
-      0;
+    width: 100vw;
+    height: 100dvh;
+
+    padding: 0;
   }
 
   .modal-content {
-    width:
-      100%;
+    width: 100%;
+    max-width: 100%;
 
-    max-height:
-      94vh;
+    max-height: 92dvh;
 
-    padding:
-      1.2rem;
+    padding: 1.3rem;
 
-    border-radius:
-      22px 22px 0 0;
+    border-radius: 22px 22px 0 0;
 
-    animation:
-      mobileModal
-      0.4s
-      cubic-bezier(0.22, 1, 0.36, 1)
-      both;
+    animation: mobileModal 0.35s ease;
   }
 
   @keyframes mobileModal {
-
     from {
-      transform:
-        translateY(100%);
+      transform: translateY(100%);
     }
 
     to {
-      transform:
-        translateY(0);
+      transform: translateY(0);
     }
+  }
 
+  .modal-content h2 {
+    margin-right: 3rem !important;
+
+    font-size: 1.3rem !important;
   }
 
   .details-row {
-    grid-template-columns:
-      1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+
+  /* DOCUMENT */
+
+  .modal-image {
+    max-height: 60dvh;
+  }
+
+  .modal-content iframe {
+    min-height: 55dvh;
+  }
+
+
+  /* QR */
+
+  .qr-container {
+    min-height: 280px;
+
+    padding: 4.5rem 1rem 1.5rem;
   }
 
   .qr-image {
-    width:
-      145px;
+    width: 150px;
+  }
 
-    height:
-      145px;
+  .qr-download-button {
+    top: 12px;
+    right: 12px;
+
+    width: 46px;
+    height: 46px;
   }
 }
 
 
 /* =========================================================
    SMALL MOBILE
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 480px) {
 
   .student-history-container {
-    padding:
-      0.75rem;
+    padding: 0.75rem;
   }
+
+
+  /* HEADER */
 
   .student-history-header {
-    font-size:
-      1.45rem;
+    gap: 0.6rem;
+
+    font-size: 1.35rem;
   }
 
-  .history-icon {
-    width:
-      39px;
-
-    height:
-      39px;
+  .student-history-header svg {
+    width: 40px;
+    height: 40px;
   }
+
+
+  /* SECTION */
+
+  .history-section-heading {
+    align-items: center;
+  }
+
+  .header {
+    font-size: 1.05rem;
+  }
+
+  .section-count {
+    padding: 0.35rem 0.65rem;
+
+    font-size: 0.65rem;
+  }
+
+
+  /* CARD */
 
   .student-history-card {
-    padding:
-      0.8rem;
+    padding: 0.85rem;
   }
 
-  .history-info {
-    padding:
-      0.7rem;
+
+  /* DATE */
+
+  .pass-date-block {
+    padding: 0.75rem;
   }
 
-  .history-info .text {
-    font-size:
-      0.61rem;
+  .pass-date-block strong {
+    font-size: 0.9rem;
   }
 
-  .text-secondary {
-    font-size:
-      0.82rem;
+
+  /* TEXT */
+
+  .pass-title-row h3 {
+    font-size: 0.98rem;
   }
 
-  .in-out {
-    gap:
-      0.45rem;
+  .journey-item strong {
+    font-size: 0.7rem;
   }
 
-  .in-out p {
-    padding:
-      0.6rem;
+  .pass-reason {
+    font-size: 0.76rem;
   }
+
+
+  /* STATUS */
+
+  .approval-item > span:first-child {
+    font-size: 0.67rem;
+  }
+
+  .status {
+    font-size: 0.6rem;
+
+    padding: 0.35rem 0.55rem;
+  }
+
+
+  /* MODAL */
 
   .modal-content {
-    padding:
-      1rem;
+    padding: 1rem;
   }
 
   .modal-content h2 {
-    font-size:
-      1.35rem;
+    font-size: 1.15rem !important;
   }
 
   .popup-x {
-    width:
-      36px;
+    width: 36px;
+    height: 36px;
 
-    height:
-      36px;
+    top: 0.9rem;
+    right: 0.9rem;
+  }
+
+  .details-column p {
+    padding: 0.75rem;
+
+    font-size: 0.78rem;
+  }
+
+
+  /* QR */
+
+  .qr-container {
+    min-height: 250px;
+
+    padding: 4rem 0.75rem 1rem;
   }
 
   .qr-image {
-    width:
-      130px;
+    width: 130px;
+  }
 
-    height:
-      130px;
+  .qr-download-button {
+    width: 42px;
+    height: 42px;
   }
 }
 
 
 /* =========================================================
-   TOUCH
-   ========================================================= */
+   EXTRA SMALL DEVICES
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .student-history-container {
+    padding: 0.6rem;
+  }
+
+  .student-history-header {
+    font-size: 1.15rem;
+  }
+
+  .student-history-card {
+    padding: 0.7rem;
+  }
+
+  .pass-date-block {
+    gap: 0.4rem;
+  }
+
+  .approval-item {
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+  }
+
+  .status {
+    max-width: 100%;
+  }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+========================================================= */
 
 @media (hover: none) and (pointer: coarse) {
 
   .student-history-card:hover {
-    transform:
-      none;
+    transform: none;
 
     box-shadow:
-      none !important;
+      0 3px 12px rgba(0, 0, 0, 0.05);
   }
 
   .student-history-card:active {
-    transform:
-      scale(0.985);
+    transform: scale(0.99);
   }
 
   .view-details-button:hover,
   .stu-edit-button:hover {
-    transform:
-      none;
+    transform: none;
   }
 }
 
 
 /* =========================================================
-   REDUCE MOTION
-   ========================================================= */
+   REDUCED MOTION
+========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
   *,
   *::before,
   *::after {
-    animation-duration:
-      0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
 
-    animation-iteration-count:
-      1 !important;
+    transition-duration: 0.01ms !important;
 
-    transition-duration:
-      0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
