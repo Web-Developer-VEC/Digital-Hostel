@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import "./WardenAnalytics.css";
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { getRequest } from "../../../api/axios";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for the donut chart
 
@@ -77,9 +78,9 @@ const Dashboard = () => {
     const fetchData = async ()=>{
 
       try{
-        const response = await axios.get('/api/pass_measures_warden');
+        const response = await getRequest('/api/pass_measures_warden');
         const fetchedData = response.data;
-
+        
         const years = Object.keys(fetchedData?.data)
         
         setYears(years);
