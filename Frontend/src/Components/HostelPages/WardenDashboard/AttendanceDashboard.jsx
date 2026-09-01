@@ -101,7 +101,9 @@ function AttendanceDashboard() {
     '9': 'ME',
     'overall': 'Overall'
   };
-
+  const vegCount = foodCount?.[selectedYear]?.veg_count || 0;
+  const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
+  const totalStudents = vegCount + nonVegCount;
   useEffect(() => {
     // Reset animations when year changes
     setAnimatedCount(0);
@@ -146,7 +148,7 @@ function AttendanceDashboard() {
       // clearInterval(speedInterval);
       clearInterval(foodInterval);
     };
-  }, [selectedYear]);
+  }, [selectedYear, vegCount, nonVegCount]);
 
   const getSpeedometerColor = (percentage) => {
     if (percentage > 80) return "green";
@@ -165,8 +167,9 @@ function AttendanceDashboard() {
       try {
         const response = await axios.get('/api/food_count_warden');
         const fetchedData = response.data;
+        console.log(response.data);
 
-        const years = Object.keys(fetchedData.foodCounts).map(Number);
+        const years = Object.keys(fetchedData.foodCounts);
         setAvailableYears(years);
 
         if (years.length > 0) {
@@ -187,9 +190,7 @@ function AttendanceDashboard() {
     fetchData();
   }, []);
 
-  const vegCount = foodCount?.[selectedYear]?.veg_count || 0;
-  const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
-  const totalStudents = vegCount + nonVegCount;
+  
 
   // Show alert if no data available for selected year
   useEffect(() => {
@@ -209,7 +210,7 @@ function AttendanceDashboard() {
       {/* Main Content */}
       <div className="attendance-main">
         {/* ... (keep all your existing main content) */}
-        <div className="attendance-year-buttons">
+        {/*<div className="attendance-year-buttons">
           {availableYear?.map((yearKey) => (
             <button
               key={yearKey}
@@ -219,7 +220,7 @@ function AttendanceDashboard() {
               {yearToAlphabet[yearKey]}
             </button>
           ))}
-        </div>
+        </div>*/}
 
         {/* <div className="attendance-overview">
           <div className="attendance-chart">
