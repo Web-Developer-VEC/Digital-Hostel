@@ -243,7 +243,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
              <div className="warden-sidebar-top">
                 <div className="warden-photo-container">
                   <img
-                    src={wardenSlidebar?.image_path}
+                    src={UrlParser(wardenSlidebar?.image_path) }
                     alt={wardenSlidebar?.name}
                     className="warden-photo"
                     style={{ color: "white" }}
@@ -314,25 +314,19 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
         </div>
       )}
 
-      {/* Warden Profile Popup */}
-      {showProfile && (
-        <div className="warden-profile-popup">
-          <div className="warden-profile-header">
-            <img
-              src={
-                wardenSlidebar?.image_path || "https://via.placeholder.com/150"
-              }
-              alt={wardenSlidebar?.name}
-              className="warden-photo"
-            />
-            <div>
-              <h3 className="sidebar-warden-name">{wardenSlidebar?.name}</h3>
-              <p className="warden-years">
-                Handling:{" "}
-                <span className="text-white">
-                  {primaryYears} {yearLabel}
-                </span>
-              </p>
+        {/* Warden Profile Popup */}
+        {showProfile && (
+          <div className="warden-profile-popup">
+            <div className="warden-profile-header">
+              <img
+                src={UrlParser(wardenSlidebar?.image_path) || "https://via.placeholder.com/150"}
+                alt={wardenSlidebar?.name}
+                className="warden-photo"
+              />
+              <div>
+                <h3 className="sidebar-warden-name">{wardenSlidebar?.name}</h3>
+                <p className="warden-years">Handling: <span className="text-white">{primaryYears} {yearLabel}</span></p>
+              </div>
             </div>
           </div>
           <p className="warden-mobile">

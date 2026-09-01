@@ -469,6 +469,7 @@ function HostelPass() {
           room_number: firstDraft.room_no,
           registration_number: firstDraft.registration_number,
           block_name: firstDraft.blockname,
+          batch: firstDraft.batch
         });
 
         setReasonType(firstDraft.reason_type);
