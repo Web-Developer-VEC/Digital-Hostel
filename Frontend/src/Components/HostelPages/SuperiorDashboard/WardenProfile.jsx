@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { X, Edit, Power, Trash2 } from 'lucide-react';
-import './WardenProfile.css';
+import {
+  X,
+  Edit,
+  Power,
+  Trash2,
+  Upload,
+  Image as ImageIcon,
+  Plus,
+  UserRound,
+  CalendarDays,
+  Phone,
+  LockKeyhole,
+} from "lucide-react";
+import "./WardenProfile.css";
 import axiosInstance from "../../../api/axios";
 import Swal from "sweetalert2";
 
@@ -45,13 +57,13 @@ const WardenProfile = () => {
   // };
 
   const yearToAlphabet = {
-    '1': 'First Year',
-    '2': 'Second Year',
-    '3': 'Third Year',
-    '4': 'Fourth Year',
-    '10': 'MBA',
-    '9': 'ME',
-    'overall': 'Overall'
+    1: "First Year",
+    2: "Second Year",
+    3: "Third Year",
+    4: "Fourth Year",
+    10: "MBA",
+    9: "ME",
+    overall: "Overall",
   };
 
   // Fetch warden details
@@ -72,20 +84,19 @@ const WardenProfile = () => {
             date: warden.joined_date,
             isActive: warden.active,
             phone_number: warden.phone_number,
-            primaryYears: pBatch
+            primaryYears: pBatch,
           };
         });
 
         setWardens(formattedWardens);
         console.log("Wardens", formattedWardens);
-
       } catch (err) {
         console.error("Error fetching warden data", err);
         Swal.fire({
           title: "Error ❌",
           text: "Failed to fetch warden details. Please refresh the page.",
           icon: "error",
-          confirmButtonText: "OK"
+          confirmButtonText: "OK",
         });
       }
     };
@@ -94,8 +105,7 @@ const WardenProfile = () => {
   }, []);
 
   const toggleStatus = async (id) => {
-
-    const warden = wardens.find(w => w.id === id);
+    const warden = wardens.find((w) => w.id === id);
 
     if (!warden) return;
 
@@ -104,11 +114,11 @@ const WardenProfile = () => {
     // Show loading alert
     Swal.fire({
       title: "Processing ⏳",
-      text: `${newStatus ? 'Deactivating' : 'Activating'} warden...`,
+      text: `${newStatus ? "Deactivating" : "Activating"} warden...`,
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
@@ -118,21 +128,21 @@ const WardenProfile = () => {
             warden_name: selectedReallocations[year],
             inactive_warden_id: id,
             batch: parseInt(year),
-            year: parseInt(year)
+            year: parseInt(year),
           });
         }
       } else {
-        await axiosInstance.post('/api/warden_active_status_handling', {
-          warden_id: id
+        await axiosInstance.post("/api/warden_active_status_handling", {
+          warden_id: id,
         });
       }
 
       Swal.fire({
         title: "Success! ✅",
-        text: `Warden ${newStatus ? 'deactivated' : 'activated'} successfully.`,
+        text: `Warden ${newStatus ? "deactivated" : "activated"} successfully.`,
         icon: "success",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       }).then(() => {
         window.location.reload();
       });
@@ -142,7 +152,7 @@ const WardenProfile = () => {
         title: "Error ❌",
         text: "Failed to update warden status. Please try again.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
     }
   };
@@ -153,10 +163,10 @@ const WardenProfile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditedWarden(prev => ({
+        setEditedWarden((prev) => ({
           ...prev,
           img: reader.result, // For preview
-          file: file // Store actual file
+          file: file, // Store actual file
         }));
       };
       reader.readAsDataURL(file);
@@ -166,16 +176,16 @@ const WardenProfile = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedWarden(prev => ({
+    setEditedWarden((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleReallocationChange = (year, wardenName) => {
-    setSelectedReallocations(prev => ({
+    setSelectedReallocations((prev) => ({
       ...prev,
-      [year]: wardenName // Update the selected warden for the specific year
+      [year]: wardenName, // Update the selected warden for the specific year
     }));
   };
 
@@ -206,12 +216,17 @@ const WardenProfile = () => {
     e.preventDefault();
 
     // Validation
-    if (!newWarden.name || !newWarden.phone_number || !newWarden.password || !newWarden.joinedDate) {
+    if (
+      !newWarden.name ||
+      !newWarden.phone_number ||
+      !newWarden.password ||
+      !newWarden.joinedDate
+    ) {
       Swal.fire({
         title: "Missing Information",
         text: "Please fill in all required fields.",
         icon: "warning",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -221,17 +236,22 @@ const WardenProfile = () => {
         title: "Missing Information",
         text: "Please select at least one year for the warden.",
         icon: "warning",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
 
-    const primaryYearArray = newWarden.primaryWarden.map(year => parseInt(year, 10));
+    const primaryYearArray = newWarden.primaryWarden.map((year) =>
+      parseInt(year, 10),
+    );
 
     const formData = new FormData();
     formData.append("name", newWarden.name);
     formData.append("phone_number", newWarden.phone_number);
-    formData.append("gender", newWarden.inCharge === "Boys" ? "Male" : "Female");
+    formData.append(
+      "gender",
+      newWarden.inCharge === "Boys" ? "Male" : "Female",
+    );
     formData.append("primary_batch", JSON.stringify(primaryYearArray));
     formData.append("password", newWarden.password); // Add password
     formData.append("category", "assistant"); // Assuming category is always "assistant"
@@ -248,7 +268,7 @@ const WardenProfile = () => {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
@@ -264,7 +284,7 @@ const WardenProfile = () => {
           text: "Warden added successfully.",
           icon: "success",
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
           setIsAddModalOpen(false);
           setNewWarden({
@@ -283,16 +303,18 @@ const WardenProfile = () => {
           title: "Error ❌",
           text: "Failed to add warden. Please try again.",
           icon: "error",
-          confirmButtonText: "OK"
+          confirmButtonText: "OK",
         });
       }
     } catch (error) {
       console.error("Error adding warden", error);
       Swal.fire({
         title: "Error ❌",
-        text: error.response?.data?.message || "An error occurred while adding the warden.",
+        text:
+          error.response?.data?.message ||
+          "An error occurred while adding the warden.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
     }
   };
@@ -308,13 +330,13 @@ const WardenProfile = () => {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
       const response = await axiosInstance.post("/api/delete_student", {
         registration_number,
-        type: "warden"
+        type: "warden",
       });
 
       if (response.status === 200) {
@@ -323,7 +345,7 @@ const WardenProfile = () => {
           text: "Warden data deleted successfully.",
           icon: "success",
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
           window.location.reload();
         });
@@ -347,10 +369,13 @@ const WardenProfile = () => {
       updateFields.phone_number = editedWarden.phone_number;
     }
     if (editedWarden.inCharge !== selectedWarden.inCharge) {
-      updateFields.gender = editedWarden.inCharge === "Boys" ? "Male" : "Female";
+      updateFields.gender =
+        editedWarden.inCharge === "Boys" ? "Male" : "Female";
     }
     if (editedWarden.primaryWarden !== selectedWarden.primaryYears) {
-      updateFields.primary_batch = editedWarden.primaryWarden.map(year => parseInt(year, 10)); // Send the updated primary batch
+      updateFields.primary_batch = editedWarden.primaryWarden.map((year) =>
+        parseInt(year, 10),
+      ); // Send the updated primary batch
     }
 
     // Handle file upload
@@ -363,7 +388,7 @@ const WardenProfile = () => {
         title: "No Changes",
         text: "No changes detected to save.",
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -375,7 +400,7 @@ const WardenProfile = () => {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
@@ -383,8 +408,13 @@ const WardenProfile = () => {
       formData.append("unique_id", selectedWarden.id);
 
       // Append updated fields to formData
-      Object.keys(updateFields).forEach(key => {
-        if (key === "primary_batch" || key === "secondary_batch" || key === "primary_year" || key === "secondary_year") {
+      Object.keys(updateFields).forEach((key) => {
+        if (
+          key === "primary_batch" ||
+          key === "secondary_batch" ||
+          key === "primary_year" ||
+          key === "secondary_year"
+        ) {
           formData.append(key, JSON.stringify(updateFields[key]));
         } else if (key === "file") {
           formData.append("wardenImage", updateFields.file); // Append the file to FormData
@@ -393,11 +423,15 @@ const WardenProfile = () => {
         }
       });
 
-      const response = await axiosInstance.post("/api/update_warden_by_superior", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axiosInstance.post(
+        "/api/update_warden_by_superior",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       if (response.status === 200) {
         Swal.fire({
@@ -405,7 +439,7 @@ const WardenProfile = () => {
           text: "Warden details updated successfully.",
           icon: "success",
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
           window.location.reload();
         });
@@ -414,16 +448,18 @@ const WardenProfile = () => {
           title: "Error ❌",
           text: "Failed to update warden details.",
           icon: "error",
-          confirmButtonText: "OK"
+          confirmButtonText: "OK",
         });
       }
     } catch (error) {
       console.error("Error updating warden details", error);
       Swal.fire({
         title: "Error ❌",
-        text: error.response?.data?.message || "An error occurred while updating the warden details.",
+        text:
+          error.response?.data?.message ||
+          "An error occurred while updating the warden details.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
     }
 
@@ -433,25 +469,30 @@ const WardenProfile = () => {
 
   const handleToggle = async (wardenId) => {
     try {
-      const response = await axiosInstance.post("/api/fetch_warden_details_reallocation", {
-        target_warden_id: wardenId
-      });
+      const response = await axiosInstance.post(
+        "/api/fetch_warden_details_reallocation",
+        {
+          target_warden_id: wardenId,
+        },
+      );
       setReallocationWardens(response.data.warden_names);
-      setPrimaryYears(response.data.primary_batchs || response.data.primary_years || []);
+      setPrimaryYears(
+        response.data.primary_batchs || response.data.primary_years || [],
+      );
     } catch (error) {
       console.error("Error fetching reallocation wardens", error);
       Swal.fire({
         title: "Error ❌",
         text: "Failed to fetch reallocation options. Please try again.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
     }
-  }
+  };
 
   // Open modal and set selected warden
   const openModal = (warden, event) => {
-    if (!event.target.closest('.toggle-container')) {
+    if (!event.target.closest(".toggle-container")) {
       setSelectedWarden(warden);
       setEditedWarden({
         ...warden,
@@ -470,7 +511,6 @@ const WardenProfile = () => {
     setIsEditing(false);
   };
 
-
   return (
     <div className="warden-container">
       <div className="add-buttons">
@@ -479,15 +519,22 @@ const WardenProfile = () => {
         </button>
       </div>
       <div className="wardens-grid">
-        {wardens?.map(warden => (
+        {wardens?.map((warden) => (
           <div
             key={warden.id}
             className={`hos-warden-card ${warden.inCharge.toLowerCase()}`}
-            onClick={(e) => { openModal(warden, e); setPendingToggleId(warden.id); }}
+            onClick={(e) => {
+              openModal(warden, e);
+              setPendingToggleId(warden.id);
+            }}
           >
             <div className="warden-content">
               <div className="warden-image-wrapper">
-                <img src={UrlParser(warden.img)} alt={warden.name} className="warden-image" />
+                <img
+                  src={UrlParser(warden.img)}
+                  alt={warden.name}
+                  className="warden-image"
+                />
               </div>
               <div className="warden-info">
                 <h3 className="warden-name">{warden.name}</h3>
@@ -501,13 +548,16 @@ const WardenProfile = () => {
                   <span className="label">Joined Date:</span> {warden.date}
                 </p>
               </div>
-              <div className="toggle-container" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="toggle-container"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
-                  className={`toggle-button ${warden.isActive ? 'active' : ''}`}
+                  className={`toggle-button ${warden.isActive ? "active" : ""}`}
                   onClick={() => {
                     setPendingToggleId(warden.id);
                     setConfirmModalOpen(true);
-                    handleToggle(warden.id)
+                    handleToggle(warden.id);
                   }}
                 >
                   <Power className="toggle-icon" />
@@ -519,124 +569,264 @@ const WardenProfile = () => {
       </div>
 
       {isAddModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Add New Warden</h2>
-            <form onSubmit={handleAddWardenSubmit}>
-              {/* Name */}
-              <div className="form-row">
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newWarden.name || ""}
-                  onChange={handleNewWardenChange}
-                  required
-                />
-              </div>
+        <div
+          className="modal-overlay add-warden-overlay"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <div
+            className="modal-content add-warden-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="add-warden-modal-header">
+              <div className="add-warden-title-area">
+                <div className="add-warden-title-icon">
+                  <UserRound size={22} />
+                </div>
 
-              {/* Photo */}
-              <div className="form-row">
-                <label>Photo:</label>
-                <input
-                  type="file"
-                  name="wardenImage"
-                  accept="image/*"
-                  onChange={handleNewWardenImageChange}
-                  className="no-border photo"
-                />
-              </div>
-
-              {/* Joined Date */}
-              <div className="form-row">
-                <label>Joined Date:</label>
-                <input
-                  type="date"
-                  name="joinedDate"
-                  value={newWarden.joinedDate || ""}
-                  onChange={handleNewWardenChange}
-                  className="no-border"
-                  required
-                />
-              </div>
-
-              {/* Phone Number */}
-              <div className="form-row">
-                <label>Phone Number:</label>
-                <input
-                  type="number"
-                  name="phone_number"
-                  value={newWarden.phone_number || ""}
-                  onChange={handleNewWardenChange}
-                  required
-                />
-              </div>
-
-              {/* Warden For */}
-              <div className="form-row">
-                <label>Warden For:</label>
-                <div className="checkbox-container no-border">
-                  {["1", "2", "3", "4", "10", "9"].map((option) => (
-                    <div key={option} className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        name="primaryWarden"
-                        value={option}
-                        checked={newWarden.primaryWarden?.map(String).includes(option)}
-                        onChange={(e) => {
-                          const selectedYear = e.target.value;
-                          setNewWarden((prev) => {
-                            const stringYears = prev.primaryWarden?.map(String) || [];
-                            const updatedYears = stringYears.includes(selectedYear)
-                              ? stringYears.filter((y) => y !== selectedYear)
-                              : [...stringYears, selectedYear];
-                            return {
-                              ...prev,
-                              primaryWarden: updatedYears,
-                            };
-                          });
-                        }}
-                      />
-                      <label>{yearToAlphabet[option] || option}</label>
-                    </div>
-                  ))}
+                <div>
+                  <h2>Add New Warden</h2>
+                  <p>Create and assign a new hostel warden profile</p>
                 </div>
               </div>
 
-              {/* In Charge */}
-              <div className="form-row">
-                <label>In Charge:</label>
-                <select
-                  name="inCharge"
-                  value={newWarden.inCharge || ""}
-                  onChange={handleNewWardenChange}
-                  required
+              <button
+                type="button"
+                className="add-modal-close"
+                onClick={() => setIsAddModalOpen(false)}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form className="add-warden-form" onSubmit={handleAddWardenSubmit}>
+              {/* Photo Upload Section */}
+              <div className="photo-upload-section">
+                <label className="section-label">Profile Photo</label>
+
+                <div className="photo-upload-wrapper">
+                  <input
+                    id="warden-photo-upload"
+                    type="file"
+                    name="wardenImage"
+                    accept="image/*"
+                    onChange={handleNewWardenImageChange}
+                    className="hidden-file-input"
+                  />
+
+                  <label
+                    htmlFor="warden-photo-upload"
+                    className={`premium-photo-upload ${
+                      newWarden.photo ? "has-image" : ""
+                    }`}
+                  >
+                    {newWarden.photo ? (
+                      <>
+                        <img
+                          src={newWarden.photo}
+                          alt="Warden Preview"
+                          className="uploaded-photo-preview"
+                        />
+
+                        <div className="image-change-overlay">
+                          <Upload size={20} />
+                          <span>Change Photo</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="upload-empty-state">
+                        <div className="upload-icon-circle">
+                          <Upload size={25} />
+                        </div>
+
+                        <div className="upload-text">
+                          <strong>Upload Profile Photo</strong>
+                          <span>PNG, JPG or JPEG</span>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+
+                  {newWarden.photo && (
+                    <div className="photo-upload-success">
+                      <ImageIcon size={15} />
+                      <span>Photo selected successfully</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Basic Information */}
+              <div className="form-section">
+                <div className="form-section-heading">
+                  <span>Basic Information</span>
+                  <div className="section-line"></div>
+                </div>
+
+                <div className="form-grid">
+                  {/* Name */}
+                  <div className="form-row premium-field">
+                    <label>
+                      <UserRound size={15} />
+                      Name
+                    </label>
+
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Enter warden name"
+                      value={newWarden.name || ""}
+                      onChange={handleNewWardenChange}
+                      required
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div className="form-row premium-field">
+                    <label>
+                      <Phone size={15} />
+                      Phone Number
+                    </label>
+
+                    <input
+                      type="number"
+                      name="phone_number"
+                      placeholder="Enter phone number"
+                      value={newWarden.phone_number || ""}
+                      onChange={handleNewWardenChange}
+                      required
+                    />
+                  </div>
+
+                  {/* Joined Date */}
+                  <div className="form-row premium-field">
+                    <label>
+                      <CalendarDays size={15} />
+                      Joined Date
+                    </label>
+
+                    <input
+                      type="date"
+                      name="joinedDate"
+                      value={newWarden.joinedDate || ""}
+                      onChange={handleNewWardenChange}
+                      required
+                    />
+                  </div>
+
+                  {/* In Charge */}
+                  <div className="form-row premium-field">
+                    <label>
+                      <UserRound size={15} />
+                      In Charge
+                    </label>
+
+                    <select
+                      name="inCharge"
+                      value={newWarden.inCharge || ""}
+                      onChange={handleNewWardenChange}
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Boys">Boys Hostel</option>
+                      <option value="Girls">Girls Hostel</option>
+                    </select>
+                  </div>
+
+                  {/* Password */}
+                  <div className="form-row premium-field full-width-field">
+                    <label>
+                      <LockKeyhole size={15} />
+                      Password
+                    </label>
+
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Create a secure password"
+                      value={newWarden.password || ""}
+                      onChange={handleNewWardenChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Warden Assignment */}
+              <div className="form-section assignment-section">
+                <div className="form-section-heading">
+                  <span>Warden Assignment</span>
+                  <div className="section-line"></div>
+                </div>
+
+                <div className="assignment-description">
+                  Select the academic years this warden will be responsible for.
+                </div>
+
+                <div className="premium-checkbox-grid">
+                  {["1", "2", "3", "4", "10", "9"].map((option) => {
+                    const isChecked = newWarden.primaryWarden
+                      ?.map(String)
+                      .includes(option);
+
+                    return (
+                      <label
+                        key={option}
+                        className={`premium-year-option ${
+                          isChecked ? "selected" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="primaryWarden"
+                          value={option}
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const selectedYear = e.target.value;
+
+                            setNewWarden((prev) => {
+                              const stringYears =
+                                prev.primaryWarden?.map(String) || [];
+
+                              const updatedYears = stringYears.includes(
+                                selectedYear,
+                              )
+                                ? stringYears.filter((y) => y !== selectedYear)
+                                : [...stringYears, selectedYear];
+
+                              return {
+                                ...prev,
+                                primaryWarden: updatedYears,
+                              };
+                            });
+                          }}
+                        />
+
+                        <span className="custom-check"></span>
+
+                        <span className="year-option-text">
+                          {yearToAlphabet[option] || option}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="add-warden-actions">
+                <button
+                  type="button"
+                  className="add-cancel-button"
+                  onClick={() => setIsAddModalOpen(false)}
                 >
-                  <option value="">Select</option>
-                  <option value="Boys">Boys</option>
-                  <option value="Girls">Girls</option>
-                </select>
-              </div>
-
-              {/* Password */}
-              <div className="form-row">
-                <label>Password:</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={newWarden.password || ""}
-                  onChange={handleNewWardenChange}
-                  required
-                />
-              </div>
-
-              {/* Form Actions */}
-              <div className="form-actions">
-                <button type="button" className="cancel-button" onClick={() => setIsAddModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="save-button">
-                  Save
+
+                <button type="submit" className="add-submit-button">
+                  <Plus size={18} />
+                  Add Warden
                 </button>
               </div>
             </form>
@@ -646,11 +836,14 @@ const WardenProfile = () => {
 
       {isModalOpen && selectedWarden && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             {!isEditing ? (
               <>
                 <div className="modal-header">
-                  <button className="icon-button edit" onClick={() => setIsEditing(true)}>
+                  <button
+                    className="icon-button edit"
+                    onClick={() => setIsEditing(true)}
+                  >
                     <Edit size={20} />
                   </button>
                   <button className="icon-button close" onClick={closeModal}>
@@ -659,15 +852,34 @@ const WardenProfile = () => {
                 </div>
                 <div className="modal-body">
                   <div className="warden-profile">
-                    <img src={UrlParser(selectedWarden.img)} alt={selectedWarden.name} className="profile-image" />
+                    <img
+                      src={UrlParser(selectedWarden.img)}
+                      alt={selectedWarden.name}
+                      className="profile-image"
+                    />
                     <h2 className="profile-name">{selectedWarden.name}</h2>
                     <div className="profile-">
-                      <p className="text-left"><span className="label">Warden For:</span> {selectedWarden.wardenFor}</p>
-                      <p className="text-left"><span className="label">In Charge:</span> {selectedWarden.inCharge}</p>
-                      <p className="text-left"><span className="label">Joined Date:</span> {selectedWarden.date}</p>
-                      <p className="text-left"><span className="label">Status:</span> {selectedWarden.isActive ? 'Active' : 'Inactive'}</p>
+                      <p className="text-left">
+                        <span className="label">Warden For:</span>{" "}
+                        {selectedWarden.wardenFor}
+                      </p>
+                      <p className="text-left">
+                        <span className="label">In Charge:</span>{" "}
+                        {selectedWarden.inCharge}
+                      </p>
+                      <p className="text-left">
+                        <span className="label">Joined Date:</span>{" "}
+                        {selectedWarden.date}
+                      </p>
+                      <p className="text-left">
+                        <span className="label">Status:</span>{" "}
+                        {selectedWarden.isActive ? "Active" : "Inactive"}
+                      </p>
                     </div>
-                    <button className="delete-button" onClick={() => setconfirmModalOpenDelete(true)}>
+                    <button
+                      className="delete-button"
+                      onClick={() => setconfirmModalOpenDelete(true)}
+                    >
                       <Trash2 className="superior-icon" /> Remove Warden
                     </button>
                   </div>
@@ -703,12 +915,17 @@ const WardenProfile = () => {
                           type="checkbox"
                           name="primaryWarden"
                           value={option}
-                          checked={editedWarden?.primaryWarden?.map(String).includes(option)} // Reflect current state
+                          checked={editedWarden?.primaryWarden
+                            ?.map(String)
+                            .includes(option)} // Reflect current state
                           onChange={(e) => {
                             const selectedYear = e.target.value;
                             setEditedWarden((prev) => {
-                              const stringYears = prev.primaryWarden?.map(String) || [];
-                              const updatedYears = stringYears.includes(selectedYear)
+                              const stringYears =
+                                prev.primaryWarden?.map(String) || [];
+                              const updatedYears = stringYears.includes(
+                                selectedYear,
+                              )
                                 ? stringYears.filter((y) => y !== selectedYear)
                                 : [...stringYears, selectedYear];
                               return { ...prev, primaryWarden: updatedYears };
@@ -731,7 +948,10 @@ const WardenProfile = () => {
                   />
                 </div>
                 <div className="form-actions">
-                  <button className="cancel-button" onClick={() => setIsEditing(false)}>
+                  <button
+                    className="cancel-button"
+                    onClick={() => setIsEditing(false)}
+                  >
                     Cancel
                   </button>
                   <button className="save-button" onClick={handleSave}>
@@ -748,20 +968,38 @@ const WardenProfile = () => {
         <div className="modal-overlay">
           <div className="confirm-modal">
             <h3>Confirm Action</h3>
-            <p>Are you sure you want to {wardens.find(w => w.id === pendingToggleId)?.isActive ? 'deactivate' : 'activate'} this warden?</p>
-            {wardens.find(w => w.id === pendingToggleId)?.isActive && (
+            <p>
+              Are you sure you want to{" "}
+              {wardens.find((w) => w.id === pendingToggleId)?.isActive
+                ? "deactivate"
+                : "activate"}{" "}
+              this warden?
+            </p>
+            {wardens.find((w) => w.id === pendingToggleId)?.isActive && (
               <>
                 {primaryYears?.map((year, index) => (
                   <div key={index} className="status-year-dropdown">
-                    <label className="warden-pri-years">{yearToAlphabet[year]}</label>
+                    <label className="warden-pri-years">
+                      {yearToAlphabet[year]}
+                    </label>
                     <select
                       value={selectedReallocations[year] || ""}
-                      onChange={(e) => handleReallocationChange(year, e.target.value)}
+                      onChange={(e) =>
+                        handleReallocationChange(year, e.target.value)
+                      }
                       className="warden-status-select"
                     >
-                      <option value="" className="warden-status-select">Select Warden</option>
-                      {reallocationWardens?.map(warden => (
-                        <option key={warden} value={warden} className="warden-status-select">{warden}</option>
+                      <option value="" className="warden-status-select">
+                        Select Warden
+                      </option>
+                      {reallocationWardens?.map((warden) => (
+                        <option
+                          key={warden}
+                          value={warden}
+                          className="warden-status-select"
+                        >
+                          {warden}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -769,10 +1007,16 @@ const WardenProfile = () => {
               </>
             )}
             <div className="confirm-actions">
-              <button className="confirm-button" onClick={() => toggleStatus(pendingToggleId)}>
+              <button
+                className="confirm-button"
+                onClick={() => toggleStatus(pendingToggleId)}
+              >
                 Confirm
               </button>
-              <button className="cancel-button" onClick={() => setConfirmModalOpen(false)}>
+              <button
+                className="cancel-button"
+                onClick={() => setConfirmModalOpen(false)}
+              >
                 Cancel
               </button>
             </div>
@@ -783,14 +1027,22 @@ const WardenProfile = () => {
         <div className="modal-overlay">
           <div className="confirm-modal">
             <h3>Confirm Action</h3>
-            <p>Are you sure you want to {wardens.find(w => w.id === pendingToggleId)?.name} ?</p>
-            {console.log("IID", pendingToggleId)
-            }
+            <p>
+              Are you sure you want to{" "}
+              {wardens.find((w) => w.id === pendingToggleId)?.name} ?
+            </p>
+            {console.log("IID", pendingToggleId)}
             <div className="confirm-actions">
-              <button className="confirm-button" onClick={() => handleDelete(pendingToggleId)}>
+              <button
+                className="confirm-button"
+                onClick={() => handleDelete(pendingToggleId)}
+              >
                 Confirm
               </button>
-              <button className="cancel-button" onClick={() => setconfirmModalOpenDelete(false)}>
+              <button
+                className="cancel-button"
+                onClick={() => setconfirmModalOpenDelete(false)}
+              >
                 Cancel
               </button>
             </div>

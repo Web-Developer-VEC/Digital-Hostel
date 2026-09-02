@@ -1,65 +1,221 @@
 /* =========================================================
-   HOSTEL SIDEBAR
-   PREMIUM MAROON + GOLD DESIGN
+   HOSTEL SIDEBAR — ULTRA PREMIUM ANIMATED EXPERIENCE
+   SAME MAROON + GOLD THEME
+   DESKTOP: CINEMATIC INTERACTIONS
+   MOBILE: SAME STRUCTURE + EQUAL ICON DISTRIBUTION
 ========================================================= */
 
 :root {
   --header-height: 125px;
 
   --hostel-maroon: #800000;
-  --hostel-maroon-dark: #550000;
+  --hostel-maroon-deep: #4f0000;
+  --hostel-maroon-soft: rgba(128, 0, 0, 0.45);
 
   --hostel-gold: #fdcd03;
-  --hostel-gold-light: #ffe47a;
+  --hostel-gold-bright: #ffe16b;
+  --hostel-gold-soft: rgba(253, 205, 3, 0.16);
 
-  --sidebar-dark: #171719;
-  --sidebar-dark-2: #202023;
+  --sidebar-black: #111113;
+  --sidebar-dark: #18181b;
+  --sidebar-light: #242428;
 
-  --text-white: #ffffff;
-  --text-muted: #a7a7a7;
+  --text-main: #ffffff;
+  --text-muted: #a8a8ad;
 }
 
-
 /* =========================================================
-   DESKTOP SIDEBAR
+   DESKTOP SIDEBAR BASE
 ========================================================= */
 
 .Hostel-sidebar {
   width: 16rem;
+  height: calc(100vh - var(--header-height));
 
   position: fixed;
   top: var(--header-height);
   left: 0;
 
-  height: calc(100vh - var(--header-height));
-
-  background:
-    linear-gradient(
-      180deg,
-      #1e1e21 0%,
-      #171719 50%,
-      #111112 100%
-    );
-
   display: flex;
   flex-direction: column;
 
-  z-index: 500;
-
-  box-shadow:
-    4px 0 25px rgba(0, 0, 0, 0.18);
-
   overflow: hidden;
 
-  animation: sidebarEntrance 0.45s ease both;
+  background:
+    linear-gradient(
+      145deg,
+      #202024 0%,
+      #171719 42%,
+      #101011 100%
+    );
+
+  box-shadow:
+    10px 0 45px rgba(0, 0, 0, 0.32),
+    1px 0 0 rgba(255, 255, 255, 0.03) inset;
+
+  z-index: 500;
+
+  isolation: isolate;
+
+  animation:
+    sidebar-cinematic-enter 0.9s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }
 
 
 /* =========================================================
-   SIDEBAR ACCENT
+   LAYER 1 — AMBIENT MOVING LIGHT
 ========================================================= */
 
 .Hostel-sidebar::before {
+  content: "";
+
+  position: absolute;
+
+  width: 320px;
+  height: 320px;
+
+  top: -180px;
+  left: -170px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(253, 205, 3, 0.08),
+      rgba(128, 0, 0, 0.035) 40%,
+      transparent 70%
+    );
+
+  filter: blur(12px);
+
+  pointer-events: none;
+
+  z-index: -2;
+
+  animation:
+    ambient-orbit 14s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   LAYER 2 — FLOATING LIGHT ORB
+========================================================= */
+
+.Hostel-sidebar::after {
+  content: "";
+
+  position: absolute;
+
+  width: 220px;
+  height: 220px;
+
+  right: -150px;
+  bottom: 5%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(128, 0, 0, 0.18),
+      rgba(128, 0, 0, 0.04) 45%,
+      transparent 72%
+    );
+
+  filter: blur(20px);
+
+  pointer-events: none;
+
+  z-index: -2;
+
+  animation:
+    floating-orb 11s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   SIDEBAR ENTRANCE
+========================================================= */
+
+@keyframes sidebar-cinematic-enter {
+
+  0% {
+    opacity: 0;
+    transform: translateX(-70px) scale(0.96);
+    filter: blur(5px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateX(6px) scale(1);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+@keyframes ambient-orbit {
+
+  0% {
+    transform:
+      translate(-30px, -20px)
+      scale(0.9);
+  }
+
+  50% {
+    transform:
+      translate(100px, 140px)
+      scale(1.25);
+  }
+
+  100% {
+    transform:
+      translate(30px, 300px)
+      scale(1);
+  }
+}
+
+
+@keyframes floating-orb {
+
+  0% {
+    transform:
+      translate(0, 0)
+      scale(0.9);
+  }
+
+  100% {
+    transform:
+      translate(-80px, -180px)
+      scale(1.3);
+  }
+}
+
+
+/* =========================================================
+   CONTENT LAYER
+========================================================= */
+
+.warden-sidebar-top,
+.warden-contact,
+.Hostel-sidebar-content {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =========================================================
+   ANIMATED GOLD EDGE
+========================================================= */
+
+.Hostel-sidebar-content::before {
   content: "";
 
   position: absolute;
@@ -72,31 +228,37 @@
 
   background:
     linear-gradient(
-      180deg,
+      to bottom,
       transparent,
+      var(--hostel-gold),
+      var(--hostel-maroon),
       var(--hostel-gold),
       transparent
     );
 
-  opacity: 0.7;
+  background-size: 100% 300%;
+
+  opacity: 0.65;
+
+  animation:
+    energy-border-flow 7s linear infinite;
 }
 
 
-@keyframes sidebarEntrance {
+@keyframes energy-border-flow {
+
   from {
-    opacity: 0;
-    transform: translateX(-20px);
+    background-position: 0 0;
   }
 
   to {
-    opacity: 1;
-    transform: translateX(0);
+    background-position: 0 300%;
   }
 }
 
 
 /* =========================================================
-   WARDEN TOP SECTION
+   WARDEN PROFILE TOP
 ========================================================= */
 
 .warden-sidebar-top {
@@ -105,95 +267,187 @@
   display: flex;
   align-items: center;
 
-  padding: 1.1rem 1rem;
+  padding: 1.15rem 1rem;
 
   background:
     linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.055),
-      rgba(255, 255, 255, 0.015)
+      rgba(255, 255, 255, 0.012)
     );
 
   border-bottom:
-    1px solid rgba(255, 255, 255, 0.07);
+    1px solid rgba(255, 255, 255, 0.06);
+
+  overflow: hidden;
+
+  animation:
+    profile-drop 0.75s 0.15s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }
 
 
-.warden-photo-container {
-  position: relative;
-  flex-shrink: 0;
+/* PROFILE SHINE */
+
+.warden-sidebar-top::before {
+  content: "";
+
+  position: absolute;
+
+  top: -80%;
+  left: -50%;
+
+  width: 35%;
+  height: 260%;
+
+  transform:
+    rotate(25deg);
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+
+  animation:
+    profile-shine 7s ease-in-out infinite;
+}
+
+
+@keyframes profile-shine {
+
+  0%,
+  70% {
+    left: -60%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+
+@keyframes profile-drop {
+
+  from {
+    opacity: 0;
+    transform: translateY(-35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
 /* =========================================================
-   WARDEN PHOTO
+   PROFILE IMAGE
 ========================================================= */
 
 .warden-photo {
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
 
   object-fit: cover;
 
-  border-radius: 50%;
+  border-radius: 18px;
 
-  margin-right: 0.85rem;
+  margin-right: 0.9rem;
 
-  border: 2px solid var(--hostel-gold);
+  border:
+    2px solid var(--hostel-gold);
 
   box-shadow:
-    0 0 0 3px rgba(253, 205, 3, 0.1);
+    0 0 0 4px rgba(253, 205, 3, 0.08),
+    0 10px 25px rgba(0, 0, 0, 0.28);
+
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s ease,
+    border-radius 0.5s ease;
+}
+
+
+.warden-sidebar-top:hover .warden-photo {
+  transform:
+    rotate(-4deg)
+    scale(1.1);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 7px rgba(253, 205, 3, 0.1),
+    0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
 
 /* =========================================================
-   WARDEN INFO
+   PROFILE TEXT
 ========================================================= */
 
 .warden-sidebar-info {
   min-width: 0;
-
-  display: flex;
-  flex-direction: column;
 }
 
 
 .warden-title {
-  font-size: 0.58rem;
+  display: inline-block;
 
-  font-weight: 700;
+  font-size: 0.56rem;
 
-  letter-spacing: 0.12em;
+  font-weight: 800;
+
+  letter-spacing: 0.15em;
 
   color: var(--hostel-gold);
 
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
+
+  animation:
+    title-glow 3s ease-in-out infinite;
+}
+
+
+@keyframes title-glow {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 12px rgba(253, 205, 3, 0.3);
+  }
 }
 
 
 .sidebar-warden-name {
   margin: 0;
 
-  font-size: 0.98rem;
+  font-size: 1rem;
 
   font-weight: 700;
 
   color: white;
 
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
 
 .warden-years {
-  margin: 0.25rem 0 0;
+  margin: 0.28rem 0 0;
 
-  font-size: 0.73rem;
+  color: #98989e;
 
-  color: #a8a8a8;
+  font-size: 0.72rem;
 }
 
 
@@ -203,17 +457,36 @@
 
 
 /* =========================================================
-   WARDEN CONTACT
+   CONTACT SECTION
 ========================================================= */
 
 .warden-contact {
   padding: 0.8rem 1rem;
 
   background:
-    rgba(255, 255, 255, 0.018);
+    rgba(255, 255, 255, 0.012);
 
   border-bottom:
-    1px solid rgba(255, 255, 255, 0.06);
+    1px solid rgba(255, 255, 255, 0.055);
+
+  animation:
+    contact-slide 0.7s 0.28s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+
+@keyframes contact-slide {
+
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 
@@ -223,29 +496,52 @@
 
   gap: 0.5rem;
 
-  text-decoration: none;
+  color: #d1d1d5;
 
-  color: #d7d7d7;
+  text-decoration: none;
 
   font-size: 0.8rem;
 
   margin-bottom: 0.65rem;
+
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+
+
+.warden-mobile:hover {
+  color: var(--hostel-gold);
+  transform: translateX(5px);
 }
 
 
 .warden-mobile svg {
   color: var(--hostel-gold);
+
+  transition: transform 0.3s ease;
 }
 
 
+.warden-mobile:hover svg {
+  transform:
+    rotate(-12deg)
+    scale(1.15);
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
 .warden-status-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 
   font-size: 0.75rem;
 
-  color: #a8a8a8;
+  color: #929298;
 }
 
 
@@ -253,15 +549,15 @@
   display: flex;
   align-items: center;
 
-  gap: 0.35rem;
+  gap: 0.4rem;
 
   font-weight: 600;
 }
 
 
 .warden-status-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 
   border-radius: 50%;
 }
@@ -275,34 +571,64 @@
 .warden-status.active .warden-status-dot {
   background: #4ade80;
 
-  box-shadow:
-    0 0 8px rgba(74, 222, 128, 0.8);
+  animation:
+    online-radar 2s infinite;
 }
 
 
-.warden-status.inactive {
-  color: #f87171;
-}
+@keyframes online-radar {
 
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(74, 222, 128, 0.65);
+  }
 
-.warden-status.inactive .warden-status-dot {
-  background: #f87171;
+  70% {
+    box-shadow:
+      0 0 0 8px rgba(74, 222, 128, 0);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(74, 222, 128, 0);
+  }
 }
 
 
 /* =========================================================
-   SIDEBAR CONTENT
+   CONTENT
 ========================================================= */
 
 .Hostel-sidebar-content {
+  position: relative;
+
   flex: 1;
 
   min-height: 0;
 
-  padding: 0.9rem;
+  padding: 1rem 0.85rem;
 
   display: flex;
   flex-direction: column;
+
+  animation:
+    content-rise 0.8s 0.35s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+
+@keyframes content-rise {
+
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
@@ -314,7 +640,7 @@
   scrollbar-width: thin;
 
   scrollbar-color:
-    rgba(253, 205, 3, 0.35)
+    rgba(253, 205, 3, 0.45)
     transparent;
 }
 
@@ -326,9 +652,12 @@
 
 .Hostel-sidebar-menu::-webkit-scrollbar-thumb {
   background:
-    rgba(253, 205, 3, 0.45);
+    linear-gradient(
+      var(--hostel-gold),
+      var(--hostel-maroon)
+    );
 
-  border-radius: 20px;
+  border-radius: 10px;
 }
 
 
@@ -339,7 +668,7 @@
 
 
 /* =========================================================
-   DESKTOP NAVIGATION
+   NAVIGATION BUTTON
 ========================================================= */
 
 .Hostel-nav-button {
@@ -350,87 +679,319 @@
   display: flex;
   align-items: center;
 
-  gap: 0.75rem;
+  gap: 0.8rem;
 
-  padding: 0.78rem 0.9rem;
+  padding: 0.82rem 0.9rem;
 
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.42rem;
 
-  border-radius: 0.65rem;
+  border-radius: 14px;
+
+  color: #b8b8bd;
 
   text-decoration: none;
 
-  color: #cfcfcf;
+  font-size: 0.88rem;
 
-  font-size: 0.9rem;
+  font-weight: 550;
 
-  font-weight: 500;
+  letter-spacing: 0.01em;
 
-  background:
-    transparent;
+  overflow: hidden;
+
+  isolation: isolate;
 
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    color 0.35s ease,
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.42s ease;
+
+  animation:
+    nav-cinematic-reveal 0.65s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }
 
 
-.Hostel-nav-button svg {
-  width: 18px;
-  height: 18px;
+/* STAGGER */
 
-  flex-shrink: 0;
+.Hostel-nav-button:nth-child(1) { animation-delay: 0.08s; }
+.Hostel-nav-button:nth-child(2) { animation-delay: 0.14s; }
+.Hostel-nav-button:nth-child(3) { animation-delay: 0.20s; }
+.Hostel-nav-button:nth-child(4) { animation-delay: 0.26s; }
+.Hostel-nav-button:nth-child(5) { animation-delay: 0.32s; }
+.Hostel-nav-button:nth-child(6) { animation-delay: 0.38s; }
+.Hostel-nav-button:nth-child(7) { animation-delay: 0.44s; }
 
-  transition:
-    transform 0.2s ease;
+
+@keyframes nav-cinematic-reveal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateX(-40px)
+      rotateX(-12deg);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateX(0)
+      rotateX(0);
+  }
 }
 
 
 /* =========================================================
-   DESKTOP NAV HOVER
+   LIQUID HOVER LAYER
+========================================================= */
+
+.Hostel-nav-button::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.075) 40%,
+      rgba(253, 205, 3, 0.055) 55%,
+      transparent 100%
+    );
+
+  transform:
+    translateX(-110%);
+
+  transition:
+    transform 0.55s
+    cubic-bezier(0.16, 1, 0.3, 1);
+
+  z-index: -1;
+}
+
+
+/* GOLD SIDE INDICATOR */
+
+.Hostel-nav-button::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 3px;
+  height: 0;
+
+  border-radius:
+    0 10px 10px 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      var(--hostel-gold),
+      var(--hostel-gold-bright)
+    );
+
+  transform:
+    translateY(-50%);
+
+  box-shadow:
+    0 0 12px rgba(253, 205, 3, 0.55);
+
+  transition:
+    height 0.35s
+    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.Hostel-nav-button svg {
+  width: 19px;
+  height: 19px;
+
+  flex-shrink: 0;
+
+  transition:
+    color 0.35s ease,
+    transform 0.45s
+    cubic-bezier(0.16, 1.4, 0.3, 1);
+}
+
+
+/* =========================================================
+   HOVER EXPERIENCE
 ========================================================= */
 
 .Hostel-nav-button:hover:not(.Hostel-nav-active) {
-  background:
-    rgba(255, 255, 255, 0.055);
-
   color: white;
 
-  transform: translateX(3px);
+  transform:
+    translateX(7px)
+    scale(1.015);
+
+  box-shadow:
+    -8px 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+
+.Hostel-nav-button:hover:not(.Hostel-nav-active)::before {
+  transform:
+    translateX(100%);
+}
+
+
+.Hostel-nav-button:hover:not(.Hostel-nav-active)::after {
+  height: 62%;
 }
 
 
 .Hostel-nav-button:hover:not(.Hostel-nav-active) svg {
   color: var(--hostel-gold);
 
-  transform: scale(1.08);
+  transform:
+    translateX(4px)
+    rotate(-10deg)
+    scale(1.16);
 }
 
 
 /* =========================================================
-   ACTIVE NAVIGATION
+   ACTIVE NAVIGATION — PREMIUM SPOTLIGHT
 ========================================================= */
 
 .Hostel-nav-active {
-  color: #1b1b1b !important;
+  position: relative;
 
-  font-weight: 700;
+  color: #1b1600 !important;
+
+  font-weight: 750;
 
   background:
     linear-gradient(
-      135deg,
-      var(--hostel-gold),
-      #f5b900
+      120deg,
+      #f7bd00 0%,
+      #ffe16b 45%,
+      #fdcd03 100%
     );
 
+  background-size: 200% 100%;
+
+  animation:
+    active-gold-flow 5s ease-in-out infinite,
+    active-breathe 3.5s ease-in-out infinite;
+
   box-shadow:
-    0 6px 18px rgba(253, 205, 3, 0.16);
+    0 10px 28px rgba(253, 205, 3, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+
+@keyframes active-gold-flow {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+
+@keyframes active-breathe {
+
+  0%,
+  100% {
+    box-shadow:
+      0 8px 22px rgba(253, 205, 3, 0.18);
+  }
+
+  50% {
+    box-shadow:
+      0 13px 34px rgba(253, 205, 3, 0.3);
+  }
+}
+
+
+.Hostel-nav-active::after {
+  display: none;
 }
 
 
 .Hostel-nav-active svg {
   color: var(--hostel-maroon);
+
+  animation:
+    active-icon-drift 3s ease-in-out infinite;
+}
+
+
+@keyframes active-icon-drift {
+
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(0);
+  }
+
+  50% {
+    transform:
+      translateY(-3px)
+      rotate(-4deg);
+  }
+}
+
+
+/* ACTIVE SHINE */
+
+.Hostel-nav-active::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      110deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.38) 48%,
+      transparent 66%
+    );
+
+  transform:
+    translateX(-120%);
+
+  animation:
+    active-shine 4s ease-in-out infinite;
+}
+
+
+@keyframes active-shine {
+
+  0%,
+  70% {
+    transform:
+      translateX(-120%);
+  }
+
+  100% {
+    transform:
+      translateX(120%);
+  }
 }
 
 
@@ -439,69 +1000,154 @@
 ========================================================= */
 
 .Logout-container {
+  position: relative;
+
   display: flex;
   align-items: center;
 
   gap: 0.75rem;
 
-  padding: 0.78rem 0.9rem;
+  padding: 0.82rem 0.9rem;
 
-  margin-top: 0.6rem;
+  margin-top: 0.65rem;
 
-  border-radius: 0.65rem;
+  border-radius: 14px;
 
-  color: #cfcfcf;
+  color: #b8b8bd;
 
   border:
     1px solid rgba(255, 255, 255, 0.07);
 
+  background:
+    rgba(255, 255, 255, 0.015);
+
   cursor: pointer;
 
+  overflow: hidden;
+
+  isolation: isolate;
+
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    color 0.35s ease,
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease;
+
+  animation:
+    logout-rise 0.7s 0.6s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+
+@keyframes logout-rise {
+
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.Logout-container::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      100deg,
+      rgba(128, 0, 0, 0.7),
+      rgba(128, 0, 0, 0.25)
+    );
+
+  transform:
+    translateX(-105%);
+
+  transition:
+    transform 0.5s
+    cubic-bezier(0.16, 1, 0.3, 1);
+
+  z-index: -1;
 }
 
 
 .Logout-container:hover {
-  background:
-    rgba(128, 0, 0, 0.45);
-
   color: white;
 
-  transform: translateY(-2px);
+  transform:
+    translateX(6px);
+
+  border-color:
+    rgba(128, 0, 0, 0.65);
+}
+
+
+.Logout-container:hover::before {
+  transform:
+    translateX(0);
 }
 
 
 .Hostel-icon {
   width: 19px;
   height: 19px;
+
+  transition:
+    transform 0.35s ease;
+}
+
+
+.Logout-container:hover .Hostel-icon {
+  animation:
+    logout-icon-motion 0.55s ease;
+}
+
+
+@keyframes logout-icon-motion {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  30% {
+    transform: translateX(-4px);
+  }
+
+  70% {
+    transform: translateX(5px);
+  }
 }
 
 
 .Logout-button {
-  padding: 0;
-
   border: none;
+
+  padding: 0;
 
   background: transparent;
 
   color: inherit;
 
-  font-size: 0.9rem;
-
   font-family: inherit;
 
-  font-weight: 600;
+  font-size: 0.88rem;
+
+  font-weight: 650;
 
   cursor: pointer;
 }
 
 
 /* =========================================================
-   MOBILE NAVIGATION
-   FLOATING 7-ITEM APP DOCK
+   MOBILE — DO NOT CHANGE STRUCTURE
 ========================================================= */
 
 .Hostel-mobile-dock {
@@ -510,37 +1156,30 @@
 
 
 /* =========================================================
-   MOBILE
+   MOBILE VIEW
+   ONLY IMPROVEMENT: EQUAL DISTRIBUTION
 ========================================================= */
 
 @media (max-width: 768px) {
 
-  /* Hide desktop sidebar */
-
   .Hostel-sidebar {
     display: none;
   }
-
-
-  /* =============================================
-     FLOATING BOTTOM DOCK
-  ============================================= */
 
   .Hostel-mobile-dock {
     position: fixed;
 
     left: 10px;
     right: 10px;
+
     bottom: max(10px, env(safe-area-inset-bottom));
 
     height: 76px;
 
-    display: grid;
-
-    grid-template-columns:
-      repeat(7, minmax(0, 1fr));
+    display: flex;
 
     align-items: center;
+    justify-content: space-evenly;
 
     padding: 5px;
 
@@ -557,41 +1196,23 @@
     border-radius: 20px;
 
     box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.32),
-      0 2px 0 rgba(253, 205, 3, 0.12) inset;
+      0 12px 40px rgba(0, 0, 0, 0.32);
 
     backdrop-filter: blur(18px);
 
     -webkit-backdrop-filter: blur(18px);
 
     z-index: 2000;
-
-    animation:
-      mobileDockEnter 0.45s ease both;
   }
 
 
-  @keyframes mobileDockEnter {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-
-  /* =============================================
-     DOCK ITEM
-  ============================================= */
+  /* AUTO EQUAL WIDTH FOR ALL ICONS */
 
   .Hostel-mobile-dock-item {
-    position: relative;
+    flex: 1 1 0;
 
     min-width: 0;
+
     height: 64px;
 
     display: flex;
@@ -617,17 +1238,8 @@
     font-family: inherit;
 
     cursor: pointer;
-
-    transition:
-      color 0.2s ease,
-      background 0.2s ease,
-      transform 0.2s ease;
   }
 
-
-  /* =============================================
-     ICON
-  ============================================= */
 
   .Hostel-mobile-dock-icon {
     height: 25px;
@@ -641,26 +1253,13 @@
   .Hostel-mobile-dock-icon svg {
     width: 20px;
     height: 20px;
-
-    stroke-width: 1.8;
-
-    transition:
-      transform 0.25s ease;
   }
 
-
-  /* =============================================
-     LABEL
-  ============================================= */
 
   .Hostel-mobile-dock-label {
     width: 100%;
 
     font-size: 8px;
-
-    font-weight: 600;
-
-    line-height: 1;
 
     text-align: center;
 
@@ -669,455 +1268,23 @@
     overflow: hidden;
 
     text-overflow: ellipsis;
-
-    letter-spacing: -0.01em;
   }
 
-
-  /* =============================================
-     ACTIVE MOBILE ITEM
-  ============================================= */
 
   .Hostel-mobile-dock-item.active {
     color: var(--hostel-gold);
 
     background:
-      linear-gradient(
-        180deg,
-        rgba(253, 205, 3, 0.15),
-        rgba(253, 205, 3, 0.04)
-      );
+      rgba(253, 205, 3, 0.12);
 
     transform:
       translateY(-7px);
-
-    box-shadow:
-      0 8px 20px rgba(0, 0, 0, 0.22);
-  }
-
-
-  .Hostel-mobile-dock-item.active::before {
-    content: "";
-
-    position: absolute;
-
-    top: 4px;
-
-    width: 18px;
-    height: 3px;
-
-    border-radius: 20px;
-
-    background:
-      var(--hostel-gold);
-  }
-
-
-  .Hostel-mobile-dock-item.active .Hostel-mobile-dock-icon svg {
-    transform:
-      scale(1.08);
-  }
-
-
-  /* =============================================
-     WARDEN ACTIVE
-  ============================================= */
-
-  .Hostel-mobile-dock-item.warden-active {
-    color: var(--hostel-gold);
-
-    background:
-      rgba(253, 205, 3, 0.09);
-  }
-
-
-  /* =============================================
-     LOGOUT
-  ============================================= */
-
-  .Hostel-mobile-dock-item.logout-mobile:hover,
-  .Hostel-mobile-dock-item.logout-mobile:active {
-    color: #ff6b6b;
-  }
-
-
-  /* =============================================
-     MOBILE WARDEN POPUP BACKDROP
-  ============================================= */
-
-  .warden-popup-backdrop {
-    position: fixed;
-
-    inset: 0;
-
-    background:
-      rgba(0, 0, 0, 0.28);
-
-    backdrop-filter:
-      blur(2px);
-
-    z-index: 1900;
-
-    animation:
-      backdropFade 0.25s ease both;
-  }
-
-
-  @keyframes backdropFade {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-
-  /* =============================================
-     WARDEN BOTTOM SHEET
-  ============================================= */
-
-  .warden-profile-popup {
-    position: fixed;
-
-    left: 14px;
-    right: 14px;
-
-    bottom: 98px;
-
-    width: auto;
-
-    padding: 1.1rem;
-
-    border-radius: 22px;
-
-    background:
-      linear-gradient(
-        145deg,
-        #28282c,
-        #171719
-      );
-
-    border:
-      1px solid rgba(253, 205, 3, 0.2);
-
-    box-shadow:
-      0 25px 70px rgba(0, 0, 0, 0.45);
-
-    z-index: 2001;
-
-    animation:
-      wardenPopupEnter 0.35s
-      cubic-bezier(0.22, 1, 0.36, 1)
-      both;
-  }
-
-
-  @keyframes wardenPopupEnter {
-    from {
-      opacity: 0;
-
-      transform:
-        translateY(30px)
-        scale(0.97);
-    }
-
-    to {
-      opacity: 1;
-
-      transform:
-        translateY(0)
-        scale(1);
-    }
-  }
-
-
-  /* =============================================
-     POPUP HANDLE
-  ============================================= */
-
-  .warden-popup-handle {
-    width: 38px;
-    height: 4px;
-
-    margin: 0 auto 1rem;
-
-    border-radius: 20px;
-
-    background:
-      rgba(255, 255, 255, 0.2);
-  }
-
-
-  /* =============================================
-     POPUP HEADER
-  ============================================= */
-
-  .warden-profile-header {
-    display: flex;
-    align-items: center;
-
-    gap: 0.85rem;
-  }
-
-
-  .warden-popup-image-wrapper {
-    position: relative;
-  }
-
-
-  .warden-popup-photo {
-    width: 62px;
-    height: 62px;
-
-    object-fit: cover;
-
-    border-radius: 18px;
-
-    border:
-      2px solid var(--hostel-gold);
-
-    box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.3);
-  }
-
-
-  .warden-online-dot {
-    position: absolute;
-
-    right: -2px;
-    bottom: -2px;
-
-    width: 14px;
-    height: 14px;
-
-    border-radius: 50%;
-
-    border:
-      3px solid #222225;
-  }
-
-
-  .warden-online-dot.online {
-    background: #4ade80;
-  }
-
-
-  .warden-online-dot.offline {
-    background: #f87171;
-  }
-
-
-  .warden-popup-info {
-    min-width: 0;
-  }
-
-
-  .warden-popup-small-title {
-    display: block;
-
-    font-size: 0.6rem;
-
-    font-weight: 700;
-
-    letter-spacing: 0.12em;
-
-    color: var(--hostel-gold);
-
-    margin-bottom: 0.25rem;
-  }
-
-
-  .warden-popup-info h3 {
-    margin: 0;
-
-    font-size: 1.05rem;
-
-    color: white;
-  }
-
-
-  .warden-popup-info p {
-    margin: 0.3rem 0 0;
-
-    font-size: 0.76rem;
-
-    color: #a9a9ae;
-  }
-
-
-  /* =============================================
-     DIVIDER
-  ============================================= */
-
-  .warden-popup-divider {
-    height: 1px;
-
-    margin: 1rem 0;
-
-    background:
-      rgba(255, 255, 255, 0.08);
-  }
-
-
-  /* =============================================
-     CONTACT CARD
-  ============================================= */
-
-  .warden-contact-card {
-    display: flex;
-    align-items: center;
-
-    gap: 0.75rem;
-
-    padding: 0.8rem;
-
-    border-radius: 14px;
-
-    text-decoration: none;
-
-    background:
-      rgba(255, 255, 255, 0.045);
-
-    border:
-      1px solid rgba(255, 255, 255, 0.05);
-
-    color: white;
-  }
-
-
-  .warden-contact-icon {
-    width: 38px;
-    height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background:
-      rgba(253, 205, 3, 0.13);
-
-    color: var(--hostel-gold);
-  }
-
-
-  .warden-contact-card div:last-child {
-    display: flex;
-    flex-direction: column;
-
-    gap: 3px;
-  }
-
-
-  .warden-contact-card span {
-    font-size: 0.68rem;
-
-    color: #99999f;
-  }
-
-
-  .warden-contact-card strong {
-    font-size: 0.85rem;
-
-    font-weight: 600;
-  }
-
-
-  /* =============================================
-     STATUS ROW
-  ============================================= */
-
-  .warden-popup-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-top: 1rem;
-
-    font-size: 0.8rem;
-
-    color: #a8a8ad;
-  }
-
-
-  .warden-popup-status {
-    display: flex;
-    align-items: center;
-
-    gap: 0.4rem;
-
-    font-weight: 600;
-  }
-
-
-  .status-dot {
-    width: 7px;
-    height: 7px;
-
-    border-radius: 50%;
-  }
-
-
-  .warden-popup-status.active {
-    color: #4ade80;
-  }
-
-
-  .warden-popup-status.active .status-dot {
-    background: #4ade80;
-  }
-
-
-  .warden-popup-status.inactive {
-    color: #f87171;
-  }
-
-
-  .warden-popup-status.inactive .status-dot {
-    background: #f87171;
-  }
-
-
-  /* =============================================
-     CLOSE BUTTON
-  ============================================= */
-
-  .warden-popup-close {
-    width: 100%;
-
-    margin-top: 1rem;
-
-    padding: 0.75rem;
-
-    border: none;
-
-    border-radius: 12px;
-
-    background:
-      linear-gradient(
-        135deg,
-        var(--hostel-gold),
-        #eab308
-      );
-
-    color: #1a1a1a;
-
-    font-family: inherit;
-
-    font-size: 0.82rem;
-
-    font-weight: 700;
-
-    cursor: pointer;
   }
 }
 
 
 /* =========================================================
-   SMALL MOBILE DEVICES
+   SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 420px) {
@@ -1127,60 +1294,25 @@
     right: 7px;
 
     height: 72px;
-
-    border-radius: 18px;
-
-    padding: 4px;
   }
-
 
   .Hostel-mobile-dock-item {
     height: 60px;
-
-    border-radius: 12px;
   }
-
 
   .Hostel-mobile-dock-icon svg {
     width: 18px;
     height: 18px;
   }
 
-
   .Hostel-mobile-dock-label {
     font-size: 7px;
   }
-
-
-  .Hostel-mobile-dock-item.active {
-    transform:
-      translateY(-5px);
-  }
-
-
-  .warden-profile-popup {
-    left: 10px;
-    right: 10px;
-
-    bottom: 90px;
-  }
 }
 
 
 /* =========================================================
-   TABLET
-========================================================= */
-
-@media (min-width: 769px) and (max-width: 1024px) {
-
-  .Hostel-sidebar {
-    width: 14rem;
-  }
-}
-
-
-/* =========================================================
-   REDUCE MOTION
+   ACCESSIBILITY
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1189,9 +1321,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-
     animation-iteration-count: 1 !important;
-
     transition-duration: 0.01ms !important;
   }
 }
