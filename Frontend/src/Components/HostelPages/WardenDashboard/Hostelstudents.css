@@ -46,17 +46,46 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #1c1c1f;
-  color: #fdcd03;
+  padding: 0.75rem 1.1rem;
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: #fdcd03;
+  color: #000000;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .filter-button:hover {
-  background-color: #1f2937;
+  background-color: #800000;
+  color: #ffffff;
+}
+
+/* The Download button renders a child <DownloadPdf/> component whose
+   internal markup we don't control — force it to inherit this button's
+   look instead of any styling of its own. */
+.filter-button.download {
+  white-space: nowrap;
+}
+
+.filter-button.download a,
+.filter-button.download button,
+.filter-button.download span {
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
 }
 
 .filter-popup {
@@ -99,7 +128,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+}
+
+/* Desktop: exactly 6 equal-width columns */
+@media (min-width: 1025px) {
+  .details-grid-hos {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 
 .details-card {
@@ -110,6 +146,9 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   break-inside: avoid;
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
   /* width: 250px; */
 }
 
@@ -180,6 +219,7 @@
 
 .details-primary-info {
   flex: 1;
+  min-width: 0;
 }
 
 .details-name {
@@ -187,6 +227,9 @@
   font-weight: 600;
   color: #111827;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .details-admission {
@@ -194,6 +237,9 @@
   font-size: 0.7rem;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .details-year,
@@ -201,6 +247,9 @@
   color: #6b7280;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .details-extended-info {
@@ -233,17 +282,18 @@
 .details-view-more {
   width: 100%;
   padding: 0.75rem;
-  background-color: #1c1c1f;
-  color: #fdcd03;
+  background-color: #fdcd03;
+  color: #000000;
   border: none;
   border-radius: 0.5rem;
-  margin-top: 1rem;
+  margin-top: auto;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .details-view-more:hover {
-  background-color: #1f2937;
+  background-color: #800000;
+  color: #ffffff;
 }
 
 .details-food-edit {
@@ -299,17 +349,18 @@
 
 .details-food-edit-button {
   padding: 0.25rem 0.5rem;
-  background-color: #1c1c1f;
-  color: #fdcd03;
+  background-color: #fdcd03;
+  color: #000000;
   border: none;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .details-food-edit-button:hover {
-  background-color: #1f2937;
+  background-color: #800000;
+  color: #ffffff;
 }
 
 .transit-icon {
@@ -326,6 +377,7 @@
 
 .buttons {
   display: flex;
+  align-items: center;
   gap: 20px;
 }
 
@@ -336,17 +388,18 @@
 
 .details-vaccate-button {
   padding: 0.50rem 0.5rem;
-  background-color: #1c1c1f;
-  color: #fdcd03;
+  background-color: #fdcd03;
+  color: #000000;
   border: none;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .details-vaccate-button:hover {
-  background-color: #1f2937;
+  background-color: #800000;
+  color: #ffffff;
 }
 
 .details-vaccate-display {
@@ -356,6 +409,309 @@
   justify-content: center;
 }
 
+
+/* ===================================================
+   Desktop "View More" Modal — minimal, professional style
+   Only opened on screens > 768px (see isDesktop in JSX).
+   Cards themselves stay collapsed/unchanged on desktop.
+
+   Palette (as specified): white popup, #111827 text,
+   #6B7280 labels, #E5E7EB borders, #F4C430 edit links,
+   #800000 reserved for Mark Vacate only, green dot for
+   In Transit. No colored section boxes, no per-field icons.
+=================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(17, 17, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+  animation: modalBackdropFadeIn 0.18s ease-out;
+}
+
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.student-modal {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 0.85rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+  animation: modalContentSlideUp 0.2s ease-out;
+}
+
+@keyframes modalContentSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.25rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #b66441;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  color: #111827;
+}
+
+/* ---------- Header ---------- */
+.modal-header-new {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 2.5rem 1.5rem;
+  text-align: left;
+}
+
+.modal-student-photo {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.modal-header-text {
+  min-width: 0;
+  text-align: left;
+}
+
+.modal-student-name {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 0.2rem;
+}
+
+.modal-admission {
+  font-size: 0.92rem;
+  color: #6b7280;
+}
+
+.modal-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 0 2.5rem;
+}
+
+/* ---------- Body / sections ---------- */
+.modal-body {
+  padding: 1.5rem 2.5rem 2rem;
+  text-align: left;
+}
+
+.modal-section-plain {
+  padding: 1.35rem 0;
+  text-align: left;
+}
+
+.modal-section-plain:first-child {
+  padding-top: 0.35rem;
+}
+
+.modal-section-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #111827;
+  margin-bottom: 1.1rem;
+  text-align: left;
+}
+
+/* ---------- Columns ---------- */
+.modal-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+  text-align: left;
+}
+
+.modal-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.modal-col-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-align: left;
+}
+
+.modal-col-value {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+  word-break: break-word;
+  text-align: left;
+}
+
+.modal-status-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #10b981;
+  flex-shrink: 0;
+}
+
+.modal-status-dot.in-hostel {
+  background-color: #9ca3af;
+}
+
+.modal-pass-row {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed #e5e7eb;
+  font-size: 0.95rem;
+  color: #374151;
+  text-align: left;
+}
+
+/* Edit trigger inside the modal only — plain text link in the
+   requested #F4C430, not the solid pill button used on mobile cards. */
+.student-modal .details-food-edit-button {
+  background-color: transparent;
+  color: #f4c430;
+  padding: 0;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 0;
+  align-self: flex-start;
+}
+
+.student-modal .details-food-edit-button:hover {
+  background-color: transparent;
+  color: #b58600;
+  text-decoration: underline;
+}
+
+.student-modal .details-food-edit {
+  margin-top: 0.2rem;
+}
+
+.student-modal .details-room-input {
+  width: auto;
+  max-width: 110px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.35rem;
+  font-size: 1rem;
+}
+
+.student-modal .details-food-select {
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+}
+
+/* ---------- Footer ---------- */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.35rem;
+  margin-top: 0.35rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-vacate-btn {
+  padding: 0.75rem 1.6rem;
+  font-size: 0.95rem;
+  border-radius: 0.45rem;
+  background-color: #800000;
+  color: #ffffff;
+}
+
+.modal-vacate-btn:hover {
+  background-color: #6b0000;
+  color: #ffffff;
+}
+
+.modal-close-bottom {
+  padding: 0.75rem 1.9rem;
+  border-radius: 0.45rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  transition: background-color 0.15s ease;
+}
+.modal-close-bottom:hover {
+  background-color: #fecaca;
+  color: #7f1d1d;
+}
+
+/* Safety net: never show the desktop modal on mobile, even if state leaks through */
+@media (max-width: 768px) {
+  .modal-backdrop {
+    display: none !important;
+  }
+}
 
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
