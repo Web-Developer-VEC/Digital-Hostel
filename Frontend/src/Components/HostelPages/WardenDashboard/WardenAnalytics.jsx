@@ -1,514 +1,719 @@
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
+import "./WardenAnalytics.css";
 import axios from "axios";
 import Swal from "sweetalert2";
-import "./WardenAnalytics.css";
 
-// Professional, muted categorical palette
-const PALETTE = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#6c757d"];
+// Custom palette corresponding to your login brand colors:
+// Terracotta, Rust, Tangerine, Muted Amber
+const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 
-const SWAL_THEME = {
-  customClass: {
-    popup: "admin-swal-card",
-    confirmButton: "admin-swal-action",
-  },
-  buttonsStyling: false,
+const DashboardCard = ({ title, number, tag, isInteractive, isDanger, onClick }) => {
+  return (
+    <div
+      className={`hl-metric-card ${isInteractive ? "interactive" : ""} ${isDanger ? "danger" : ""}`}
+      onClick={onClick}
+    >
+      <div className="hl-card-header">
+        <span className="hl-card-label">{title}</span>
+        {tag && <span className="hl-card-tag">{tag}</span>}
+      </div>
+      <p className="hl-metric-number">{number ?? 0}</p>
+      {isInteractive ? (
+        <div className="hl-card-footer">
+          <span>Click to view entries</span>
+          <span>→</span>
+        </div>
+      ) : (
+        <div className="hl-card-footer passive">
+          <span>Daily total</span>
+        </div>
+      )}
+    </div>
+  );
 };
 
-const COHORT_LABELS = {
-  1: "1st Year",
-  2: "2nd Year",
-  3: "3rd Year",
-  4: "4th Year",
-  10: "MBA 1st",
-  9: "MBA 2nd",
-  8: "ME 1st",
-  7: "ME 2nd",
-  overall: "All Hostels",
-};
-
-const PASS_NAMES = {
-  od: "On Duty",
-  outpass: "Out Pass",
-  staypass: "Stay Pass",
-  leave: "Official Leave",
-};
-
-export default function WardenAnalyticsDashboard() {
-  const [selectedYear, setSelectedYear] = useState("overall");
-  const [years, setYears] = useState([]);
-  const [fetchData, setFetchData] = useState(null);
-
-  // Modal Sheet States
-  const [activeModal, setActiveModal] = useState(null); // 'movement' | 'pass_analysis'
-  const [selectedMovement, setSelectedMovement] = useState(null);
-  const [selectedPass, setSelectedPass] = useState(null);
-  const [fetchedPassAnalysis, setFetchedPassAnalysis] = useState(null);
-  const [activeRosterTab, setActiveRosterTab] = useState("total");
-
-  // Filter States
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+const Dashboard = () => {
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [showNames, setShowNames] = useState(false);
+  const [highlightedData, setHighlightedData] = useState(null);
+  const [showChartPopup, setShowChartPopup] = useState(false);
+  const [chartPopupData, setChartPopupData] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [showCalendar, setShowCalendar] = useState(false);
-  const [hoveredSlice, setHoveredSlice] = useState(null);
-
-  // Networking
+  const [selectedYear, setSelectedYear] = useState("overall");
+  const [fetchData, setFetchData] = useState(null);
+  const [years, setYears] = useState(null);
+  const [showNameList, setShowNameList] = useState(false);
+  const [nameListData, setNameListData] = useState([]);
+  const [fetchedPassAnalysis, setFetchedPassAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const yearToAlphabet = {
+    "1": "First Year",
+    "2": "Second Year",
+    "3": "Third Year",
+    "4": "Fourth Year",
+    "10": "MBA First Year",
+    "9": "MBA Second Year",
+    "8": "ME First Year",
+    "7": "ME Second Year",
+    overall: "Overall"
+  };
+
+  const passTypeParse = {
+    od: "OD Pass",
+    outpass: "Out Pass",
+    staypass: "Stay Pass",
+    leave: "Leave"
+  };
+
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value);
+  };
+
+  // Synchronized with login branding for alert dialogs
+  const fireSwal = (config) => {
+    return Swal.fire({
+      background: "#fefbf4",
+      color: "#7c2d12",
+      confirmButtonColor: "#a73d1a",
+      ...config
+    });
+  };
+
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchMeasures = async () => {
       try {
         const response = await axios.get("/api/pass_measures_warden");
-        const data = response.data?.data || {};
-        setFetchData(data);
-        setYears(Object.keys(data));
+        const fetched = response.data;
+        const yearKeys = Object.keys(fetched?.data || {});
+        setYears(yearKeys);
+        setFetchData(fetched?.data);
       } catch (err) {
-        console.error(err);
-        Swal.fire({
-          ...SWAL_THEME,
-          title: "Connection Lost",
-          text: "Unable to sync with gate systems. Please reload.",
+        console.error("Error Fetching data", err);
+        fireSwal({
+          title: "Network Error",
+          text: "Failed to fetch pass analytics data. Please refresh.",
           icon: "error",
-          confirmButtonText: "Okay",
+          confirmButtonText: "OK"
         });
       }
     };
-    fetchAnalytics();
+    fetchMeasures();
   }, []);
 
-  const passMeasure = fetchData?.[selectedYear] || {};
+  const passMeasure = fetchData ? fetchData[selectedYear] : {};
 
-  const gateCards = [
+  const cardData = [
     {
-      id: "outgoing",
-      title: "Departed Today",
-      detail: "Gate exits processed",
-      value: passMeasure?.exitTimeCount ?? 0,
-      badge: "Normal",
-      tone: "neutral",
-      isLive: false,
+      title: "Outgoing",
+      tag: "Out",
+      number: passMeasure?.exitTimeCount,
+      names: passMeasure?.exitTimeDetails || passMeasure?.exitDetails, // Attach backend exit list
+      isInteractive: true,
+      isDanger: false
     },
     {
-      id: "arrived",
-      title: "Checked In",
-      detail: "Returned through gate",
-      value: passMeasure?.reEntryTimeCount ?? 0,
-      badge: "Cleared",
-      tone: "success",
-      isLive: false,
+      title: "Arrive",
+      tag: "Inside",
+      number: passMeasure?.reEntryTimeCount,
+      names: passMeasure?.reEntryTimeDetails || passMeasure?.reEntryDetails, // Attach backend return list
+      isInteractive: true,
+      isDanger: false
     },
     {
-      id: "outside",
-      title: "Currently Outside",
-      detail: "Active off-campus students",
-      value: passMeasure?.activeOutsideCount ?? 0,
-      badge: "Tracking",
-      tone: "warning",
-      isLive: true,
+      title: "Waiting",
+      tag: "Waiting",
+      number: passMeasure?.activeOutsideCount,
       names: passMeasure?.activeOutsideDetails,
+      isInteractive: true,
+      isDanger: false
     },
     {
-      id: "overtime",
-      title: "Curfew Overdue",
-      detail: "Passed allowed return hour",
-      value: passMeasure?.overdueReturnCount ?? 0,
-      badge: "Action Req.",
-      tone: "danger",
-      isLive: true,
+      title: "Overtime",
+      tag: "Late",
+      number: passMeasure?.overdueReturnCount,
       names: passMeasure?.overdueReturnDetails,
-    },
+      isInteractive: true,
+      isDanger: true
+    }
   ];
 
-  const passTypes = [
+  const chartData = [
     { name: "OD", value: passMeasure?.passTypeCounts?.od?.count || 0 },
     { name: "Leave", value: passMeasure?.passTypeCounts?.leave?.count || 0 },
     { name: "Stay Pass", value: passMeasure?.passTypeCounts?.staypass?.count || 0 },
-    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count || 0 },
+    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count || 0 }
   ];
 
-  const totalPassCount = passTypes.reduce((sum, item) => sum + Number(item.value || 0), 0);
+  const totalPassCount = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
-  const handleCardInspect = (card) => {
-    if (!card.isLive) return;
-    setSelectedMovement(card);
-    setActiveModal("movement");
+  const getRandomThemeColor = (idx) => {
+    const palette = ["#a73d1a", "#ea580c", "#7c2d12", "#c2410c", "#9a3412", "#f97316"];
+    return palette[idx % palette.length];
   };
 
-  const handlePassInspect = async (item) => {
-    if (!item?.value) {
-      Swal.fire({
-        ...SWAL_THEME,
+  const handleCardClick = (card) => {
+    // Check if the card has a student list with names
+    const namesList = card.names?.names || (Array.isArray(card.names) ? card.names : []);
+
+    if (!namesList || namesList.length === 0) {
+      fireSwal({
         title: "No Data",
-        text: `Zero recorded passes for ${item.name} today.`,
+        text: `No student records found for ${card.title}.`,
         icon: "info",
-        confirmButtonText: "Close",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+
+    setSelectedCard(card);
+    setShowNames(true);
+  };
+
+  const closeModal = () => {
+    setShowNames(false);
+    setShowChartPopup(false);
+  };
+
+  const handlePieMouseEnter = (data) => {
+    if (window.innerWidth < 769) return;
+    setHighlightedData(data);
+  };
+
+  const handlePieMouseLeave = () => {
+    setHighlightedData(null);
+  };
+
+  const handlePieClick = async (data) => {
+    if (!data || !data.value) {
+      fireSwal({
+        title: "No Records Found",
+        text: "Zero student passes filed in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
       });
       return;
     }
 
     setIsLoading(true);
     setError(null);
-    setSelectedPass(item);
-    setActiveModal("pass_analysis");
+
+    fireSwal({
+      title: "Fetching Category Data",
+      text: "Loading pass analysis records...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     try {
-      const formatted = item.name.trim().toLowerCase().replace(/\s+/g, "");
-      const res = await axios.post(
+      const response = await axios.post(
         "/api/pass_analysis_warden",
-        { type: formatted, year: selectedYear },
+        {
+          type: data.name.trim().toLowerCase().replace(/\s+/g, ""),
+          year: selectedYear
+        },
         { withCredentials: true }
       );
-      setFetchedPassAnalysis(res.data || {});
+
+      if (response.status === 200) {
+        Swal.close();
+        const fetched = response.data;
+        setFetchedPassAnalysis(fetched);
+
+        const popupChartData = Object.entries(fetched.reasonTypeCounts || {}).map(
+          ([reason, count], idx) => ({
+            name: reason,
+            value: count,
+            color: getRandomThemeColor(idx)
+          })
+        );
+
+        setChartPopupData({
+          title: data.name,
+          count: data.value,
+          dates: [],
+          popupChartData
+        });
+
+        setShowChartPopup(true);
+      } else {
+        throw new Error(response.data.error || "Failed to fetch pass analysis data");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch pass breakdown.");
+      console.error("Error fetching pass analysis data:", err);
+      fireSwal({
+        title: "Query Failed",
+        text: err.response?.data?.message || "Could not retrieve breakdown.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
+      setError(err.message || "Failed to fetch data.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDateChange = async (date) => {
-    const formatted = format(date, "yyyy-MM-dd");
-    setSelectedDate(formatted);
+    const formattedDate = format(date, "yyyy-MM-dd");
+    setSelectedDate(formattedDate);
     setShowCalendar(false);
     setIsLoading(true);
     setError(null);
 
+    fireSwal({
+      title: "Filtering by Date",
+      text: `Syncing records for ${formattedDate}...`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
-      const formattedType = selectedPass?.name?.trim().toLowerCase().replace(/\s+/g, "");
-      const res = await axios.post(
+      const response = await axios.post(
         "/api/pass_analysis_by_date_warden",
-        { type: formattedType, year: selectedYear, date: formatted },
+        {
+          type: chartPopupData?.title.trim().toLowerCase().replace(/\s+/g, ""),
+          year: selectedYear,
+          date: formattedDate
+        },
         { withCredentials: true }
       );
-      setFetchedPassAnalysis(res.data || {});
+
+      if (response.status === 200) {
+        Swal.close();
+        const fetched = response.data;
+        setFetchedPassAnalysis(fetched);
+
+        const popupChartData = Object.entries(fetched.reasonTypeCounts || {}).map(
+          ([reason, count], idx) => ({
+            name: reason,
+            value: count,
+            color: getRandomThemeColor(idx)
+          })
+        );
+
+        setChartPopupData((prev) => ({
+          ...prev,
+          popupChartData
+        }));
+      } else {
+        throw new Error(response.data.error || "Failed to query date metrics");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to retrieve date log.");
+      console.error("Error:", err);
+      fireSwal({
+        title: "Filter Failed",
+        text: err.response?.data?.message || "Failed to fetch data for this date.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
+      setError(err.message || "Failed to fetch data for selected date.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const closeModal = () => {
-    setActiveModal(null);
-    setSelectedMovement(null);
-    setSelectedPass(null);
-    setShowCalendar(false);
-    setActiveRosterTab("total");
-    setError(null);
+  const handleToggleCalendar = () => {
+    setShowCalendar((prev) => !prev);
   };
 
-  const getRosterList = () => {
-    if (activeRosterTab === "total") return fetchedPassAnalysis?.activePasses?.names || [];
-    if (activeRosterTab === "returning") return fetchedPassAnalysis?.toFieldMatch?.names || [];
-    if (activeRosterTab === "overtime") return fetchedPassAnalysis?.overduePasses?.names || [];
-    return [];
+  const handleTotalClick = () => {
+    const names = fetchedPassAnalysis?.activePasses?.names || [];
+    if (names.length === 0) {
+      fireSwal({
+        title: "No Data",
+        text: "No students registered in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    setNameListData(names);
+    setShowNameList(true);
   };
 
-  const currentRosterList = getRosterList();
+  const handleReturningClick = () => {
+    const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
+    if (names.length === 0) {
+      fireSwal({
+        title: "No Data",
+        text: "No students registered in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    setNameListData(names);
+    setShowNameList(true);
+  };
 
-  const reasonData = Object.entries(fetchedPassAnalysis?.reasonTypeCounts || {}).map(
-    ([reason, count], idx) => ({
-      name: reason,
-      value: count,
-      color: PALETTE[idx % PALETTE.length],
-    })
-  );
+  const handleOvertimeClick = () => {
+    const names = fetchedPassAnalysis?.overduePasses?.names || [];
+    if (names.length === 0) {
+      fireSwal({
+        title: "No Data",
+        text: "No students registered in this category.",
+        icon: "info",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+    setNameListData(names);
+    setShowNameList(true);
+  };
 
   return (
-    <div className="admin-layout-container">
-      <div className="admin-content-wrapper">
-        
-        {/* Page Header */}
-        <header className="page-header">
-          <div className="header-titles">
-            <h1>Campus Residence Control</h1>
-            <p>Monitor gate access, active outpasses, and student curfews.</p>
-          </div>
-          <div className="header-actions">
-            <label className="select-label">Cohort Filter:</label>
-            <select
-              className="admin-select"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-            >
-              {years.map((yr) => (
-                <option key={yr} value={yr}>
-                  {COHORT_LABELS[yr] || yr}
-                </option>
-              ))}
-            </select>
-          </div>
-        </header>
+    <div className="hl-warden-dashboard">
+      {/* Top Header */}
+      <header className="hl-warden-header">
+        <div>
+          
+          <h1 className="hl-title">Pass Measures & Analytics</h1>
+          <p className="hl-subtitle">
+            Hostel warden administrative overview and pass clearance audits
+          </p>
+        </div>
 
-        {/* Real-Time Metrics */}
-        <section className="dashboard-section">
-          <h2 className="section-title">Active Gate Metrics</h2>
-          <div className="metrics-grid">
-            {gateCards.map((card) => (
+        <div className="hl-filter-control">
+          <label htmlFor="hl-year-select" className="hl-filter-label">
+            Select Year:
+          </label>
+          <select
+            id="hl-year-select"
+            className="hl-select-box"
+            value={selectedYear}
+            onChange={handleYearChange}
+          >
+            {years?.map((year) => (
+              <option key={year} value={year}>
+                {yearToAlphabet[year] || year}
+              </option>
+            ))}
+          </select>
+        </div>
+      </header>
+
+      {/* Top 4 KPI Metrics */}
+      <section className="hl-metrics-grid">
+        {cardData.map((card, index) => (
+          <DashboardCard
+            key={index}
+            title={card.title}
+            number={card.number}
+            tag={card.tag}
+            isInteractive={card.isInteractive}
+            isDanger={card.isDanger}
+            onClick={() => handleCardClick(card)}
+          />
+        ))}
+      </section>
+
+      {/* Main Visualizer */}
+      <section className="hl-chart-card">
+        <div className="hl-chart-header">
+          <div>
+            <h3 className="hl-chart-title">Pass Classification</h3>
+            <p className="hl-chart-sub">
+              Distribution of issued passes. Click any slice or legend item to drill down.
+            </p>
+          </div>
+          <div className="hl-total-badge">
+            Total Passes: <strong>{totalPassCount}</strong>
+          </div>
+        </div>
+
+        <div className="hl-chart-content-split">
+          <div className="hl-chart-wrapper">
+            <ResponsiveContainer width="100%" height={340}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={95}
+                  outerRadius={140}
+                  paddingAngle={5}
+                  dataKey="value"
+                  onMouseEnter={handlePieMouseEnter}
+                  onMouseLeave={handlePieMouseLeave}
+                  onClick={handlePieClick}
+                  cursor="pointer"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={BRAND_COLORS[index % BRAND_COLORS.length]}
+                      opacity={
+                        highlightedData && highlightedData.name !== entry.name
+                          ? 0.4
+                          : 1
+                      }
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="hl-tooltip-box">
+                          <span className="hl-tooltip-title">{payload[0].name}</span>
+                          <span>{payload[0].value} Passes</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="hl-chart-hub-center">
+              <span className="hl-hub-label">TOTAL ISSUED</span>
+              <span className="hl-hub-count">{totalPassCount}</span>
+            </div>
+          </div>
+
+          <div className="hl-legend-stack">
+            {chartData.map((item, idx) => (
               <div
-                key={card.id}
-                className={`stat-card border-${card.tone} ${card.isLive ? "interactive" : ""}`}
-                onClick={() => handleCardInspect(card)}
+                key={idx}
+                className="hl-legend-pill"
+                onClick={() => handlePieClick(item)}
               >
-                <div className="stat-header">
-                  <span className="stat-title">{card.title}</span>
-                  <span className={`badge badge-${card.tone}`}>{card.badge}</span>
+                <div
+                  className="hl-color-swatch"
+                  style={{
+                    backgroundColor: BRAND_COLORS[idx % BRAND_COLORS.length]
+                  }}
+                />
+                <div className="hl-legend-meta">
+                  <span className="hl-legend-name">{item.name}</span>
+                  <span className="hl-legend-sub">Click to inspect entries</span>
                 </div>
-                <div className="stat-value">{card.value}</div>
-                <div className="stat-footer">
-                  <span className="stat-detail">{card.detail}</span>
-                  {card.isLive && <span className="stat-link">View List &rarr;</span>}
-                </div>
+                <div className="hl-legend-val">{item.value}</div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Pass Distribution Panel */}
-        <section className="dashboard-section">
-          <div className="section-header-row">
-            <h2 className="section-title">Pass Distribution Matrix</h2>
-            <div className="total-badge">
-              <strong>{totalPassCount}</strong> Passes Registered Today
+      {/* Modal: All 4 Cards Roster */}
+      {showNames && selectedCard && (
+        <div className="hl-modal-mask" onClick={closeModal}>
+          <div className="hl-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="hl-modal-head">
+              <h3>{selectedCard.title} Residents</h3>
+              <button className="hl-btn-close" onClick={closeModal} aria-label="Close">
+                ×
+              </button>
             </div>
-          </div>
+            <div className="hl-scroll-body">
+              {(() => {
+                const list = selectedCard.names?.names || (Array.isArray(selectedCard.names) ? selectedCard.names : []);
 
-          <div className="analytics-panel">
-            {/* Chart Column */}
-            <div className="chart-container">
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie
-                    data={passTypes}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={95}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                    onMouseEnter={(d) => setHoveredSlice(d.name)}
-                    onMouseLeave={() => setHoveredSlice(null)}
-                    onClick={(d) => handlePassInspect(d)}
-                  >
-                    {passTypes.map((item, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={PALETTE[index % PALETTE.length]}
-                        opacity={hoveredSlice && hoveredSlice !== item.name ? 0.4 : 1}
-                        style={{ cursor: "pointer", transition: "opacity 0.2s" }}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "#fff",
-                      border: "1px solid #dee2e6",
-                      borderRadius: "4px",
-                      fontSize: "13px",
-                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="chart-center-label">
-                <span className="center-value">{totalPassCount}</span>
-                <span className="center-text">Total Passes</span>
-              </div>
-            </div>
-
-            {/* Progress Bars Column */}
-            <div className="bars-container">
-              {passTypes.map((item, idx) => {
-                const percentage = totalPassCount > 0 ? Math.round((item.value / totalPassCount) * 100) : 0;
-                const color = PALETTE[idx % PALETTE.length];
+                if (list.length === 0) {
+                  return (
+                    <p style={{ textAlign: "center", color: "#333333", padding: "16px" }}>
+                      No resident records logged in this category.
+                    </p>
+                  );
+                }
 
                 return (
-                  <div key={item.name} className="progress-row" onClick={() => handlePassInspect(item)}>
-                    <div className="progress-header">
-                      <div className="progress-label">
-                        <span className="color-dot" style={{ backgroundColor: color }} />
-                        {item.name}
-                      </div>
-                      <div className="progress-stats">
-                        <strong>{item.value}</strong>
-                        <span className="text-muted">({percentage}%)</span>
-                      </div>
-                    </div>
-                    <div className="progress-track">
-                      <div className="progress-fill" style={{ width: `${percentage}%`, backgroundColor: color }} />
-                    </div>
-                  </div>
+                  <ul className="hl-roster-list">
+                    {list.map((entry, i) => (
+                      <li key={i} className="hl-roster-entry">
+                        <div className="hl-roster-name">
+                          <span className="hl-roster-index">{i + 1}.</span>
+                          {typeof entry === "string" ? entry : entry.name}
+                        </div>
+                        <div className="hl-tags-tray">
+                          {selectedCard.names?.late_by?.[i] && (
+                            <span className="hl-tag danger">
+                              Late: {selectedCard.names.late_by[i]}
+                            </span>
+                          )}
+                          {selectedCard.names?.passtypes?.[i] && (
+                            <span className="hl-tag info">
+                              {passTypeParse[selectedCard.names.passtypes[i]] ||
+                                selectedCard.names.passtypes[i]}
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 );
-              })}
-              <p className="help-text">Click on any category to view detailed logs and student rosters.</p>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* --- MODALS --- */}
-
-      {/* 1. Gate Movement Roster Modal */}
-      {activeModal === "movement" && selectedMovement && (
-        <div className="admin-modal-overlay" onClick={closeModal}>
-          <div className="admin-modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div>
-                <h3 className="modal-title">{selectedMovement.title}</h3>
-                <p className="modal-subtitle">Gate Records Analysis</p>
-              </div>
-              <button className="btn-close" onClick={closeModal}>&times;</button>
-            </div>
-            
-            <div className="modal-body">
-              <div className="table-summary-bar">
-                Total found in category: <strong>{selectedMovement.value} Students</strong>
-              </div>
-              
-              <div className="data-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th width="10%">#</th>
-                      <th width="60%">Student Name</th>
-                      <th width="30%" className="text-right">Status / Class</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedMovement.names?.names?.length ? (
-                      selectedMovement.names.names.map((entry, i) => (
-                        <tr key={i}>
-                          <td className="text-muted">{String(i + 1).padStart(2, "0")}</td>
-                          <td className="font-weight-bold">{typeof entry === "string" ? entry : entry.name}</td>
-                          <td className="text-right text-primary">
-                            {selectedMovement.names?.late_by?.[i] ||
-                              (selectedMovement.names?.passtypes?.[i]
-                                ? PASS_NAMES[selectedMovement.names.passtypes[i]]
-                                : "Regular Gate")}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="3" className="text-center text-muted py-4">No log entries found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              })()}
             </div>
           </div>
         </div>
       )}
 
-      {/* 2. Pass Drilldown Analytics Modal */}
-      {activeModal === "pass_analysis" && selectedPass && (
-        <div className="admin-modal-overlay" onClick={closeModal}>
-          <div className="admin-modal-dialog modal-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+      {/* Modal: Pass Reason & Date Filtering */}
+      {showChartPopup && chartPopupData && (
+        <div className="hl-modal-mask" onClick={closeModal}>
+          <div
+            className="hl-modal-box hl-popup-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hl-modal-head">
               <div>
-                <h3 className="modal-title">{selectedPass.name} Analytics</h3>
-                <p className="modal-subtitle">Detailed pass telemetry and roster distribution</p>
+                <h3>{chartPopupData.title} Details</h3>
               </div>
-              <button className="btn-close" onClick={closeModal}>&times;</button>
+              <button className="hl-btn-close" onClick={closeModal} aria-label="Close">
+                ×
+              </button>
             </div>
 
-            {/* Date Picker Bar */}
-            {selectedPass.name !== "Out Pass" && (
-              <div className="modal-toolbar">
-                <span className="toolbar-label">Audit Date:</span>
-                <div className="dropdown-container">
-                  <button className="btn-default" onClick={() => setShowCalendar(!showCalendar)}>
-                    {selectedDate} &#9662;
+            {/* Date Picker trigger */}
+            <div className="hl-date-strip">
+              {chartPopupData.title !== "Out Pass" && (
+                <div>
+                  <button
+                    className="hl-date-toggle-btn"
+                    onClick={handleToggleCalendar}
+                  >
+                    Date: {selectedDate}
                   </button>
                   {showCalendar && (
-                    <div className="calendar-dropdown">
-                      <Calendar onChange={handleDateChange} value={new Date(selectedDate)} />
+                    <div className="hl-calendar-wrapper">
+                      <Calendar
+                        onChange={handleDateChange}
+                        value={new Date(selectedDate)}
+                      />
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            <div className="modal-body bg-light">
-              {isLoading && <div className="state-message">Loading diagnostic logs...</div>}
-              {error && <div className="state-message text-danger">{error}</div>}
-
-              {!isLoading && !error && (
-                <>
-                  {/* Segmented Controls */}
-                  <div className="segmented-controls">
-                    <button
-                      className={`segment-btn ${activeRosterTab === "total" ? "active" : ""}`}
-                      onClick={() => setActiveRosterTab("total")}
-                    >
-                      <span className="segment-label">Active Passes</span>
-                      <span className="segment-value">{fetchedPassAnalysis?.activePasses?.count || 0}</span>
-                    </button>
-                    <button
-                      className={`segment-btn ${activeRosterTab === "returning" ? "active" : ""}`}
-                      onClick={() => setActiveRosterTab("returning")}
-                    >
-                      <span className="segment-label">Scheduled Returning</span>
-                      <span className="segment-value">{fetchedPassAnalysis?.toFieldMatch?.count || 0}</span>
-                    </button>
-                    <button
-                      className={`segment-btn danger ${activeRosterTab === "overtime" ? "active" : ""}`}
-                      onClick={() => setActiveRosterTab("overtime")}
-                    >
-                      <span className="segment-label">Overstayed</span>
-                      <span className="segment-value">{fetchedPassAnalysis?.overduePasses?.count || 0}</span>
-                    </button>
-                  </div>
-
-                  <div className="split-panel">
-                    {/* Left: Reasons */}
-                    <div className="panel-card">
-                      <h4 className="panel-title">Stated Reasons</h4>
-                      <div className="list-group">
-                        {reasonData.length ? (
-                          reasonData.map((r) => (
-                            <div key={r.name} className="list-group-item">
-                              <div className="item-left">
-                                <span className="color-dot" style={{ backgroundColor: r.color }} />
-                                {r.name}
-                              </div>
-                              <div className="item-right font-weight-bold">{r.value}</div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center text-muted p-3">No reasons logged.</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Right: Roster */}
-                    <div className="panel-card">
-                      <h4 className="panel-title">Roster ({activeRosterTab.toUpperCase()})</h4>
-                      <div className="list-group">
-                        {currentRosterList.length ? (
-                          currentRosterList.map((st, i) => (
-                            <div key={i} className="list-group-item">
-                              <span className="text-muted mr-2">{String(i + 1).padStart(2, "0")}</span>
-                              <span>{st}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center text-muted p-3">No students found.</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
               )}
             </div>
+
+            {isLoading && (
+              <p style={{ textAlign: "center", padding: "20px", color: "#9a3412" }}>
+                Loading analysis...
+              </p>
+            )}
+
+            {error && (
+              <p style={{ textAlign: "center", padding: "16px", color: "#c2410c" }}>
+                {error}
+              </p>
+            )}
+
+            {!isLoading && !error && (
+              <>
+                <div className="hl-summary-pods">
+                  <div className="hl-summary-pod" onClick={handleTotalClick}>
+                    <span>Total Active</span>
+                    <strong>{fetchedPassAnalysis?.activePasses?.count || 0}</strong>
+                    <small>View names</small>
+                  </div>
+
+                  <div className="hl-summary-pod" onClick={handleReturningClick}>
+                    <span>
+                      {chartPopupData.title !== "Out Pass"
+                        ? `Returning (${selectedDate})`
+                        : "Returning Count"}
+                    </span>
+                    <strong>{fetchedPassAnalysis?.toFieldMatch?.count || 0}</strong>
+                    <small>View names</small>
+                  </div>
+
+                  <div className="hl-summary-pod danger" onClick={handleOvertimeClick}>
+                    <span>
+                      {chartPopupData.title !== "Out Pass"
+                        ? `OverDay (${selectedDate})`
+                        : "Overtime"}
+                    </span>
+                    <strong>{fetchedPassAnalysis?.overduePasses?.count || 0}</strong>
+                    <small>View names</small>
+                  </div>
+                </div>
+
+                {/* Nested student list flyout */}
+                {showNameList && (
+                  <div className="hl-submodal-overlay">
+                    <div className="hl-submodal-content">
+                      <div className="hl-submodal-head">
+                        <h4>Student Manifest</h4>
+                        <button
+                          className="hl-btn-close"
+                          style={{ width: "24px", height: "24px", fontSize: "0.9rem" }}
+                          onClick={() => setShowNameList(false)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="hl-submodal-scroll">
+                        <ul>
+                          {nameListData.length > 0 ? (
+                            nameListData.map((name, index) => (
+                              <li key={index}>{name}</li>
+                            ))
+                          ) : (
+                            <li>No students found</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reason sub-donut */}
+                <div style={{ padding: "0 24px 20px 24px" }}>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={
+                          chartPopupData?.popupChartData?.length > 0
+                            ? chartPopupData.popupChartData
+                            : [{ name: "No Data", value: 1 }]
+                        }
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={75}
+                        dataKey="value"
+                      >
+                        {chartPopupData?.popupChartData?.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={
+                              entry.color ||
+                              BRAND_COLORS[index % BRAND_COLORS.length]
+                            }
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default Dashboard;
