@@ -129,7 +129,7 @@ const navItems = {
     },
   ],
 };
-
+const base_url = process.env.REACT_APP_QR_URL;
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -155,6 +155,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/sidebar_warden");
+        
         setWardenSlidebar(response.data);
       } catch (err) {
         console.error("Failed to fetch warden data:", err);
@@ -262,7 +263,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
      Change this if your project requires UrlParser
   ========================================================= */
 
-  const wardenImage =
+  const wardenImage =  base_url +
     wardenSlidebar?.image_path ||
     "https://via.placeholder.com/150";
 
