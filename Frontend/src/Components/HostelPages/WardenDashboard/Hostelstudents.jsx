@@ -20,6 +20,10 @@ function Hostelstudents() {
     passType: "All"
   });
   const [expandedCards, setExpandedCards] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' ? window.innerWidth > 768 : true
+  );
+  const [modalStudentId, setModalStudentId] = useState(null);
   const [activeNav, setActiveNav] = useState('students');
   const [editingStates, setEditingStates] = useState({});
   const [tempFoodTypes, setTempFoodTypes] = useState({});
@@ -34,6 +38,18 @@ function Hostelstudents() {
 
   const UrlParser = (path) => {
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
+  };
+
+  // Temporary dummy avatar, generated per student from their initials —
+  // used whenever a real photo isn't available yet or fails to load.
+  // Once the backend serves a real photo URL, the <img src> below just
+  // uses that directly, so there's nothing extra to wire up later.
+  const getAvatarUrl = (name) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Student')}&background=fdcd03&color=1c1c1f&bold=true&size=128`;
+
+  const handlePhotoError = (name) => (e) => {
+    e.target.onerror = null;
+    e.target.src = getAvatarUrl(name);
   };
 
   // Year Mapping
@@ -201,8 +217,58 @@ function Hostelstudents() {
     };
   }, []);
 
+  // Track desktop/mobile breakpoint (matches existing 768px breakpoint used in CSS)
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 769px)');
+
+    const handleBreakpointChange = (e) => {
+      setIsDesktop(e.matches);
+      // If switching into desktop view, make sure no card is left expanded
+      // so the grid/card heights stay uniform on desktop.
+      if (e.matches) {
+        setExpandedCards(null);
+      } else {
+        // If switching into mobile view, close any open desktop modal.
+        setModalStudentId(null);
+      }
+    };
+
+    setIsDesktop(mql.matches);
+    if (mql.matches) setExpandedCards(null);
+
+    mql.addEventListener('change', handleBreakpointChange);
+    return () => mql.removeEventListener('change', handleBreakpointChange);
+  }, []);
+
+  // Desktop modal: close on Escape + lock body scroll while open
+  useEffect(() => {
+    if (!isDesktop || !modalStudentId) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setModalStudentId(null);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isDesktop, modalStudentId]);
+
   const toggleCard = (id) => {
     setExpandedCards(prev => (prev === id ? null : id));
+  };
+
+  // Desktop -> open centered modal. Mobile -> keep existing inline expand behavior.
+  const handleViewMore = (id) => {
+    if (isDesktop) {
+      setModalStudentId(id);
+    } else {
+      toggleCard(id);
+    }
   };
 
   const startEditing = (studentId) => {
@@ -382,9 +448,28 @@ function Hostelstudents() {
     setTempRoomNumbers(prev => ({ ...prev, [studentId]: newValue }));
   };
 
-  const handleFoodTypeChange = (studentId, newValue) => {
-    setTempFoodTypes(prev => ({ ...prev, [studentId]: newValue }));
-  };
+
+const handleFoodTypeChange = (studentId, newValue) => {
+  setTempFoodTypes(prev => ({
+    ...prev,
+    [studentId]: newValue
+  }));
+};
+
+const hasFoodTypeChanged = (studentId) => {
+  const student = studentsData?.find(
+    (s) => s.id === studentId
+  );
+
+  return (
+    student &&
+    tempFoodTypes[studentId] &&
+    tempFoodTypes[studentId] !== student.foodType
+  );
+};
+
+
+
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return { date: "N/A", time: "N/A" }; // Handle missing values
@@ -453,7 +538,7 @@ function Hostelstudents() {
           <div className="buttons">
 
             <button className='filter-button download'>
-              <Download />
+              <Download size={18} />
               <DownloadPdf studentData={filteredStudents} />
             </button>
 
@@ -462,7 +547,7 @@ function Hostelstudents() {
                 className="filter-button"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Filter size={20} />
+                <Filter size={18} />
                 Filters
               </button>
 
@@ -571,9 +656,10 @@ function Hostelstudents() {
               </div>
               <div className="details-basic-info">
                 <img
-                  src={UrlParser(student.photo)}
+                  src={student.photo ? UrlParser(student.photo) : getAvatarUrl(student.name)}
                   alt={student.name}
                   className="details-student-photo"
+                  onError={handlePhotoError(student.name)}
                 />
                 <div className="details-primary-info">
                   <h3 className="details-name">{student.name}</h3>
@@ -656,43 +742,57 @@ function Hostelstudents() {
                     <span className="details-label">Area:</span>
                     <span>{student.area}</span>
                   </div>
-                  <div className="details-info-item">
-                    <span className="details-label">Food Type:</span>
-                    {editingStates[student.id] ? (
-                      <div className="details-food-edit">
-                        <select
-                          value={tempFoodTypes[student.id] || student.foodType}
-                          onChange={(e) => handleFoodTypeChange(student.id, e.target.value)}
-                          className="details-food-select"
-                        >
-                          <option value="Vegetarian">Vegetarian</option>
-                          <option value="Non-Vegetarian">Non-Vegetarian</option>
-                        </select>
-                        <button
-                          className="details-food-button save"
-                          onClick={() => saveFoodType(student.id)}
-                        >
-                          ✔
-                        </button>
-                        <button
-                          className="details-food-button cancel"
-                          onClick={() => cancelEditing(student.id)}
-                        >
-                          ✘
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="details-food-display">
-                        <span>{student.foodType}</span>
-                        <button
-                          className="details-food-edit-button"
-                          onClick={() => startEditing(student.id)}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                <div className="details-info-item">
+  <span className="details-label">Food Type:</span>
+
+  {editingStates[student.id] ? (
+    <div className="details-food-edit">
+
+      {/* Dropdown */}
+      <select
+        value={tempFoodTypes[student.id] || student.foodType}
+        onChange={(e) =>
+          handleFoodTypeChange(student.id, e.target.value)
+        }
+        className="details-food-select"
+      >
+        <option value="Vegetarian">Vegetarian</option>
+        <option value="Non-Vegetarian">Non-Vegetarian</option>
+      </select>
+
+      {/* Show buttons ONLY after changing dropdown */}
+      {hasFoodTypeChanged(student.id) && (
+        <>
+          <button
+            className="details-food-button save"
+            onClick={() => saveFoodType(student.id)}
+          >
+            ✔
+          </button>
+
+          <button
+            className="details-food-button cancel"
+            onClick={() => cancelEditing(student.id)}
+          >
+            ✘
+          </button>
+        </>
+      )}
+
+    </div>
+  ) : (
+    <div className="details-food-display">
+      <span>{student.foodType}</span>
+
+      <button
+        className="details-food-edit-button"
+        onClick={() => startEditing(student.id)}
+      >
+        Edit
+      </button>
+    </div>
+  )}
+</div>
                   {!student.vacateStatus && (
                     <div className="details-vaccate-display">
                       <button
@@ -709,13 +809,215 @@ function Hostelstudents() {
 
               <button
                 className="details-view-more"
-                onClick={() => toggleCard(student.id)}
+                onClick={() => handleViewMore(student.id)}
               >
-                {expandedCards == student.id ? 'View Less' : 'View More'}
+                {!isDesktop && expandedCards == student.id ? 'View Less' : 'View More'}
               </button>
             </div>
           ))}
         </div>
+
+        {/* Desktop-only centered "View More" modal. Reuses existing student data & handlers. */}
+        {isDesktop && modalStudentId && (() => {
+          const modalStudent = studentsData?.find(s => s.id === modalStudentId);
+          if (!modalStudent) return null;
+
+          const departmentDisplay = departmentLabels[modalStudent.department] || modalStudent.department || 'N/A';
+          const hasPassInfo = modalStudent.passInfo && (modalStudent.passInfo.passtype || modalStudent.passInfo.from || modalStudent.passInfo.to);
+
+          return (
+            <div
+              className="modal-backdrop"
+              onClick={() => setModalStudentId(null)}
+            >
+              <div
+                className="student-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+               
+
+                <div className="modal-header-new">
+                  <img
+                    src={modalStudent.photo ? UrlParser(modalStudent.photo) : getAvatarUrl(modalStudent.name)}
+                    alt={modalStudent.name}
+                    className="modal-student-photo"
+                    onError={handlePhotoError(modalStudent.name)}
+                  />
+                  <div className="modal-header-text">
+                    <h2 className="modal-student-name">{modalStudent.name}</h2>
+                    <p className="modal-subtitle">
+                      {modalStudent.year || 'N/A'} • {departmentDisplay}
+                    </p>
+                    <p className="modal-admission">Admission No. {modalStudent.admissionNumber || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="modal-divider" />
+
+                <div className="modal-body">
+                  {/* Hostel */}
+                  <div className="modal-section-plain">
+                    <h3 className="modal-section-label">Hostel</h3>
+                    <div className="modal-columns">
+                      <div className="modal-col">
+                        <span className="modal-col-label">Room</span>
+                        {editingRoomStates[modalStudent.id] ? (
+                          <div className="details-food-edit">
+                            <input
+                              type="text"
+                              value={tempRoomNumbers[modalStudent.id] || modalStudent.roomNumber}
+                              onChange={(e) => handleRoomNumberChange(modalStudent.id, e.target.value)}
+                              className="details-room-input"
+                            />
+                            <button
+                              className="details-food-button save"
+                              onClick={() => saveRoomNumber(modalStudent.id)}
+                            >
+                              ✔
+                            </button>
+                            <button
+                              className="details-food-button cancel"
+                              onClick={() => cancelRoomEditing(modalStudent.id)}
+                            >
+                              ✘
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="modal-col-value">{modalStudent.roomNumber || 'N/A'}</span>
+                            <button
+                              className="details-food-edit-button"
+                              onClick={() => startRoomEditing(modalStudent.id)}
+                            >
+                              Edit
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="modal-col">
+                        <span className="modal-col-label">Food</span>
+                    {editingStates[modalStudent.id] ? (
+  <div className="details-food-edit">
+
+    <select
+      value={tempFoodTypes[modalStudent.id] || modalStudent.foodType}
+      onChange={(e) =>
+        handleFoodTypeChange(modalStudent.id, e.target.value)
+      }
+      className="details-food-select"
+    >
+      <option value="Vegetarian">Vegetarian</option>
+      <option value="Non-Vegetarian">Non-Vegetarian</option>
+    </select>
+
+    {hasFoodTypeChanged(modalStudent.id) && (
+      <>
+        <button
+          className="details-food-button save"
+          onClick={() => saveFoodType(modalStudent.id)}
+        >
+          ✔
+        </button>
+
+        <button
+          className="details-food-button cancel"
+          onClick={() => cancelEditing(modalStudent.id)}
+        >
+          ✘
+        </button>
+      </>
+    )}
+
+  </div>
+) : (
+  <>
+    <span className="modal-col-value">
+      {modalStudent.foodType || 'N/A'}
+    </span>
+
+    <button
+      className="details-food-edit-button"
+      onClick={() => startEditing(modalStudent.id)}
+    >
+      Edit
+    </button>
+  </>
+)}
+                      </div>
+
+                      <div className="modal-col">
+                        <span className="modal-col-label">Status</span>
+                        <span className="modal-col-value modal-status-value">
+                          <span className={`modal-status-dot ${modalStudent.transitStatus ? 'in-transit' : 'in-hostel'}`} />
+                          {modalStudent.transitStatus ? 'In Transit' : 'In Hostel'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {hasPassInfo && (
+                      <p className="modal-pass-row">
+                        Pass: {modalStudent.passInfo.passtype || 'N/A'} — {formatDateTime(modalStudent.passInfo?.from).date} at {formatDateTime(modalStudent.passInfo?.from).time}
+                        {' '}&rarr;{' '}
+                        {formatDateTime(modalStudent.passInfo?.to).date} at {formatDateTime(modalStudent.passInfo?.to).time}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="modal-divider" />
+
+                  {/* Contact */}
+                  <div className="modal-section-plain">
+                    <h3 className="modal-section-label">Contact</h3>
+                    <div className="modal-columns">
+                      <div className="modal-col">
+                        <span className="modal-col-label">Student</span>
+                        <span className="modal-col-value">
+                          {modalStudent.studentMobile ? (
+                            <a href={`tel:${modalStudent.studentMobile}`} className='no-underline text-black'>
+                              {modalStudent.studentMobile}
+                            </a>
+                          ) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="modal-col">
+                        <span className="modal-col-label">Parent</span>
+                        <span className="modal-col-value">
+                          {modalStudent.parentMobile ? (
+                            <a href={`tel:${modalStudent.parentMobile}`} className='no-underline text-black'>
+                              {modalStudent.parentMobile}
+                            </a>
+                          ) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="modal-col">
+                        <span className="modal-col-label">Area</span>
+                        <span className="modal-col-value">{modalStudent.area || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-footer">
+                    {!modalStudent.vacateStatus && (
+                      <button
+                        className="details-vaccate-button modal-vacate-btn"
+                        onClick={() => handleVacateStatus(modalStudent.id)}
+                      >
+                        Mark Vaccate
+                      </button>
+                    )}
+                    <button
+                      className="modal-close-bottom"
+                      onClick={() => setModalStudentId(null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
