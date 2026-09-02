@@ -6,6 +6,7 @@ import WardenStudent from "../HostelPages/WardenDashboard/Hostelstudents.jsx";
 import WardenAnalytics from "../HostelPages/WardenDashboard/WardenAnalytics.jsx";
 import FoodTypeRequest from "../HostelPages/WardenDashboard/FoodTypeRequest.jsx";
 import WardenPassHistory from "../HostelPages/WardenDashboard/WardenPassHistory.jsx";
+import WardenProfile from "../HostelPages/WardenDashboard/WardenProfile.jsx";
 import TutorialPage2 from "../HostelPages/WardenDashboard/TutorialPage2.jsx";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ const WardenLayout = () => {
       <div className="dashboard-content">
         <Routes>
           <Route index element={<Navigate to="analytics" replace />} />
+          <Route path="profile" element={<WardenProfile />} />
           <Route path="analytics" element={<WardenAnalytics />} />
           <Route path="request" element={<WardenRequest />} />
           <Route path="attendance" element={<Attendance />} />
