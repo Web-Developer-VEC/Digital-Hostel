@@ -4,8 +4,8 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
 import axios from "axios";
-import Swal from "sweetalert2";
-import "./WardenAnalytics.css";
+import Swal from 'sweetalert2';
+import { getRequest } from "../../../api/axios";
 
 // Professional, muted categorical palette
 const PALETTE = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#6c757d"];
@@ -58,13 +58,51 @@ export default function WardenAnalyticsDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const response = await axios.get("/api/pass_measures_warden");
-        const data = response.data?.data || {};
-        setFetchData(data);
-        setYears(Object.keys(data));
+  console.log("Fetched Data",fetchData);
+
+  const ReasonTypeMapping = {
+    od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
+    leave: ['Function', 'Medical', 'Exams', 'Emergency', 'Others'],
+    outpass: ['Shopping', 'Classes', 'Internship', 'Medical', 'Others'],
+    staypass: ['Holiday', 'Weekend Holiday', 'Semester Holiday', 'Festival Holiday', 'Others'],
+  };
+
+  const yearToAlphabet = {
+    '1': 'First Year', 
+    '2': 'Second Year',
+    '3': 'Third Year',
+    '4': 'Fourth Year',
+    '10': 'MBA First Year',
+    '9': 'MBA Second year',
+    '8': 'ME First Year',
+    '7': 'ME Second Year',
+    'overall': 'Overall'
+  };
+
+  const passTypeParse = {
+    'od': 'OD',
+    'outpass': 'Out Pass',
+    'staypass': 'Stay Pass',
+    'leave': 'Leave'
+  }
+
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value);
+  };
+
+  // pass measure fetching
+  useEffect(()=>{
+    const fetchData = async ()=>{
+
+      try{
+        const response = await getRequest('/api/pass_measures_warden');
+        const fetchedData = response.data;
+        
+        const years = Object.keys(fetchedData?.data)
+        
+        setYears(years);
+
+        setFetchData(fetchedData?.data);
       } catch (err) {
         console.error(err);
         Swal.fire({
