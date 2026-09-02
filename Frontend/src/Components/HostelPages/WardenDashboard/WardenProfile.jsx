@@ -19,6 +19,7 @@ function WardenProfile() {
 
             // 👇 YEARS HANDLED BY THIS WARDEN
             handling_years: [3, 4],
+            incharge_of: "Boys"
 
         },
     };
@@ -154,7 +155,18 @@ function WardenProfile() {
                             />
 
                         </div>
+                        <div className="student-form-group">
 
+                            <label>Incharge of</label>  
+
+                            <input
+                                type="text"
+                                value={warden.incharge_of}
+                                disabled
+                                className="student-input"
+                            />
+                        </div>
+                        
                         <div className="student-form-group">
 
                             <label>
