@@ -4,21 +4,8 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
 import axios from "axios";
-import Swal from "sweetalert2";
-import "./WardenAnalytics.css";
-import axios from "axios";
 import Swal from 'sweetalert2';
 import { getRequest } from "../../../api/axios";
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for the donut chart
-
-const Card = ({ title, number, onClick }) => {
-  return (
-    <div className="pl-warden-card" onClick={onClick}>
-      <h2 className="pl-warden-card-title">{title}</h2>
-      <p className="pl-warden-card-number">{number}</p>
-    </div>
-  );
 
 // Professional, muted categorical palette
 const PALETTE = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#6c757d"];
