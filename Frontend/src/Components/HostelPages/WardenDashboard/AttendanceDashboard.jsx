@@ -6,12 +6,14 @@ import {
   ClipboardCheck,
   UserX,
   AlertTriangle,
-  Utensils,
+  Leaf,
+  Drumstick,
   X
 } from 'lucide-react';
 import './AttendanceDashboard.css';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { getRequest } from '../../../api/axios';
 
 // const yearData = {
 //   1: {
@@ -101,9 +103,27 @@ function AttendanceDashboard() {
     '9': 'ME',
     'overall': 'Overall'
   };
+
   const vegCount = foodCount?.[selectedYear]?.veg_count || 0;
   const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
   const totalStudents = vegCount + nonVegCount;
+
+  // Donut chart geometry — the ring is drawn from the same animated counts
+  // that power the numbers, so the arcs sweep in as the totals count up.
+  const RADIUS = 80;
+  const STROKE_WIDTH = 26;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const GAP_DEG = totalStudents > 0 && vegCount > 0 && nonVegCount > 0 ? 6 : 0;
+  const usableDeg = 360 - GAP_DEG * 2;
+
+  const animatedFoodTotal = animatedVeg + animatedNonVeg;
+  const vegRingPct = animatedFoodTotal > 0 ? (animatedVeg / animatedFoodTotal) * 100 : 0;
+  const nonVegRingPct = animatedFoodTotal > 0 ? 100 - vegRingPct : 0;
+
+  const vegArcLen = (vegRingPct / 100) * usableDeg / 360 * CIRCUMFERENCE;
+  const nonVegArcLen = (nonVegRingPct / 100) * usableDeg / 360 * CIRCUMFERENCE;
+  const gapArcLen = (GAP_DEG / 360) * CIRCUMFERENCE;
+
   useEffect(() => {
     // Reset animations when year changes
     setAnimatedCount(0);
@@ -165,7 +185,8 @@ function AttendanceDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/food_count_warden');
+        const response = await getRequest('/api/food_count_warden');
+        console.log(response);
         const fetchedData = response.data;
         console.log(response.data);
 
@@ -298,7 +319,7 @@ function AttendanceDashboard() {
         <div className="attendance-food-section">
           <div className="attendance-food-counts">
             <div className="attendance-food-type">
-              <Utensils className="attendance-food-icon attendance-veg" />
+              <Leaf className="attendance-food-icon attendance-veg" />
               <div className="attendance-food-details">
                 <h3>Vegetarian</h3>
                 <p className="attendance-food-number">{animatedVeg}</p>
@@ -308,7 +329,7 @@ function AttendanceDashboard() {
               </div>
             </div>
             <div className="attendance-food-type">
-              <Utensils className="attendance-food-icon attendance-non-veg" />
+              <Drumstick className="attendance-food-icon attendance-non-veg" />
               <div className="attendance-food-details">
                 <h3>Non-Vegetarian</h3>
                 <p className="attendance-food-number">{animatedNonVeg}</p>
@@ -320,24 +341,86 @@ function AttendanceDashboard() {
           </div>
 
           <div className="attendance-pie-chart">
-            <div
-              className="attendance-pie"
-              style={{
-                background: totalStudents > 0 ? `conic-gradient(
-                  #10b981 0% ${(vegCount / totalStudents) * 100}%,
-                  #10b981 ${(vegCount / totalStudents) * 100}% ${(vegCount / totalStudents) * 100}%,
-                  #ef4444 ${(vegCount / totalStudents) * 100}% 100%
-                )` : '#e5e7eb'
-              }}
-            />
+            <div className="attendance-donut-wrap">
+              <svg viewBox="0 0 200 200" className="attendance-donut-svg">
+                <defs>
+                  <linearGradient id="vegGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4ade80" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="nonVegGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fb923c" />
+                    <stop offset="100%" stopColor="#dc2626" />
+                  </linearGradient>
+                  <filter id="donutShadow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.15" />
+                  </filter>
+                </defs>
+
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={RADIUS}
+                  className="attendance-donut-track"
+                  strokeWidth={STROKE_WIDTH}
+                />
+
+                {totalStudents > 0 && (
+                  <>
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r={RADIUS}
+                      fill="none"
+                      stroke="url(#vegGradient)"
+                      strokeWidth={STROKE_WIDTH}
+                      strokeLinecap="round"
+                      strokeDasharray={`${vegArcLen} ${CIRCUMFERENCE - vegArcLen}`}
+                      strokeDashoffset="0"
+                      transform="rotate(-90 100 100)"
+                      filter="url(#donutShadow)"
+                      className="attendance-donut-segment"
+                    />
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r={RADIUS}
+                      fill="none"
+                      stroke="url(#nonVegGradient)"
+                      strokeWidth={STROKE_WIDTH}
+                      strokeLinecap="round"
+                      strokeDasharray={`${nonVegArcLen} ${CIRCUMFERENCE - nonVegArcLen}`}
+                      strokeDashoffset={-(vegArcLen + gapArcLen)}
+                      transform="rotate(-90 100 100)"
+                      filter="url(#donutShadow)"
+                      className="attendance-donut-segment"
+                    />
+                  </>
+                )}
+
+                <text x="100" y="94" textAnchor="middle" className="attendance-donut-center-number">
+                  {totalStudents}
+                </text>
+                <text x="100" y="116" textAnchor="middle" className="attendance-donut-center-label">
+                  Total Students
+                </text>
+              </svg>
+            </div>
+
             <div className="attendance-pie-legend">
               <div className="attendance-legend-item">
                 <span className="attendance-legend-color attendance-veg"></span>
-                <span>Vegetarian</span>
+                <span className="attendance-legend-text">Vegetarian</span>
+                <span className="attendance-legend-pct">
+                  {totalStudents > 0 ? ((vegCount / totalStudents) * 100).toFixed(0) : 0}%
+                </span>
               </div>
               <div className="attendance-legend-item">
                 <span className="attendance-legend-color attendance-non-veg"></span>
-                <span>Non-Vegetarian</span>
+                <span className="attendance-legend-text">Non-Vegetarian</span>
+                <span className="attendance-legend-pct">
+                  {totalStudents > 0 ? ((nonVegCount / totalStudents) * 100).toFixed(0) : 0}%
+                </span>
               </div>
             </div>
           </div>
