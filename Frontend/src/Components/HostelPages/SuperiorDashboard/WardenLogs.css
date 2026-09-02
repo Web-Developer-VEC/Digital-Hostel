@@ -1,107 +1,552 @@
+/* ================================
+   WARDEN LOGS CONTAINER
+================================ */
+
 .HOS-W-warden-logs-container {
-    width: 80%;
-    /* margin: auto; */
-    margin-left: 19%;
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  margin-left: 19%;
+  box-sizing: border-box;
+
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+
+  padding: 20px;
+  border-radius: 10px;
+
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  min-height: calc(100vh - 40px);
+}
+
+
+/* ================================
+   TITLE
+================================ */
+
+.HOS-W-warden-logs-title {
+  text-align: center;
+
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+
+  margin: 0 0 20px 0;
+}
+
+
+/* ================================
+   SEARCH / FILTER CONTROLS
+================================ */
+
+.HOS-W-warden-logs-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  margin-bottom: 20px;
+}
+
+
+/* Search + Date + Select */
+
+.HOS-W-search-input,
+.HOS-W-date-filter,
+.HOS-W-filter-selector {
+  box-sizing: border-box;
+
+  padding: 10px;
+  font-size: 16px;
+
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+  background: #fff;
+
+  transition: 0.3s;
+}
+
+
+/* Search */
+
+.HOS-W-search-input {
+  width: 60%;
+}
+
+
+/* Date */
+
+.HOS-W-date-filter {
+  width: 20%;
+}
+
+
+/* Select */
+
+.HOS-W-filter-selector {
+  width: 20%;
+
+  cursor: pointer;
+}
+
+
+/* Focus */
+
+.HOS-W-search-input:focus,
+.HOS-W-date-filter:focus,
+.HOS-W-filter-selector:focus {
+  outline: none;
+
+  border-color: #fbbf24;
+
+  box-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+}
+
+
+/* ================================
+   MONTH SECTION
+================================ */
+
+.HOS-W-month-section {
+  margin-bottom: 20px;
+}
+
+
+/* Month heading */
+
+.HOS-W-month-header {
+  font-size: 20px;
+  font-weight: bold;
+
+  color: #333;
+
+  margin: 0 0 10px 0;
+
+  border-bottom: 1px solid #eee;
+
+  padding-bottom: 5px;
+}
+
+
+/* ================================
+   WARDEN ENTRY
+================================ */
+
+.HOS-W-warden-entry {
+  box-sizing: border-box;
+
+  background: #fff;
+
+  padding: 15px;
+
+  margin-bottom: 10px;
+
+  border-left: 5px solid #fbbf24;
+
+  border-radius: 5px;
+
+  transition: 0.3s;
+
+  /* Prevent long text from breaking layout */
+  overflow-wrap: anywhere;
+}
+
+
+/* Desktop hover */
+
+.HOS-W-warden-entry:hover {
+  background: #eef5ff;
+  transform: translateY(-2px);
+}
+
+
+/* ================================
+   TEXT
+================================ */
+
+.HOS-W-warden-status-text {
+  font-weight: bold;
+
+  color: #444;
+
+  line-height: 1.5;
+
+  margin: 0 0 12px 0;
+}
+
+
+.HOS-W-warden-status-text:last-child {
+  margin-bottom: 0;
+}
+
+
+.HOS-W-transfer-text {
+  display: inline-block;
+
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* ================================
+   OTHER TEXT
+================================ */
+
+.HOS-W-warden-activated-text {
+  font-style: italic;
+  color: #777;
+}
+
+
+.HOS-W-duty-text {
+  margin-left: 10px;
+  color: #555;
+}
+
+
+/* ================================
+   NO LOGS
+================================ */
+
+.HOS-W-no-logs-message {
+  text-align: center;
+
+  color: #666;
+
+  padding: 30px 15px;
+
+  line-height: 1.5;
+}
+
+
+/* ================================
+   LOADING
+================================ */
+
+.HOS-W-loading-message {
+  text-align: center;
+
+  padding: 30px;
+
+  color: #555;
+}
+
+
+/* ================================
+   ERROR
+================================ */
+
+.error {
+  text-align: center;
+
+  padding: 30px;
+
+  color: #d32f2f;
+
+  font-weight: bold;
+}
+
+
+/* ==================================================
+   TABLET
+================================================== */
+
+@media screen and (max-width: 1024px) {
+
+  .HOS-W-warden-logs-container {
+    width: 78%;
+    margin-left: 21%;
   }
-  
+
+  .HOS-W-warden-logs-controls {
+    flex-wrap: wrap;
+  }
+
+  .HOS-W-search-input {
+    width: 100%;
+  }
+
+  .HOS-W-date-filter,
+  .HOS-W-filter-selector {
+    width: calc(50% - 8px);
+  }
+}
+
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media screen and (max-width: 768px) {
+
+  /* --------------------------------
+     MAIN CONTAINER
+  -------------------------------- */
+
+  .HOS-W-warden-logs-container {
+    width: 100%;
+
+    /* REMOVE DESKTOP SIDEBAR OFFSET */
+    margin-left: 0;
+    margin-right: 0;
+
+    /* Mobile spacing */
+    padding: 15px;
+
+    border-radius: 0;
+
+    box-shadow: none;
+
+    /* Prevent bottom navigation overlap */
+    padding-bottom: 90px;
+
+    min-height: calc(100vh - 60px);
+
+    box-sizing: border-box;
+  }
+
+
+  /* --------------------------------
+     TITLE
+  -------------------------------- */
+
   .HOS-W-warden-logs-title {
+    font-size: 22px;
+
+    margin-bottom: 18px;
+
     text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #333;
+  }
+
+
+  /* --------------------------------
+     CONTROLS
+  -------------------------------- */
+
+  .HOS-W-warden-logs-controls {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 10px;
+
     margin-bottom: 20px;
   }
-  
+
+
+  /* --------------------------------
+     ALL INPUTS FULL WIDTH
+  -------------------------------- */
+
+  .HOS-W-search-input,
+  .HOS-W-date-filter,
+  .HOS-W-filter-selector {
+
+    width: 100%;
+
+    min-width: 0;
+
+    height: 45px;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+  }
+
+
+  /* --------------------------------
+     MONTH HEADER
+  -------------------------------- */
+
+  .HOS-W-month-header {
+
+    font-size: 18px;
+
+    margin-bottom: 10px;
+  }
+
+
+  /* --------------------------------
+     WARDEN CARD
+  -------------------------------- */
+
+  .HOS-W-warden-entry {
+
+    padding: 14px;
+
+    margin-bottom: 12px;
+
+    border-left-width: 4px;
+
+    border-radius: 6px;
+  }
+
+
+  /* --------------------------------
+     WARDEN TEXT
+  -------------------------------- */
+
+  .HOS-W-warden-status-text {
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    margin-bottom: 12px;
+  }
+
+
+  .HOS-W-transfer-text {
+
+    font-size: 14px;
+
+    line-height: 1.8;
+  }
+
+
+  /* Disable hover movement on mobile */
+
+  .HOS-W-warden-entry:hover {
+
+    background: #fff;
+
+    transform: none;
+  }
+
+
+  /* --------------------------------
+     NO LOGS
+  -------------------------------- */
+
+  .HOS-W-no-logs-message {
+
+    font-size: 14px;
+
+    padding: 25px 10px;
+  }
+}
+
+
+/* ==================================================
+   SMALL PHONES
+================================================== */
+
+@media screen and (max-width: 480px) {
+
+  .HOS-W-warden-logs-container {
+
+    padding: 12px;
+
+    padding-bottom: 90px;
+  }
+
+
+  .HOS-W-warden-logs-title {
+
+    font-size: 20px;
+
+    margin-bottom: 15px;
+  }
+
+
+  .HOS-W-search-input,
+  .HOS-W-date-filter,
+  .HOS-W-filter-selector {
+
+    height: 44px;
+
+    padding: 9px;
+
+    font-size: 13px;
+  }
+
+
+  .HOS-W-month-header {
+
+    font-size: 17px;
+  }
+
+
+  .HOS-W-warden-entry {
+
+    padding: 12px;
+
+    border-left-width: 4px;
+  }
+
+
+  .HOS-W-warden-status-text {
+
+    font-size: 13px;
+
+    line-height: 1.6;
+  }
+
+
+  .HOS-W-transfer-text {
+
+    font-size: 13px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .HOS-W-warden-logs-container {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+
+    /* THIS IS THE IMPORTANT PART */
+    padding: 75px 15px 90px 15px;
+
+    box-sizing: border-box;
+
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .HOS-W-warden-logs-title {
+    display: block;
+    visibility: visible;
+
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+
+    text-align: center;
+
+    margin: 0 0 20px 0;
+  }
+
   .HOS-W-warden-logs-controls {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
-  
+
   .HOS-W-search-input,
+  .HOS-W-date-filter,
   .HOS-W-filter-selector {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: 0.3s;
+    width: 100%;
+    min-width: 0;
+    height: 45px;
+    box-sizing: border-box;
+    font-size: 14px;
   }
-  
-  .HOS-W-search-input {
-    width: 60%;
-  }
-  
-  .HOS-W-search-input:focus,
-  .HOS-W-filter-selector:focus {
-    outline: none;
-    border-color: #fbbf24;
-    box-shadow: 0 0 5px #fbbf24;
-  }
-  
-  .HOS-W-filter-selector {
-    background: #fff;
-    cursor: pointer;
-  }
-  
+
   .HOS-W-warden-entry {
-    background: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-left: 5px solid #fbbf24;
-    border-radius: 5px;
-    transition: 0.3s;
+    padding: 14px;
+    margin-bottom: 12px;
   }
-  
-  .HOS-W-warden-entry:hover {
-    background: #eef5ff;
-    transform: translateY(-2px);
-  }
-  
+
   .HOS-W-warden-status-text {
-    font-weight: bold;
-    color: #444;
+    font-size: 14px;
+    line-height: 1.6;
   }
-  
-  .HOS-W-warden-activated-text {
-    font-style: italic;
-    color: #777;
-  }
-  
-  .HOS-W-duty-text {
-    margin-left: 10px;
-    color: #555;
-  }
-  
-  .HOS-W-month-section {
-    margin-bottom: 20px;
-  }
-  
+
   .HOS-W-month-header {
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+    font-size: 18px;
   }
-
-  @media  screen and (max-width: 768px){
-    .HOS-W-warden-logs-container{
-      margin: auto;
-      margin-bottom: 30px;
-    }
-
-    .HOS-W-warden-logs-controls{
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    .HOS-W-search-input{
-      width: 100%;
-    }
-  }
+}
