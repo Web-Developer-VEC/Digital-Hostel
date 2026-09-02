@@ -21,6 +21,9 @@
   --warden-bg: #f7f7f8;
   --warden-white: #ffffff;
   --warden-border: #e9e9ec;
+  --warden-danger: #dc2626;
+  --warden-danger-dark: #b91c1c;
+  --warden-success: #15803d;
   --warden-shadow: 0 10px 35px rgba(28, 28, 31, 0.08);
   --warden-transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -28,6 +31,11 @@
   --desktop-header-height: 72px;
   --mobile-header-height: 64px;
   --mobile-bottom-nav-height: 76px;
+
+  /* MODAL LAYER — deliberately astronomically high so a portal-rendered
+     modal always wins over any app chrome (sidebar/header), regardless
+     of that chrome's own z-index or stacking context. */
+  --warden-modal-z: 2147483000;
 }
 
 
@@ -43,8 +51,16 @@
 
 
 /* =========================================================
-   MAIN PAGE
+   BODY SCROLL LOCK (applied via JS while any modal is open)
 ========================================================= */
+
+body.warden-modal-open {
+  overflow: hidden;
+  /* iOS momentum-scroll guard */
+  touch-action: none;
+}
+
+
 /* =========================================================
    MAIN PAGE - HEADER SAFE
 ========================================================= */
@@ -55,7 +71,6 @@
 
   margin-left: 16rem;
 
-  /* IMPORTANT: Prevent content going under header */
   padding:
     calc(var(--desktop-header-height) + 1.5rem)
     2rem
@@ -81,13 +96,8 @@
 }
 
 @keyframes warden-page-enter {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 
@@ -98,27 +108,16 @@
 .add-buttons {
   width: 100%;
   max-width: 1400px;
-
   margin: 0 auto 1.8rem;
-
   display: flex;
   justify-content: flex-end;
   align-items: center;
-
-  animation: button-area-enter 0.7s
-    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: button-area-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes button-area-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 
@@ -128,106 +127,53 @@
 
 .add-warden {
   position: relative;
-
   min-height: 48px;
-
   padding: 0.8rem 1.4rem;
-
   border: none;
   border-radius: 12px;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-maroon),
-      var(--warden-maroon-dark)
-    );
-
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
   color: white;
-
   font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.2px;
-
   cursor: pointer;
-
   overflow: hidden;
-
-  box-shadow:
-    0 10px 25px rgba(128, 0, 0, 0.25);
-
-  transition:
-    transform var(--warden-transition),
-    box-shadow var(--warden-transition);
+  box-shadow: 0 10px 25px rgba(128, 0, 0, 0.25);
+  transition: transform var(--warden-transition), box-shadow var(--warden-transition);
 }
-
-
-/* BUTTON SHINE */
 
 .add-warden::before {
   content: "";
-
   position: absolute;
-
   top: 0;
   left: -120%;
-
   width: 55%;
   height: 100%;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent
-    );
-
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transform: skewX(-20deg);
-
   transition: left 0.8s ease;
 }
 
-
-/* BUTTON GLOW */
-
 .add-warden::after {
   content: "";
-
   position: absolute;
-
   width: 100px;
   height: 100px;
-
   border-radius: 50%;
-
   background: rgba(253, 204, 3, 0.22);
-
   right: -40px;
   top: -35px;
-
   filter: blur(10px);
-
   pointer-events: none;
 }
 
-
 .add-warden:hover {
-  transform:
-    translateY(-4px)
-    scale(1.02);
-
-  box-shadow:
-    0 18px 35px rgba(128, 0, 0, 0.32);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 18px 35px rgba(128, 0, 0, 0.32);
 }
 
-.add-warden:hover::before {
-  left: 150%;
-}
-
-.add-warden:active {
-  transform: scale(0.96);
-}
+.add-warden:hover::before { left: 150%; }
+.add-warden:active { transform: scale(0.96); }
 
 
 /* =========================================================
@@ -236,15 +182,10 @@
 
 .wardens-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
-
   width: 100%;
   max-width: 1400px;
-
   margin: 0 auto;
 }
 
@@ -255,154 +196,59 @@
 
 .hos-warden-card {
   position: relative;
-
   min-width: 0;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #fcfcfc
-    );
-
+  background: linear-gradient(145deg, #ffffff, #fcfcfc);
   border-radius: 18px;
-
   overflow: hidden;
-
-  border:
-    1px solid rgba(0, 0, 0, 0.055);
-
-  box-shadow:
-    var(--warden-shadow);
-
+  border: 1px solid rgba(0, 0, 0, 0.055);
+  box-shadow: var(--warden-shadow);
   isolation: isolate;
-
-  animation:
-    warden-card-enter 0.65s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    both;
-
-  transition:
-    transform var(--warden-transition),
-    box-shadow var(--warden-transition),
-    border-color var(--warden-transition);
+  cursor: pointer;
+  animation: warden-card-enter 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform var(--warden-transition), box-shadow var(--warden-transition), border-color var(--warden-transition);
 }
 
-
-/* CARD STAGGER */
-
-.hos-warden-card:nth-child(1) {
-  animation-delay: 0.05s;
-}
-
-.hos-warden-card:nth-child(2) {
-  animation-delay: 0.12s;
-}
-
-.hos-warden-card:nth-child(3) {
-  animation-delay: 0.19s;
-}
-
-.hos-warden-card:nth-child(4) {
-  animation-delay: 0.26s;
-}
-
-.hos-warden-card:nth-child(5) {
-  animation-delay: 0.33s;
-}
-
-.hos-warden-card:nth-child(6) {
-  animation-delay: 0.4s;
-}
-
+.hos-warden-card:nth-child(1) { animation-delay: 0.05s; }
+.hos-warden-card:nth-child(2) { animation-delay: 0.12s; }
+.hos-warden-card:nth-child(3) { animation-delay: 0.19s; }
+.hos-warden-card:nth-child(4) { animation-delay: 0.26s; }
+.hos-warden-card:nth-child(5) { animation-delay: 0.33s; }
+.hos-warden-card:nth-child(6) { animation-delay: 0.4s; }
 
 @keyframes warden-card-enter {
-  from {
-    opacity: 0;
-    transform:
-      translateY(30px)
-      scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform:
-      translateY(0)
-      scale(1);
-  }
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-
-/* =========================================================
-   CARD TOP ACCENT
-========================================================= */
 
 .hos-warden-card::before {
   content: "";
-
   position: absolute;
-
   top: 0;
   left: 0;
-
   width: 100%;
   height: 4px;
-
-  background:
-    linear-gradient(
-      90deg,
-      var(--warden-gold),
-      var(--warden-gold-light),
-      var(--warden-gold)
-    );
-
+  background: linear-gradient(90deg, var(--warden-gold), var(--warden-gold-light), var(--warden-gold));
   background-size: 200% 100%;
-
   z-index: 2;
 }
 
-
-/* GIRLS CARD */
-
 .hos-warden-card.girls::before {
-  background:
-    linear-gradient(
-      90deg,
-      var(--warden-maroon),
-      #b51f1f,
-      var(--warden-maroon)
-    );
+  background: linear-gradient(90deg, var(--warden-maroon), #b51f1f, var(--warden-maroon));
 }
-
-
-/* =========================================================
-   CARD HOVER
-========================================================= */
 
 .hos-warden-card:hover {
   transform: translateY(-8px);
-
-  border-color:
-    rgba(253, 204, 3, 0.35);
-
-  box-shadow:
-    0 22px 45px rgba(28, 28, 31, 0.14);
+  border-color: rgba(253, 204, 3, 0.35);
+  box-shadow: 0 22px 45px rgba(28, 28, 31, 0.14);
 }
 
 .hos-warden-card:hover::before {
-  animation:
-    accent-flow 2s linear infinite;
+  animation: accent-flow 2s linear infinite;
 }
 
-
 @keyframes accent-flow {
-  from {
-    background-position: 0% 50%;
-  }
-
-  to {
-    background-position: 200% 50%;
-  }
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
 }
 
 
@@ -412,106 +258,59 @@
 
 .warden-content {
   padding: 2rem 1.25rem 1.35rem;
-
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
   gap: 1.1rem;
-
   position: relative;
 }
-
-
-/* =========================================================
-   WARDEN IMAGE
-========================================================= */
 
 .warden-image-wrapper {
   width: 118px;
   height: 138px;
-
   position: relative;
-
   overflow: hidden;
-
   border-radius: 18px;
-
   border: 3px solid white;
-
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.12),
-    0 0 0 2px rgba(253, 204, 3, 0.45);
-
-  transition:
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.4s ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 0 0 2px rgba(253, 204, 3, 0.45);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
 }
 
 .warden-image {
   width: 100%;
   height: 100%;
-
   display: block;
-
   object-fit: cover;
-
   transition: transform 0.7s ease;
 }
 
-.hos-warden-card:hover .warden-image-wrapper {
-  transform:
-    translateY(-5px)
-    scale(1.04);
-}
+.hos-warden-card:hover .warden-image-wrapper { transform: translateY(-5px) scale(1.04); }
+.hos-warden-card:hover .warden-image { transform: scale(1.08); }
 
-.hos-warden-card:hover .warden-image {
-  transform: scale(1.08);
-}
-
-
-/* =========================================================
-   WARDEN INFO
-========================================================= */
-
-.warden-info {
-  width: 100%;
-  text-align: center;
-}
+.warden-info { width: 100%; text-align: center; }
 
 .warden-name {
   margin: 0 0 0.8rem;
-
   font-size: 1.15rem;
   font-weight: 750;
-
   color: var(--warden-dark);
-
   line-height: 1.35;
-
   transition: color 0.3s ease;
 }
 
-.hos-warden-card:hover .warden-name {
-  color: var(--warden-maroon);
-}
+.hos-warden-card:hover .warden-name { color: var(--warden-maroon); }
 
 .warden-detail {
   margin: 0.38rem 0;
-
   font-size: 0.82rem;
   line-height: 1.5;
-
   color: var(--warden-muted);
-
   overflow-wrap: anywhere;
 }
 
 .label {
   font-weight: 700;
   color: var(--warden-dark);
-
   margin-right: 0.35rem;
 }
 
@@ -522,116 +321,76 @@
 
 .toggle-container {
   width: 100%;
-
   display: flex;
   justify-content: center;
-
   padding-top: 0.4rem;
 }
 
 .toggle-button {
   width: 46px;
   height: 46px;
-
   border-radius: 14px;
-
-  border:
-    1.5px solid rgba(253, 204, 3, 0.7);
-
+  border: 1.5px solid rgba(253, 204, 3, 0.7);
   background: white;
-
   color: var(--warden-maroon);
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  box-shadow:
-    0 6px 15px rgba(0, 0, 0, 0.07);
-
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
   transition: all var(--warden-transition);
 }
 
 .toggle-button:hover {
-  transform:
-    translateY(-4px)
-    rotate(3deg);
-
-  box-shadow:
-    0 12px 22px rgba(253, 204, 3, 0.22);
+  transform: translateY(-4px) rotate(3deg);
+  box-shadow: 0 12px 22px rgba(253, 204, 3, 0.22);
 }
 
 .toggle-button.active {
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-gold),
-      var(--warden-gold-light)
-    );
-
+  background: linear-gradient(135deg, var(--warden-gold), var(--warden-gold-light));
   color: var(--warden-maroon);
 }
 
-.toggle-icon {
-  width: 20px;
-  height: 20px;
-}
+.toggle-icon { width: 20px; height: 20px; }
 
 
 /* =========================================================
-   MODAL OVERLAY
-========================================================= */
-
-/* =========================================================
-   FULL SCREEN MODAL BACKGROUND OVERLAY
+   MODAL OVERLAY (rendered through a React portal into <body>,
+   so it is never clipped or covered by the sidebar/header —
+   see the Modal wrapper component in WardenProfile.jsx)
 ========================================================= */
 
 .modal-overlay {
   position: fixed;
-
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-
   width: 100vw;
   height: 100vh;
   min-height: 100dvh;
-
   margin: 0;
   padding: 1.25rem;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* FULL ASH BACKGROUND */
-  background: rgba(35, 35, 38, 0.72);
-
+  background: rgba(20, 18, 22, 0.74);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
 
-  z-index: 99999;
-
+  /* Sits above absolutely everything, including a sidebar/header
+     that may itself use position:fixed + a high z-index. */
+  z-index: var(--warden-modal-z);
   isolation: isolate;
 
   animation: overlay-enter 0.25s ease both;
 }
 
-
 @keyframes overlay-enter {
-  from {
-    opacity: 0;
-    background: rgba(35, 35, 38, 0);
-  }
-
-  to {
-    opacity: 1;
-    background: rgba(35, 35, 38, 0.72);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
+
 
 /* =========================================================
    ADD / EDIT WARDEN MODAL
@@ -639,141 +398,93 @@
 
 .modal-content {
   width: min(680px, 100%);
-
-  max-height:
-    calc(100dvh - 2.5rem);
-
+  max-height: calc(100dvh - 2.5rem);
   overflow-y: auto;
-
   position: relative;
-
   padding: 1.75rem;
-
   border-radius: 24px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #fafafa
-    );
-
-  border:
-    1px solid rgba(255, 255, 255, 0.8);
-
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.3);
-
-  animation:
-    modal-enter 0.5s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    both;
+  background: linear-gradient(145deg, #ffffff, #fafafa);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+  animation: modal-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 
 @keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform:
-      translateY(35px)
-      scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform:
-      translateY(0)
-      scale(1);
-  }
+  from { opacity: 0; transform: translateY(35px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-
-/* =========================================================
-   MODAL SCROLLBAR
-========================================================= */
-
-.modal-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+.modal-content::-webkit-scrollbar { width: 6px; }
+.modal-content::-webkit-scrollbar-track { background: transparent; }
 .modal-content::-webkit-scrollbar-thumb {
-  background:
-    linear-gradient(
-      var(--warden-gold),
-      var(--warden-maroon)
-    );
-
+  background: linear-gradient(var(--warden-gold), var(--warden-maroon));
   border-radius: 10px;
 }
 
 
 /* =========================================================
-   MODAL HEADER
+   MODAL HEADER (profile view / edit form)
 ========================================================= */
 
 .modal-header {
   display: flex;
-
   justify-content: flex-end;
-
   gap: 0.6rem;
-
   margin-bottom: 1rem;
 }
 
 .icon-button {
   width: 42px;
   height: 42px;
-
   border: none;
-
   border-radius: 13px;
-
   background: #f4f4f5;
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   transition: all 0.3s ease;
 }
 
-.icon-button:hover {
-  transform:
-    translateY(-3px)
-    rotate(4deg);
-
-  background: #ececee;
-}
-
-.icon-button.edit {
-  color: var(--warden-maroon);
-}
-
-.icon-button.close {
-  color: var(--warden-dark);
-}
+.icon-button:hover { transform: translateY(-3px) rotate(4deg); background: #ececee; }
+.icon-button.edit { color: var(--warden-maroon); }
+.icon-button.close { color: var(--warden-dark); }
 
 
 /* =========================================================
-   MODAL BODY
+   MODAL BODY / PROFILE VIEW
 ========================================================= */
 
 .modal-body {
   width: 100%;
-
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
   text-align: center;
+}
+
+.warden-profile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-image {
+  width: 128px;
+  height: 152px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 4px solid white;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(253, 204, 3, 0.5);
+  margin-bottom: 1rem;
+}
+
+.profile-name {
+  margin: 0 0 1.1rem;
+  font-size: 1.35rem;
+  font-weight: 750;
+  color: var(--warden-dark);
 }
 
 
@@ -781,69 +492,74 @@
    EDIT FORM
 ========================================================= */
 
-.edit-form {
-  width: 100%;
+.edit-form { width: 100%; }
+
+.edit-form-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.edit-form-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+  color: white;
+  box-shadow: 0 8px 18px rgba(128, 0, 0, 0.2);
+}
+
+.edit-form-header h2 {
+  margin: 0;
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: var(--warden-dark);
+}
+
+.edit-form-header p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--warden-muted);
 }
 
 .edit-form h2 {
   margin: 0 0 1.5rem;
-
   text-align: center;
-
   font-size: 1.45rem;
   font-weight: 750;
-
   color: var(--warden-dark);
 }
 
-
-/* =========================================================
-   FORM GRID
-========================================================= */
-
 .form-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.form-row {
-  min-width: 0;
-  padding: 0;
-}
-
-
-/* =========================================================
-   FORM GROUP
-========================================================= */
+.form-row { min-width: 0; padding: 0; }
 
 .form-group {
   width: 100%;
-
   margin-bottom: 1rem;
-
   display: flex;
   flex-direction: column;
-
   text-align: left;
 }
 
 .form-group label {
   margin-bottom: 0.5rem;
-
   font-size: 0.82rem;
   font-weight: 700;
-
   color: var(--warden-dark);
 }
-
-
-/* =========================================================
-   INPUTS
-========================================================= */
 
 .form-group input,
 .form-group select,
@@ -851,237 +567,76 @@
 .form-row select,
 .warden-status-select {
   width: 100%;
-
   min-width: 0;
-
   height: 46px;
-
   margin: 0;
-
   padding: 0 0.9rem;
-
-  border:
-    1px solid #dedee2;
-
+  border: 1px solid #dedee2;
   border-radius: 11px;
-
   background: white;
-
   color: var(--warden-dark);
-
   font-size: 0.88rem;
-
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
-
 
 .form-group input:hover,
 .form-group select:hover,
 .form-row input:hover,
-.form-row select:hover {
-  border-color:
-    rgba(128, 0, 0, 0.35);
-}
-
+.form-row select:hover { border-color: rgba(128, 0, 0, 0.35); }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-row input:focus,
 .form-row select:focus {
   outline: none;
-
   border-color: var(--warden-gold);
-
-  box-shadow:
-    0 0 0 4px rgba(253, 204, 3, 0.15);
-
+  box-shadow: 0 0 0 4px rgba(253, 204, 3, 0.15);
   transform: translateY(-1px);
 }
 
 
 /* =========================================================
-   FILE INPUT AREA
-========================================================= */
-
-.file-input {
-  width: 100%;
-
-  min-height: 110px;
-
-  padding: 1rem;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border:
-    2px dashed rgba(128, 0, 0, 0.28);
-
-  border-radius: 14px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(128, 0, 0, 0.025),
-      rgba(253, 204, 3, 0.04)
-    );
-
-  cursor: pointer;
-
-  transition: all 0.3s ease;
-}
-
-.file-input:hover {
-  border-color: var(--warden-gold);
-
-  background:
-    rgba(253, 204, 3, 0.08);
-
-  transform: translateY(-2px);
-}
-
-
-/* =========================================================
-   CHECKBOX
+   CHECKBOX (edit form years)
 ========================================================= */
 
 .checkbox-container {
   display: flex;
-
   flex-wrap: wrap;
-
   gap: 0.7rem;
-
   margin-top: 0.5rem;
 }
 
 .checkbox-item {
-  flex:
-    1 1 calc(50% - 0.7rem);
-
+  flex: 1 1 calc(50% - 0.7rem);
   min-width: 130px;
-
   display: flex;
-
   align-items: center;
-
   gap: 0.5rem;
 }
 
 .checkbox-item input[type="checkbox"] {
   width: 17px;
   height: 17px;
-
   margin: 0;
-
-  accent-color:
-    var(--warden-maroon);
-
+  accent-color: var(--warden-maroon);
   cursor: pointer;
 }
 
 .checkbox-item label {
   margin: 0;
-
   font-size: 0.84rem;
   font-weight: 500;
-
   color: var(--warden-text);
-
   cursor: pointer;
 }
 
 
 /* =========================================================
-   RADIO BUTTONS
+   EDIT-FORM AVATAR UPLOAD
+   Now shares the .avatar-frame-* rules defined further down
+   (search "AVATAR PHOTO UPLOAD"), so both the Add Warden form
+   and the Edit Warden form use the identical framed-square style.
 ========================================================= */
-
-.radio-container {
-  display: flex;
-
-  flex-wrap: wrap;
-
-  gap: 1rem;
-}
-
-.radio-container label {
-  display: flex;
-
-  align-items: center;
-
-  gap: 0.45rem;
-
-  font-size: 0.85rem;
-
-  cursor: pointer;
-}
-
-.radio-container input {
-  width: auto;
-
-  accent-color:
-    var(--warden-maroon);
-}
-
-
-/* =========================================================
-   YEAR STATUS
-========================================================= */
-
-.status-year-dropdown {
-  width: 100%;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 1rem;
-
-  margin-bottom: 0.9rem;
-
-  padding: 0.8rem;
-
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #f9f9fa,
-      #f4f4f6
-    );
-
-  transition: transform 0.25s ease;
-}
-
-.status-year-dropdown:hover {
-  transform: translateX(3px);
-}
-
-.warden-pri-years {
-  flex: 1;
-
-  margin: 0;
-
-  font-size: 0.85rem;
-  font-weight: 650;
-
-  color: var(--warden-dark);
-}
-
-.warden-status-select {
-  flex: 1;
-
-  min-width: 120px;
-
-  height: 42px;
-
-  cursor: pointer;
-}
 
 
 /* =========================================================
@@ -1090,11 +645,8 @@
 
 .form-actions {
   width: 100%;
-
   display: flex;
-
   gap: 0.8rem;
-
   margin-top: 1.7rem;
 }
 
@@ -1103,141 +655,760 @@
 .delete-button,
 .confirm-button {
   min-height: 46px;
-
   flex: 1;
-
   padding: 0.75rem 1rem;
-
   border-radius: 11px;
-
   font-size: 0.87rem;
   font-weight: 700;
-
   cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
-
-
-/* SAVE BUTTON */
 
 .save-button {
   border: none;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-gold),
-      var(--warden-gold-light)
-    );
-
+  background: linear-gradient(135deg, var(--warden-gold), var(--warden-gold-light));
   color: #302500;
-
-  box-shadow:
-    0 8px 18px rgba(253, 204, 3, 0.25);
+  box-shadow: 0 8px 18px rgba(253, 204, 3, 0.25);
 }
 
-.save-button:hover {
-  transform: translateY(-3px);
-
-  box-shadow:
-    0 14px 26px rgba(253, 204, 3, 0.34);
-}
-
-.save-button:active {
-  transform: scale(0.97);
-}
-
-
-/* CANCEL BUTTON */
+.save-button:hover { transform: translateY(-3px); box-shadow: 0 14px 26px rgba(253, 204, 3, 0.34); }
+.save-button:active { transform: scale(0.97); }
 
 .cancel-button {
   background: white;
-
   color: var(--warden-dark);
-
-  border:
-    1px solid #dedee2;
+  border: 1px solid #dedee2;
 }
 
-.cancel-button:hover {
-  background: #f5f5f6;
-
-  transform: translateY(-2px);
-}
-
-
-/* DELETE BUTTON */
+.cancel-button:hover { background: #f5f5f6; transform: translateY(-2px); }
 
 .delete-button {
-  border:
-    1px solid rgba(220, 38, 38, 0.2);
-
+  width: 100%;
+  margin-top: 1.4rem;
+  border: 1px solid rgba(220, 38, 38, 0.2);
   background: white;
-
-  color: #dc2626;
-
+  color: var(--warden-danger);
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   gap: 0.5rem;
+  min-height: 46px;
+  border-radius: 11px;
+  font-size: 0.87rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.delete-button:hover {
-  background: #fff1f1;
-
-  transform: translateY(-2px);
-}
+.delete-button:hover { background: #fff1f1; transform: translateY(-2px); }
 
 
 /* =========================================================
-   CONFIRM MODAL
+   CONFIRM MODAL — redesigned
 ========================================================= */
 
 .confirm-modal {
-  width: min(420px, 100%);
-
-  padding: 2rem;
-
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 2.5rem);
+  overflow-y: auto;
+  padding: 2rem 1.85rem 1.85rem;
   border-radius: 22px;
-
-  background: white;
-
+  background: linear-gradient(145deg, #ffffff, #fcfcfd);
   text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);
+  animation: modal-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
-  box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.25);
+.confirm-icon-badge {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
 
-  animation:
-    modal-enter 0.4s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    both;
+.confirm-icon-badge.tone-warn {
+  background: linear-gradient(135deg, var(--warden-gold-dark), var(--warden-gold));
+  color: #3a2c00;
+}
+
+.confirm-icon-badge.tone-safe {
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+}
+
+.confirm-icon-badge.tone-danger {
+  background: linear-gradient(135deg, var(--warden-danger), var(--warden-danger-dark));
 }
 
 .confirm-modal h3 {
-  margin: 0 0 0.8rem;
-
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 750;
   color: var(--warden-dark);
 }
 
 .confirm-modal p {
-  margin: 0 0 1.5rem;
-
+  margin: 0 0 1.4rem;
   color: var(--warden-muted);
-
+  font-size: 0.9rem;
   line-height: 1.6;
+}
+
+.confirm-modal p strong {
+  color: var(--warden-dark);
+}
+
+/* Reallocation list replaces the old bare label+select rows */
+
+.reallocation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.4rem;
+  text-align: left;
+}
+
+.reallocation-card {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f9f9fa, #f4f4f6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: border-color 0.25s ease, transform 0.2s ease;
+}
+
+.reallocation-card:focus-within {
+  border-color: rgba(253, 204, 3, 0.7);
+  transform: translateX(2px);
+}
+
+.reallocation-year {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.2px;
+  color: var(--warden-maroon);
+}
+
+.warden-status-select {
+  height: 44px;
+  cursor: pointer;
 }
 
 .confirm-actions {
   display: flex;
-
   gap: 0.8rem;
 }
+
+.confirm-actions .cancel-button,
+.confirm-actions .confirm-button {
+  flex: 1;
+}
+
+.confirm-button {
+  border: none;
+  color: white;
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+  box-shadow: 0 10px 22px rgba(128, 0, 0, 0.24);
+}
+
+.confirm-button:hover { transform: translateY(-3px); box-shadow: 0 16px 30px rgba(128, 0, 0, 0.3); }
+.confirm-button:active { transform: scale(0.97); }
+
+.confirm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Danger variant used for the delete-warden confirmation */
+
+.confirm-modal.tone-danger .confirm-button {
+  background: linear-gradient(135deg, var(--warden-danger), var(--warden-danger-dark));
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.24);
+}
+
+.confirm-modal.tone-danger .confirm-button:hover {
+  box-shadow: 0 16px 30px rgba(220, 38, 38, 0.3);
+}
+
+
+/* =========================================================
+   PREMIUM ADD WARDEN MODAL
+========================================================= */
+
+.add-warden-overlay { padding: 1.5rem; overflow-y: auto; }
+
+.add-warden-modal {
+  position: relative;
+  z-index: 2;
+  width: min(760px, 100%);
+  max-height: calc(100dvh - 3rem);
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #ffffff 0%, #fcfcfd 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.28), 0 12px 35px rgba(0, 0, 0, 0.12);
+  animation: premium-add-modal-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.add-warden-modal::-webkit-scrollbar { width: 6px; }
+.add-warden-modal::-webkit-scrollbar-track { background: transparent; }
+.add-warden-modal::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--warden-gold), var(--warden-maroon));
+  border-radius: 10px;
+}
+
+@keyframes premium-add-modal-enter {
+  from { opacity: 0; transform: translateY(35px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+/* =========================================================
+   MODAL HEADER (add warden)
+========================================================= */
+
+.add-warden-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: 100%;
+  padding: 1.35rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.add-warden-title-area { display: flex; align-items: center; gap: 0.9rem; }
+
+.add-warden-title-icon {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+  color: white;
+  box-shadow: 0 8px 18px rgba(128, 0, 0, 0.2);
+}
+
+.add-warden-title-area h2 { margin: 0; font-size: 1.25rem; font-weight: 750; color: var(--warden-dark); }
+.add-warden-title-area p { margin: 0.25rem 0 0; font-size: 0.78rem; color: var(--warden-muted); }
+
+.add-modal-close {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: #f5f5f6;
+  color: var(--warden-dark);
+  cursor: pointer;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.add-modal-close:hover { transform: rotate(90deg); background: #eeeeef; }
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.add-warden-form {
+  padding: 1.5rem 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-section { width: 100%; padding-bottom: 0.25rem; margin-bottom: 1.5rem; }
+
+.form-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-section-heading span {
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: var(--warden-dark);
+}
+
+.section-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(253, 204, 3, 0.6), transparent);
+}
+
+.add-warden-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.35rem 1.15rem;
+}
+
+.premium-field { display: flex; flex-direction: column; gap: 0.55rem; margin: 0; }
+
+.premium-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--warden-dark);
+}
+
+.premium-field label svg { color: var(--warden-maroon); }
+
+.premium-field input,
+.premium-field select {
+  width: 100%;
+  height: 48px;
+  padding: 0 0.9rem;
+  border: 1px solid #dedee3;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--warden-dark);
+  font-size: 0.88rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.premium-field input::placeholder { color: #aaaaaf; }
+.premium-field input:hover,
+.premium-field select:hover { border-color: rgba(128, 0, 0, 0.3); }
+
+.premium-field input:focus,
+.premium-field select:focus {
+  outline: none;
+  border-color: var(--warden-gold);
+  box-shadow: 0 0 0 4px rgba(253, 204, 3, 0.14);
+}
+
+.full-width-field { grid-column: 1 / -1; }
+
+
+/* =========================================================
+   AVATAR PHOTO UPLOAD — replaces the old rectangular dropzone
+   with a framed-square photo, a corner camera badge, and an explicit
+   "Upload photo" / "Change photo" button — shared by both the Add
+   Warden and Edit Warden forms.
+========================================================= */
+
+.photo-upload-section { width: 100%; }
+
+.section-label {
+  display: block;
+  margin-bottom: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 750;
+  color: var(--warden-dark);
+}
+
+.hidden-file-input { display: none; }
+
+.avatar-frame-row {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(128, 0, 0, 0.025), rgba(253, 204, 3, 0.05));
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.avatar-frame {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: block;
+}
+
+.avatar-frame-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7f1e6;
+  border: 2px solid var(--warden-maroon);
+  color: var(--warden-maroon);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.avatar-frame:hover .avatar-frame-photo {
+  border-color: var(--warden-gold);
+  transform: scale(1.03);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-frame-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: image-preview-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes image-preview-enter {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.avatar-frame-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+  color: var(--warden-gold);
+  border: 3px solid white;
+  box-shadow: 0 6px 14px rgba(128, 0, 0, 0.28);
+  transition: transform 0.3s ease;
+}
+
+.avatar-frame:hover .avatar-frame-badge { transform: scale(1.1) rotate(-8deg); }
+
+.avatar-frame-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.avatar-frame-meta strong { font-size: 0.9rem; color: var(--warden-dark); }
+
+.avatar-frame-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: fit-content;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(128, 0, 0, 0.35);
+  border-radius: 10px;
+  background: white;
+  color: var(--warden-maroon);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.avatar-frame-button:hover {
+  background: rgba(128, 0, 0, 0.06);
+  border-color: var(--warden-maroon);
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   YEARS MULTI-SELECT DROPDOWN (edit form)
+========================================================= */
+
+.year-multiselect {
+  position: relative;
+  width: 100%;
+}
+
+.year-multiselect-trigger {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  border: 1px solid #dedee3;
+  border-radius: 12px;
+  background: white;
+  color: var(--warden-dark);
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.year-multiselect-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.year-multiselect-trigger span.placeholder {
+  color: #9d9da3;
+  font-weight: 500;
+}
+
+.year-multiselect-trigger:hover { border-color: rgba(128, 0, 0, 0.3); }
+
+.year-multiselect-trigger.open {
+  border-color: var(--warden-gold);
+  box-shadow: 0 0 0 4px rgba(253, 204, 3, 0.14);
+}
+
+.year-multiselect-chevron {
+  flex-shrink: 0;
+  color: var(--warden-maroon);
+  transition: transform 0.25s ease;
+}
+
+.year-multiselect-trigger.open .year-multiselect-chevron { transform: rotate(180deg); }
+
+.year-multiselect-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 0.4rem;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+  animation: year-panel-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes year-panel-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.year-multiselect-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.6rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.year-multiselect-option:hover { background: rgba(253, 204, 3, 0.09); }
+.year-multiselect-option.selected { background: rgba(128, 0, 0, 0.05); }
+
+.year-multiselect-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.year-multiselect-option .custom-check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid #c9c9ce;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.year-multiselect-option.selected .custom-check {
+  border-color: var(--warden-maroon);
+  background: var(--warden-maroon);
+}
+
+.year-multiselect-option.selected .custom-check::after {
+  content: "✓";
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.year-multiselect-option .label-text {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--warden-text);
+}
+
+.year-multiselect-panel::-webkit-scrollbar { width: 5px; }
+.year-multiselect-panel::-webkit-scrollbar-track { background: transparent; }
+.year-multiselect-panel::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--warden-gold), var(--warden-maroon));
+  border-radius: 10px;
+}
+
+
+/* =========================================================
+   ASSIGNMENT SECTION
+========================================================= */
+
+.assignment-section {
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fafafa, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.055);
+}
+
+.assignment-description {
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: var(--warden-muted);
+  line-height: 1.6;
+}
+
+.premium-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.premium-year-option {
+  position: relative;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.premium-year-option:hover {
+  transform: translateY(-2px);
+  border-color: rgba(253, 204, 3, 0.7);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+
+.premium-year-option.selected {
+  border-color: var(--warden-gold);
+  background: rgba(253, 204, 3, 0.08);
+  box-shadow: 0 5px 15px rgba(253, 204, 3, 0.12);
+}
+
+.premium-year-option input { position: absolute; opacity: 0; pointer-events: none; }
+
+.custom-check {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #c9c9ce;
+  border-radius: 6px;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.premium-year-option.selected .custom-check { border-color: var(--warden-maroon); background: var(--warden-maroon); }
+.premium-year-option.selected .custom-check::after { content: "✓"; color: white; font-size: 12px; font-weight: 800; }
+
+.year-option-text { font-size: 0.8rem; font-weight: 650; color: var(--warden-text); }
+
+
+/* =========================================================
+   ADD WARDEN ACTIONS
+========================================================= */
+
+.add-warden-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.add-cancel-button,
+.add-submit-button {
+  min-width: 140px;
+  min-height: 48px;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.add-cancel-button { border: 1px solid #dedee2; background: white; color: var(--warden-dark); }
+.add-cancel-button:hover { transform: translateY(-2px); background: #f7f7f8; }
+
+.add-submit-button {
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--warden-maroon), var(--warden-maroon-dark));
+  color: white;
+  box-shadow: 0 10px 22px rgba(128, 0, 0, 0.2);
+}
+
+.add-submit-button:hover { transform: translateY(-3px); box-shadow: 0 16px 30px rgba(128, 0, 0, 0.28); }
+.add-submit-button:active,
+.add-cancel-button:active { transform: scale(0.97); }
+
+.add-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   PROFILE DETAILS BLOCK
+========================================================= */
+
+.profile- {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 1.2rem 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f8f8f9, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.055);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(0, 0, 0, 0.035);
+}
+
+.profile- p {
+  margin: 0;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.87rem;
+  line-height: 1.6;
+  color: var(--warden-muted);
+  text-align: left;
+}
+
+.profile- p:first-child { padding-top: 0; }
+.profile- p:last-child { padding-bottom: 0; border-bottom: none; }
 
 
 /* =========================================================
@@ -1245,17 +1416,8 @@
 ========================================================= */
 
 @media (max-width: 1200px) {
-
-  .warden-container {
-    padding: 1.5rem;
-  }
-
-  .wardens-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    gap: 1.25rem;
-  }
+  .warden-container { padding: 1.5rem; }
+  .wardens-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
 }
 
 
@@ -1265,239 +1427,130 @@
 
 @media (max-width: 768px) {
 
-  /* PAGE */
-
   .warden-container {
     width: 100%;
-
     min-height: 100dvh;
-
     margin-left: 0;
-
     margin-top: 3.2rem;
     margin-bottom: 5.5rem;
-
     padding: 1rem 0.85rem;
-
     overflow-x: hidden;
   }
 
-
-  /* ADD BUTTON */
-
-  .add-buttons {
-    margin-bottom: 1.1rem;
-
-    justify-content: stretch;
-  }
+  .add-buttons { margin-bottom: 1.1rem; justify-content: stretch; }
 
   .add-warden {
     width: 100%;
-
     min-height: 52px;
-
     border-radius: 14px;
-
     font-size: 0.92rem;
-
-    box-shadow:
-      0 10px 25px rgba(128, 0, 0, 0.22);
+    box-shadow: 0 10px 25px rgba(128, 0, 0, 0.22);
   }
 
+  .wardens-grid { grid-template-columns: 1fr; gap: 1rem; }
 
-  /* GRID */
+  .hos-warden-card { border-radius: 16px; }
+  .warden-content { padding: 1.5rem 1rem 1.2rem; }
+  .warden-image-wrapper { width: 105px; height: 125px; }
 
-  .wardens-grid {
-    grid-template-columns: 1fr;
+  /* MOBILE MODAL — BOTTOM SHEET EXPERIENCE */
 
-    gap: 1rem;
-  }
-
-
-  /* CARD */
-
-  .hos-warden-card {
-    border-radius: 16px;
-  }
-
-  .warden-content {
-    padding:
-      1.5rem
-      1rem
-      1.2rem;
-  }
-
-  .warden-image-wrapper {
-    width: 105px;
-    height: 125px;
-  }
-
-
-  /* =====================================================
-     MOBILE MODAL — BOTTOM SHEET EXPERIENCE
-  ===================================================== */
-
-  .modal-overlay {
-    align-items: flex-end;
-
-    padding: 0;
-  }
+  .modal-overlay { align-items: flex-end; padding: 0; }
 
   .modal-content {
     width: 100%;
     max-width: 100%;
-
     max-height: 92dvh;
-
-    padding:
-      1.2rem
-      1rem
-      1.5rem;
-
-    border-radius:
-      24px
-      24px
-      0
-      0;
-
-    animation:
-      mobile-modal-enter 0.5s
-      cubic-bezier(0.16, 1, 0.3, 1)
-      both;
+    padding: 1.2rem 1rem 1.5rem;
+    border-radius: 24px 24px 0 0;
+    animation: mobile-modal-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-
 
   @keyframes mobile-modal-enter {
-
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
+  .modal-header { margin-bottom: 0.8rem; }
+  .icon-button { width: 40px; height: 40px; }
 
-  /* MODAL HEADER */
+  .edit-form h2 { font-size: 1.25rem; margin-bottom: 1.25rem; }
 
-  .modal-header {
-    margin-bottom: 0.8rem;
-  }
-
-  .icon-button {
-    width: 40px;
-    height: 40px;
-  }
-
-
-  /* FORM TITLE */
-
-  .edit-form h2 {
-    font-size: 1.25rem;
-
-    margin-bottom: 1.25rem;
-  }
-
-
-  /* FORM GRID */
-
-  .form-grid {
-    grid-template-columns: 1fr;
-
-    gap: 0;
-  }
-
-  .form-row {
-    width: 100%;
-  }
-
-
-  /* INPUT */
+  .form-grid { grid-template-columns: 1fr; gap: 0; }
+  .form-row { width: 100%; }
 
   .form-group input,
   .form-group select,
   .form-row input,
-  .form-row select {
-    height: 48px;
+  .form-row select { height: 48px; font-size: 16px; }
 
-    font-size: 16px;
-  }
+  .checkbox-container { gap: 0.6rem; }
 
-
-  /* FILE INPUT */
-
-  .file-input {
-    min-height: 100px;
-  }
-
-
-  /* STATUS */
-
-  .status-year-dropdown {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 0.65rem;
-  }
-
-  .warden-status-select {
-    width: 100%;
-
-    flex: none;
-  }
-
-
-  /* CHECKBOX */
-
-  .checkbox-container {
-    gap: 0.6rem;
-  }
-
-
-  /* ACTIONS */
-
-  .form-actions {
-    flex-direction: column-reverse;
-
-    gap: 0.7rem;
-
-    margin-top: 1.4rem;
-  }
-
+  .form-actions { flex-direction: column-reverse; gap: 0.7rem; margin-top: 1.4rem; }
   .save-button,
   .cancel-button,
-  .delete-button {
-    width: 100%;
+  .delete-button { width: 100%; flex: none; min-height: 50px; }
 
-    flex: none;
+  /* CONFIRM MODAL — bottom sheet on mobile too, for thumb reach */
 
-    min-height: 50px;
-  }
-
-
-  /* CONFIRM MODAL */
+  .confirm-overlay,
+  .modal-overlay:has(.confirm-modal) { align-items: flex-end; padding: 0; }
 
   .confirm-modal {
-    width:
-      calc(100% - 2rem);
-
-    padding: 1.5rem;
-
-    border-radius: 20px;
-  }
-
-  .confirm-actions {
-    flex-direction: column;
-  }
-
-  .confirm-button,
-  .confirm-actions .cancel-button {
     width: 100%;
+    max-width: 100%;
+    max-height: 90dvh;
+    border-radius: 24px 24px 0 0;
+    padding: 1.75rem 1.25rem 1.5rem;
+    animation: mobile-modal-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+
+  .confirm-actions { flex-direction: column-reverse; }
+
+  /* ADD-WARDEN AVATAR ROW */
+
+  .avatar-frame-row { padding: 0.9rem; gap: 0.9rem; }
+  .avatar-frame { width: 68px; height: 68px; }
+}
+
+
+/* =========================================================
+   ADD WARDEN MODAL — TABLET/MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .add-warden-overlay { padding: 0; align-items: flex-end; }
+
+  .add-warden-modal {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 24px 24px 0 0;
+    animation: mobile-premium-modal-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes mobile-premium-modal-enter {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .add-warden-modal-header { padding: 1rem; }
+  .add-warden-form { padding: 1.25rem 1rem 1.5rem; gap: 1.7rem; }
+  .add-warden-form .form-grid { grid-template-columns: 1fr; gap: 1.1rem; }
+  .full-width-field { grid-column: auto; }
+  .premium-checkbox-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .add-warden-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 1rem 0 0;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(10px);
+    flex-direction: column-reverse;
+  }
+
+  .add-cancel-button,
+  .add-submit-button { width: 100%; }
 }
 
 
@@ -1507,70 +1560,35 @@
 
 @media (max-width: 480px) {
 
-  .warden-container {
-    padding:
-      0.85rem
-      0.65rem;
-  }
+  .warden-container { padding: 0.85rem 0.65rem; }
+  .add-warden { min-height: 50px; font-size: 0.87rem; }
+  .warden-content { padding: 1.35rem 0.8rem 1rem; }
+  .warden-image-wrapper { width: 95px; height: 115px; }
+  .warden-name { font-size: 1rem; }
+  .warden-detail { font-size: 0.76rem; }
+  .toggle-button { width: 44px; height: 44px; }
 
-  .add-warden {
-    min-height: 50px;
+  .modal-content { padding: 1rem 0.85rem 1.3rem; }
+  .form-group label { font-size: 0.78rem; }
 
-    font-size: 0.87rem;
-  }
+  .checkbox-container { flex-direction: column; }
+  .checkbox-item { flex: none; width: 100%; min-width: 100%; }
 
-  .warden-content {
-    padding:
-      1.35rem
-      0.8rem
-      1rem;
-  }
+  .confirm-modal { padding: 1.5rem 1rem 1.35rem; }
+  .confirm-icon-badge { width: 52px; height: 52px; }
 
-  .warden-image-wrapper {
-    width: 95px;
-    height: 115px;
-  }
+  .add-warden-title-icon { width: 42px; height: 42px; border-radius: 12px; }
+  .add-warden-title-area h2 { font-size: 1.08rem; }
+  .add-warden-title-area p { font-size: 0.7rem; }
+  .add-modal-close { width: 38px; height: 38px; }
 
-  .warden-name {
-    font-size: 1rem;
-  }
+  .assignment-section { padding: 1rem 0.85rem; }
+  .premium-checkbox-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+  .premium-year-option { min-height: 50px; }
+  .form-section-heading { margin-bottom: 1rem; }
 
-  .warden-detail {
-    font-size: 0.76rem;
-  }
-
-  .toggle-button {
-    width: 44px;
-    height: 44px;
-  }
-
-
-  /* MOBILE FORM */
-
-  .modal-content {
-    padding:
-      1rem
-      0.85rem
-      1.3rem;
-  }
-
-  .form-group label {
-    font-size: 0.78rem;
-  }
-
-
-  /* CHECKBOX STACK */
-
-  .checkbox-container {
-    flex-direction: column;
-  }
-
-  .checkbox-item {
-    flex: none;
-
-    width: 100%;
-    min-width: 100%;
-  }
+  .avatar-upload-row { flex-direction: column; text-align: center; }
+  .avatar-upload-meta { align-items: center; }
 }
 
 
@@ -1580,40 +1598,13 @@
 
 @media (max-width: 360px) {
 
-  .warden-container {
-    padding:
-      0.75rem
-      0.5rem;
-  }
-
-  .add-warden {
-    font-size: 0.8rem;
-
-    padding:
-      0.7rem
-      0.8rem;
-  }
-
-  .warden-image-wrapper {
-    width: 88px;
-    height: 108px;
-  }
-
-  .warden-name {
-    font-size: 0.95rem;
-  }
-
-  .modal-content {
-    border-radius:
-      20px
-      20px
-      0
-      0;
-  }
-
-  .edit-form h2 {
-    font-size: 1.1rem;
-  }
+  .warden-container { padding: 0.75rem 0.5rem; }
+  .add-warden { font-size: 0.8rem; padding: 0.7rem 0.8rem; }
+  .warden-image-wrapper { width: 88px; height: 108px; }
+  .warden-name { font-size: 0.95rem; }
+  .modal-content { border-radius: 20px 20px 0 0; }
+  .edit-form h2 { font-size: 1.1rem; }
+  .confirm-modal { border-radius: 20px 20px 0 0; }
 }
 
 
@@ -1622,33 +1613,18 @@
 ========================================================= */
 
 @media (hover: none) {
-
-  .hos-warden-card:hover {
-    transform: none;
-
-    box-shadow:
-      var(--warden-shadow);
-  }
-
-  .hos-warden-card:active {
-    transform: scale(0.985);
-  }
-
-  .add-warden:hover {
-    transform: none;
-  }
-
-  .add-warden:active {
-    transform: scale(0.97);
-  }
-
-  .toggle-button:hover {
-    transform: none;
-  }
-
-  .toggle-button:active {
-    transform: scale(0.92);
-  }
+  .hos-warden-card:hover { transform: none; box-shadow: var(--warden-shadow); }
+  .hos-warden-card:active { transform: scale(0.985); }
+  .add-warden:hover { transform: none; }
+  .add-warden:active { transform: scale(0.97); }
+  .toggle-button:hover { transform: none; }
+  .toggle-button:active { transform: scale(0.92); }
+  .avatar-upload-circle:hover .avatar-upload-frame { transform: none; }
+  .avatar-upload-circle:active .avatar-upload-frame { transform: scale(0.96); }
+  .premium-year-option:hover { transform: none; }
+  .premium-year-option:active { transform: scale(0.98); }
+  .add-submit-button:hover,
+  .add-cancel-button:hover { transform: none; }
 }
 
 
@@ -1657,1248 +1633,24 @@
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-
   .warden-container,
   .hos-warden-card,
   .modal-overlay,
   .modal-content,
   .confirm-modal,
   .add-buttons,
-  .add-warden {
-    animation-duration: 0.01ms !important;
-
-    animation-iteration-count: 1 !important;
-
-    transition-duration: 0.01ms !important;
-  }
-}
-/* =========================================================
-   PREMIUM ADD WARDEN MODAL
-========================================================= */
-
-.add-warden-overlay {
-  padding: 1.5rem;
-  overflow-y: auto;
-}
-
-/* =========================================================
-   MODAL MAIN STRUCTURE
-========================================================= */
-
-.add-warden-modal {
-  position: relative;
-  z-index: 2;
-
-  width: min(760px, 100%);
-  max-height: calc(100dvh - 3rem);
-
-  padding: 0;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  border-radius: 24px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff 0%,
-      #fcfcfd 100%
-    );
-
-  border: 1px solid rgba(255, 255, 255, 0.9);
-
-  box-shadow:
-    0 35px 100px rgba(0, 0, 0, 0.28),
-    0 12px 35px rgba(0, 0, 0, 0.12);
-
-  animation:
-    premium-add-modal-enter
-    0.45s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    both;
-}
-
-/* Scrollbar */
-
-.add-warden-modal::-webkit-scrollbar {
-  width: 6px;
-}
-
-.add-warden-modal::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.add-warden-modal::-webkit-scrollbar-thumb {
-  background:
-    linear-gradient(
-      var(--warden-gold),
-      var(--warden-maroon)
-    );
-
-  border-radius: 10px;
-}
-
-/* =========================================================
-   MODAL ANIMATION
-========================================================= */
-
-@keyframes premium-add-modal-enter {
-
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(35px)
-      scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0)
-      scale(1);
-  }
-}
-
-
-/* =========================================================
-   MODAL HEADER
-========================================================= */
-
-.add-warden-modal-header {
-  position: sticky;
-
-  top: 0;
-
-  z-index: 30;
-
-  width: 100%;
-
-  padding:
-    1.35rem
-    1.5rem;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 1rem;
-
-  background:
-    rgba(255, 255, 255, 0.96);
-
-  backdrop-filter:
-    blur(14px);
-
-  -webkit-backdrop-filter:
-    blur(14px);
-
-  border-bottom:
-    1px solid rgba(0, 0, 0, 0.06);
-}
-
-.add-warden-title-area {
-  display: flex;
-
-  align-items: center;
-
-  gap: 0.9rem;
-}
-
-.add-warden-title-icon {
-  width: 46px;
-  height: 46px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 14px;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-maroon),
-      var(--warden-maroon-dark)
-    );
-
-  color: white;
-
-  box-shadow:
-    0 8px 18px rgba(128, 0, 0, 0.2);
-}
-
-.add-warden-title-area h2 {
-  margin: 0;
-
-  font-size: 1.25rem;
-
-  font-weight: 750;
-
-  color: var(--warden-dark);
-}
-
-.add-warden-title-area p {
-  margin:
-    0.25rem
-    0
-    0;
-
-  font-size: 0.78rem;
-
-  color: var(--warden-muted);
-}
-
-.add-modal-close {
-  width: 42px;
-  height: 42px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-
-  border-radius: 12px;
-
-  background:
-    #f5f5f6;
-
-  color: var(--warden-dark);
-
-  cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    background 0.25s ease;
-}
-
-.add-modal-close:hover {
-  transform:
-    rotate(90deg);
-
-  background:
-    #eeeeef;
-}
-
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.add-warden-form {
-  padding:
-    1.5rem
-    1.5rem
-    1.75rem;
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2rem;
-}
-
-
-/* =========================================================
-   FORM SECTION
-========================================================= */
-
-.form-section {
-  width: 100%;
-
-  padding-bottom: 0.25rem;
-}
-
-.form-section-heading {
-  display: flex;
-
-  align-items: center;
-
-  gap: 0.8rem;
-
-  margin-bottom: 1.25rem;
-}
-
-.form-section-heading span {
-  white-space: nowrap;
-
-  font-size: 0.95rem;
-
-  font-weight: 750;
-
-  color: var(--warden-dark);
-}
-
-.section-line {
-  width: 100%;
-
-  height: 1px;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(253, 204, 3, 0.6),
-      transparent
-    );
-}
-
-
-/* =========================================================
-   FORM GRID
-========================================================= */
-
-.add-warden-form .form-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap:
-    1.35rem
-    1.15rem;
-}
-
-
-/* =========================================================
-   PREMIUM FIELD
-========================================================= */
-
-.premium-field {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 0.55rem;
-
-  margin: 0;
-}
-
-.premium-field label {
-  display: flex;
-
-  align-items: center;
-
-  gap: 0.45rem;
-
-  margin: 0;
-
-  font-size: 0.8rem;
-
-  font-weight: 700;
-
-  color: var(--warden-dark);
-}
-
-.premium-field label svg {
-  color: var(--warden-maroon);
-}
-
-.premium-field input,
-.premium-field select {
-  width: 100%;
-
-  height: 48px;
-
-  padding:
-    0
-    0.9rem;
-
-  border:
-    1px solid #dedee3;
-
-  border-radius: 12px;
-
-  background:
-    #ffffff;
-
-  color:
-    var(--warden-dark);
-
-  font-size: 0.88rem;
-
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
-}
-
-.premium-field input::placeholder {
-  color:
-    #aaaaaf;
-}
-
-.premium-field input:hover,
-.premium-field select:hover {
-  border-color:
-    rgba(128, 0, 0, 0.3);
-}
-
-.premium-field input:focus,
-.premium-field select:focus {
-  outline: none;
-
-  border-color:
-    var(--warden-gold);
-
-  box-shadow:
-    0 0 0 4px rgba(253, 204, 3, 0.14);
-}
-
-.full-width-field {
-  grid-column:
-    1 / -1;
-}
-
-
-/* =========================================================
-   PHOTO UPLOAD SECTION
-========================================================= */
-
-.photo-upload-section {
-  width: 100%;
-}
-
-.section-label {
-  display: block;
-
-  margin-bottom: 0.75rem;
-
-  font-size: 0.9rem;
-
-  font-weight: 750;
-
-  color: var(--warden-dark);
-}
-
-.photo-upload-wrapper {
-  width: 100%;
-}
-
-.hidden-file-input {
-  display: none;
-}
-
-
-/* =========================================================
-   PREMIUM PHOTO UPLOAD
-========================================================= */
-
-.premium-photo-upload {
-  position: relative;
-
-  width: 100%;
-
-  min-height: 190px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  border:
-    2px dashed rgba(128, 0, 0, 0.25);
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(128, 0, 0, 0.025),
-      rgba(253, 204, 3, 0.05)
-    );
-
-  cursor: pointer;
-
-  transition:
-    border-color 0.3s ease,
-    background 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.premium-photo-upload:hover {
-  border-color:
-    var(--warden-gold);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(253, 204, 3, 0.09),
-      rgba(128, 0, 0, 0.04)
-    );
-
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.06);
-}
-
-
-/* =========================================================
-   EMPTY UPLOAD STATE
-========================================================= */
-
-.upload-empty-state {
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  text-align: center;
-
-  gap: 0.75rem;
-
-  pointer-events: none;
-}
-
-.upload-icon-circle {
-  width: 58px;
-  height: 58px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-maroon),
-      var(--warden-maroon-dark)
-    );
-
-  color: white;
-
-  box-shadow:
-    0 10px 22px rgba(128, 0, 0, 0.18);
-
-  transition:
-    transform 0.35s
-    cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.premium-photo-upload:hover
-.upload-icon-circle {
-  transform:
-    translateY(-4px)
-    scale(1.06);
-}
-
-.upload-text {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 0.3rem;
-}
-
-.upload-text strong {
-  font-size: 0.9rem;
-
-  color: var(--warden-dark);
-}
-
-.upload-text span {
-  font-size: 0.75rem;
-
-  color: var(--warden-muted);
-}
-
-
-/* =========================================================
-   IMAGE PREVIEW
-========================================================= */
-
-.premium-photo-upload.has-image {
-  min-height: 250px;
-
-  border-style: solid;
-
-  border-color:
-    rgba(253, 204, 3, 0.6);
-
-  background:
-    #f7f7f8;
-}
-
-.uploaded-photo-preview {
-  width: 100%;
-  height: 250px;
-
-  display: block;
-
-  object-fit: contain;
-
-  padding: 0.6rem;
-
-  background:
-    #f7f7f8;
-
-  animation:
-    image-preview-enter
-    0.45s
-    cubic-bezier(0.16, 1, 0.3, 1)
-    both;
-}
-
-@keyframes image-preview-enter {
-
-  from {
-    opacity: 0;
-
-    transform:
-      scale(0.94);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      scale(1);
-  }
-}
-
-
-/* =========================================================
-   IMAGE CHANGE OVERLAY
-========================================================= */
-
-.image-change-overlay {
-  position: absolute;
-
-  inset: 0;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.55rem;
-
-  background:
-    rgba(28, 28, 31, 0.72);
-
-  color: white;
-
-  opacity: 0;
-
-  transition:
-    opacity 0.3s ease;
-}
-
-.image-change-overlay span {
-  font-size: 0.82rem;
-
-  font-weight: 700;
-}
-
-.premium-photo-upload:hover
-.image-change-overlay {
-  opacity: 1;
-}
-
-
-/* =========================================================
-   UPLOAD SUCCESS MESSAGE
-========================================================= */
-
-.photo-upload-success {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 0.4rem;
-
-  margin-top: 0.7rem;
-
-  padding:
-    0.45rem
-    0.7rem;
-
-  border-radius: 8px;
-
-  background:
-    rgba(34, 197, 94, 0.08);
-
-  color:
-    #15803d;
-
-  font-size: 0.75rem;
-
-  font-weight: 650;
-}
-
-
-/* =========================================================
-   ASSIGNMENT SECTION
-========================================================= */
-
-.assignment-section {
-  padding:
-    1.25rem;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fafafa,
-      #ffffff
-    );
-
-  border:
-    1px solid rgba(0, 0, 0, 0.055);
-}
-
-.assignment-description {
-  margin-bottom: 1rem;
-
-  font-size: 0.8rem;
-
-  color: var(--warden-muted);
-
-  line-height: 1.6;
-}
-
-
-/* =========================================================
-   PREMIUM CHECKBOX GRID
-========================================================= */
-
-.premium-checkbox-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 0.75rem;
-}
-
-.premium-year-option {
-  position: relative;
-
-  min-height: 54px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 0.65rem;
-
-  padding:
-    0.7rem
-    0.75rem;
-
-  border:
-    1px solid #e4e4e7;
-
-  border-radius: 12px;
-
-  background:
-    white;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-.premium-year-option:hover {
-  transform:
-    translateY(-2px);
-
-  border-color:
-    rgba(253, 204, 3, 0.7);
-
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.05);
-}
-
-.premium-year-option.selected {
-  border-color:
-    var(--warden-gold);
-
-  background:
-    rgba(253, 204, 3, 0.08);
-
-  box-shadow:
-    0 5px 15px rgba(253, 204, 3, 0.12);
-}
-
-.premium-year-option input {
-  position: absolute;
-
-  opacity: 0;
-
-  pointer-events: none;
-}
-
-.custom-check {
-  width: 19px;
-  height: 19px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border:
-    2px solid #c9c9ce;
-
-  border-radius: 6px;
-
-  transition:
-    background 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.premium-year-option.selected
-.custom-check {
-  border-color:
-    var(--warden-maroon);
-
-  background:
-    var(--warden-maroon);
-}
-
-.premium-year-option.selected
-.custom-check::after {
-  content: "✓";
-
-  color: white;
-
-  font-size: 12px;
-
-  font-weight: 800;
-}
-
-.year-option-text {
-  font-size: 0.8rem;
-
-  font-weight: 650;
-
-  color: var(--warden-text);
-}
-
-
-/* =========================================================
-   ADD WARDEN ACTIONS
-========================================================= */
-
-.add-warden-actions {
-  display: flex;
-
-  justify-content: flex-end;
-
-  gap: 0.8rem;
-
-  padding-top: 0.5rem;
-
-  border-top:
-    1px solid rgba(0, 0, 0, 0.06);
-}
-
-.add-cancel-button,
-.add-submit-button {
-  min-width: 140px;
-
-  min-height: 48px;
-
-  padding:
-    0.7rem
-    1.2rem;
-
-  border-radius: 12px;
-
-  font-size: 0.85rem;
-
-  font-weight: 750;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
-}
-
-.add-cancel-button {
-  border:
-    1px solid #dedee2;
-
-  background:
-    white;
-
-  color:
-    var(--warden-dark);
-}
-
-.add-cancel-button:hover {
-  transform:
-    translateY(-2px);
-
-  background:
-    #f7f7f8;
-}
-
-.add-submit-button {
-  border: none;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.5rem;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--warden-maroon),
-      var(--warden-maroon-dark)
-    );
-
-  color:
-    white;
-
-  box-shadow:
-    0 10px 22px rgba(128, 0, 0, 0.2);
-}
-
-.add-submit-button:hover {
-  transform:
-    translateY(-3px);
-
-  box-shadow:
-    0 16px 30px rgba(128, 0, 0, 0.28);
-}
-
-.add-submit-button:active,
-.add-cancel-button:active {
-  transform:
-    scale(0.97);
-}
-
-
-/* =========================================================
-   FIX PROFILE DETAILS SPACING
-========================================================= */
-
-.profile- {
-  width: 100%;
-
-  margin-top: 0.5rem;
-
-  padding:
-    1.2rem
-    1.25rem;
-
-  border-radius: 16px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #f8f8f9,
-      #ffffff
-    );
-
-  border:
-    1px solid rgba(0, 0, 0, 0.055);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 8px 20px rgba(0, 0, 0, 0.035);
-}
-
-.profile- p {
-  margin: 0;
-
-  padding:
-    0.8rem
-    0;
-
-  border-bottom:
-    1px solid rgba(0, 0, 0, 0.06);
-
-  font-size: 0.87rem;
-
-  line-height: 1.6;
-
-  color: var(--warden-muted);
-}
-
-.profile- p:first-child {
-  padding-top: 0;
-}
-
-.profile- p:last-child {
-  padding-bottom: 0;
-
-  border-bottom: none;
-}
-
-
-/* =========================================================
-   EDIT PHOTO PREVIEW
-========================================================= */
-
-.edit-form .file-input {
-  position: relative;
-
-  min-height: 130px;
-
-  border-radius: 16px;
-
-  border:
-    2px dashed rgba(128, 0, 0, 0.22);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(128, 0, 0, 0.02),
-      rgba(253, 204, 3, 0.04)
-    );
-
-  cursor: pointer;
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 768px) {
-
-  .add-warden-overlay {
-    padding: 0;
-
-    align-items: flex-end;
-  }
-
-  .add-warden-modal {
-    width: 100%;
-
-    max-height: 94dvh;
-
-    border-radius:
-      24px
-      24px
-      0
-      0;
-
-    animation:
-      mobile-premium-modal-enter
-      0.45s
-      cubic-bezier(0.16, 1, 0.3, 1)
-      both;
-  }
-
-  @keyframes mobile-premium-modal-enter {
-
-    from {
-      opacity: 0;
-
-      transform:
-        translateY(100%);
-    }
-
-    to {
-      opacity: 1;
-
-      transform:
-        translateY(0);
-    }
-  }
-
-  .add-warden-modal-header {
-    padding:
-      1rem
-      1rem;
-  }
-
-  .add-warden-form {
-    padding:
-      1.25rem
-      1rem
-      1.5rem;
-
-    gap: 1.7rem;
-  }
-
-  .add-warden-form .form-grid {
-    grid-template-columns: 1fr;
-
-    gap: 1.1rem;
-  }
-
-  .full-width-field {
-    grid-column: auto;
-  }
-
-  .premium-checkbox-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .premium-photo-upload {
-    min-height: 170px;
-  }
-
-  .uploaded-photo-preview {
-    height: 220px;
-  }
-
-  .add-warden-actions {
-    position: sticky;
-
-    bottom: 0;
-
-    padding:
-      1rem
-      0
-      0;
-
-    background:
-      rgba(255, 255, 255, 0.97);
-
-    backdrop-filter:
-      blur(10px);
-
-    flex-direction: column-reverse;
-  }
-
-  .add-cancel-button,
-  .add-submit-button {
-    width: 100%;
-  }
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
-@media (max-width: 480px) {
-
-  .add-warden-title-icon {
-    width: 42px;
-    height: 42px;
-
-    border-radius: 12px;
-  }
-
-  .add-warden-title-area h2 {
-    font-size: 1.08rem;
-  }
-
-  .add-warden-title-area p {
-    font-size: 0.7rem;
-  }
-
-  .add-modal-close {
-    width: 38px;
-    height: 38px;
-  }
-
-  .assignment-section {
-    padding: 1rem 0.85rem;
-  }
-
-  .premium-checkbox-grid {
-    grid-template-columns: 1fr;
-
-    gap: 0.6rem;
-  }
-
-  .premium-year-option {
-    min-height: 50px;
-  }
-
-  .form-section-heading {
-    margin-bottom: 1rem;
-  }
-
-  .premium-photo-upload {
-    min-height: 155px;
-
-    border-radius: 15px;
-  }
-
-  .premium-photo-upload.has-image {
-    min-height: 210px;
-  }
-
-  .uploaded-photo-preview {
-    height: 210px;
-  }
-}
-
-
-/* =========================================================
-   TOUCH DEVICES
-========================================================= */
-
-@media (hover: none) {
-
-  .premium-photo-upload:hover,
-  .premium-year-option:hover,
-  .add-submit-button:hover,
-  .add-cancel-button:hover {
-    transform: none;
-  }
-
-  .premium-photo-upload:active {
-    transform:
-      scale(0.99);
-  }
-
-  .premium-year-option:active {
-    transform:
-      scale(0.98);
-  }
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
+  .add-warden,
   .add-warden-modal,
-  .uploaded-photo-preview,
-  .premium-photo-upload,
+  .avatar-upload-frame,
+  .avatar-upload-badge,
   .premium-year-option,
+  .year-multiselect-panel,
+  .year-multiselect-chevron,
   .add-submit-button,
   .add-cancel-button,
   .add-modal-close {
-    animation: none !important;
-
-    transition-duration:
-      0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
