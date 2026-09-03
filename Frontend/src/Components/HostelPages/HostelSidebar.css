@@ -1640,3 +1640,10 @@
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
 }
+.page-transition-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+}

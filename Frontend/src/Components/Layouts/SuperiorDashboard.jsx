@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import HostelSidebar from "../HostelPages/HostelSidebar.jsx";
 import SuperiorRequest from "../HostelPages/SuperiorDashboard/SuperiorRequest.jsx";
 import SupWardenProfile from "../HostelPages/SuperiorDashboard/SupWardenProfile.jsx";
@@ -10,29 +10,48 @@ import SuperiorAttentance from '../HostelPages/SuperiorDashboard/SuperiorAttenda
 import PrevRequest from "../HostelPages/SuperiorDashboard/PrevRequests.jsx";
 import WardenLogs from "../HostelPages/SuperiorDashboard/WardenLogs.jsx";
 import VacateReq from "../HostelPages/SuperiorDashboard/vacatereq.jsx";
-import { useState } from "react";
+import LoadComp from "../LoadComp.jsx";
+import { useState, useEffect } from "react";
 
 const SuperiorLayout = () => {
 
     const [activeNav, setActiveNav] = useState("profile");
-  
+    const [pageLoading, setPageLoading] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+      setPageLoading(true);
+
+      const timer = setTimeout(() => {
+        setPageLoading(false);
+      }, 400);
+
+      return () => clearTimeout(timer);
+    }, [location.pathname]);
+
   return (
     <div className="dashboard-container">
       <HostelSidebar role="superior" activeNav={activeNav} setActiveNav={setActiveNav}/>
       <div className="dashboard-content">
-        <Routes>
-          <Route index element={<Navigate to="profile" replace />} />
-          <Route path="profile" element={<SupWardenProfile />} />
-          <Route path="wardens" element={<SuperiorWarden />} />
-          <Route path="requests" element={<SuperiorRequest />} />
-          <Route path="attendance" element={<SuperiorAttentance/>} />
-          <Route path="analytics" element={<SuperiorAnalytics />} />
-          <Route path="students" element={<SuperiorStudent />} />
-          <Route path="requests/profile-change-request" element={<ProfileChange />} />
-          <Route path="requests/vacate" element={<VacateReq />} />
-          <Route path="requests/Prev-Requests" element={<PrevRequest />} />
-          <Route path="wardenlogs" element={<WardenLogs/>}/>
-        </Routes>
+        {pageLoading ? (
+          <div className="page-transition-loader">
+            <LoadComp txt="Loading..." />
+          </div>
+        ) : (
+          <Routes>
+            <Route index element={<Navigate to="profile" replace />} />
+            <Route path="profile" element={<SupWardenProfile />} />
+            <Route path="wardens" element={<SuperiorWarden />} />
+            <Route path="requests" element={<SuperiorRequest />} />
+            <Route path="attendance" element={<SuperiorAttentance/>} />
+            <Route path="analytics" element={<SuperiorAnalytics />} />
+            <Route path="students" element={<SuperiorStudent />} />
+            <Route path="requests/profile-change-request" element={<ProfileChange />} />
+            <Route path="requests/vacate" element={<VacateReq />} />
+            <Route path="requests/Prev-Requests" element={<PrevRequest />} />
+            <Route path="wardenlogs" element={<WardenLogs/>}/>
+          </Routes>
+        )}
       </div>
     </div>
   );

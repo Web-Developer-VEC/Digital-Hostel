@@ -112,13 +112,11 @@ const App = () => {
         setCurrentPath(location.pathname); 
     }, [location]);
 
-    if (!isOnline) {
-//         return (
-//           <div className="h-screen flex items-center justify-center md:mt-[15%] md:block">
-//             <LoadComp txt={"You are offline"} />
-//           </div>
-//         );
-    }
+      if (!isOnline) {
+        return (
+            <Boot isAuth={true} isLoaded={false} persist={true} theme={theme} />
+        );
+    }
 
     return (
         <>
