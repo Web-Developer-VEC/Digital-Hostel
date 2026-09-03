@@ -1,673 +1,763 @@
-/* Dashboard container */
-.pl-warden-dashboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    padding: 30px;
-    background-color: #f9f9f9;
-    min-height: 100vh;
-    position: relative;
-    font-family: 'Arial', sans-serif;
-    margin-top: -20px;
+/* Color Palette: Warm Terracotta Accents with Crisp Black Text */
+:root {
+  --hl-bg-canvas: #fefbf4;
+  --hl-surface: #ffffff;
+  --hl-surface-alt: #fffaf0;
+  --hl-primary: #a73d1a;
+  --hl-primary-hover: #ea580c;
+  --hl-primary-deep: #111111;
+  --hl-text-dark: #111111;
+  --hl-text-muted: #333333;
+  --hl-text-subtle: #555555;
+  --hl-input-bg: rgba(255, 237, 213, 0.35);
+  --hl-border: rgba(249, 115, 22, 0.28);
+  --hl-border-strong: rgba(249, 115, 22, 0.55);
+  --hl-danger: #b91c1c;
+  --hl-radius: 10px;
+  --hl-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  --hl-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Blurred background when popup is open */
-.pl-warden-dashboard-container .blurred {
-    filter: blur(8px);
-    pointer-events: none;
+/* Base Dashboard Container - Sidebar Offset Fixed */
+.hl-warden-dashboard {
+  min-height: 100vh;
+  background-color: var(--hl-bg-canvas);
+  color: var(--hl-text-dark);
+  margin-left: 16rem;
+  width: calc(100% - 16rem);
+  padding: 36px 44px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Cards Layout */
-.pl-warden-cards {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-}
-
-/* Styling for individual cards (Total Count, Returning, Overtime) */
-.pl-warden-card {
-    background-color: white;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 18px;
-    padding: 0px;
-    text-align: center;
-    width: 205px;
-    height: 205px;
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 40px;
-    margin-bottom: 0px;
-}
-
-.pl-warden-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Card Title */
-.pl-warden-card-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Card Number */
-.pl-warden-card-number {
-    font-size: 32px;
-    font-weight: bold;
-    color: #1E90FF;
-    margin-top: 10px;
-}
-
-/* Donut Chart Section */
-.pl-warden-chart-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 30px;
-    width: 70%;
-}
-
-/* Custom Legend */
-.pl-warden-dashboard-container .recharts-legend-wrapper {
-    transform: translateX(50px);
-}
-
-/* Tooltip Styling */
-.pl-warden-dashboard-container .recharts-tooltip-wrapper {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 12px 18px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Modal overlay with blurred background */
-.pl-warden-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-/* Modal card styling */
-.pl-warden-modal-card {
-    background: #ffffff;
-    padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    /* width: 650px; */
-    height: 300px;
-    position: relative;
-    transition: transform 0.3s ease;
-    font-family: 'Helvetica Neue', sans-serif;
-}
-
-.pl-warden-popup-card {
-    background: #ffffff;
-    padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    width: 700px;
-    height: 600px;
-    position: relative;
-    transition: transform 0.3s ease;
-    font-family: 'Helvetica Neue', sans-serif;
-}
-
-.pl-warden-popup-card {
-    max-width: 400px;
-}
-
-.pl-warden-popup-card:hover {
-    transform: translateY(-8px);
-}
-
-/* Close button inside the modal */
-.pl-warden-close-button {
-    position: absolute;
-    top: 25px;
-    right: 16px;
-    padding: 0px 10px;
-    background-color: #E74C3C;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 22px;
-    border-radius: 15%;
-    transition: background-color 0.3s ease;
-}
-
-.pl-warden-close-button:hover {
-    background-color: #C0392B;
-}
-
-/* Modal card heading */
-.pl-warden-modal-card h3,
-.pl-warden-popup-card h3 {
-    font-size: 22px;
-    font-weight: bold;
-    margin-top: 10px;
-    margin-left: 35px;
-    color: #333;
-    line-height: 1.4;
-}
-
-/* Styling for the time in red color */
-.pl-warden-time {
-    color: #D9534F;
-    font-weight: 500;
-    margin-left: 8px;
-}
-
-/* Pie chart sector animation on hover */
-@media (min-width: 769px){
-  .pl-warden-dashboard-container .recharts-pie-sector:hover {
-      opacity: 0.85;
-      transform: scale(1.05);
-      transition: transform 0.2s ease-in-out;
-  }
-}
-
-/* Popup effect on hover for legend */
-.pl-warden-dashboard-container .recharts-legend-item .recharts-legend-icon {
-    transform: scale(1.5);
-    transition: transform 0.2s ease-in-out;
-}
-
-/* Optional: Make it larger on hover */
-.pl-warden-dashboard-container .recharts-legend-item:hover .recharts-legend-icon {
-    transform: scale(4);
-}
-
-/* Optional: Increase spacing if needed */
-.pl-warden-dashboard-container .recharts-legend-item {
-    gap: 30px;
-    /* Adjust spacing between the symbol and the text */
-}
-/* Toggle Button for Today/Tomorrow */
-.pl-warden-toggle-button {
-    position: absolute;
-    top: 25px;
-    left: 10px;
-    padding: 5px 10px;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.pl-warden-toggle-button:hover {
-    background-color: #5B9BD5;
-    transform: scale(1.05);
-}
-
-.pl-warden-toggle-button:active {
-    background-color: #4A89C1;
-    transform: scale(0.98);
-}
-
-/* Adding smooth hover effect */
-.pl-warden-toggle-button:focus {
-    box-shadow: 0 0 8px rgba(0, 136, 254, 0.5);
-}
-
-.pl-warden-popup-count {
-    padding-top: 25px;
-}
-
-.pl-warden-popup-count,
-.pl-warden-popup-returning,
-.pl-warden-popup-overtime {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.pl-warden-popup-count h4,
-.pl-warden-popup-returning h4,
-.pl-warden-popup-overtime h4 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-}
-
-.pl-warden-popup-count strong,
-.pl-warden-popup-returning p strong,
-.pl-warden-popup-overtime p strong {
-    font-size: 16px;
-    font-weight: normal;
-    color: #1E90FF;
-    margin-left: 10px;
-}
-
-/* Calendar Button Styling */
-.pl-warden-calendar-button {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #1E90FF;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1000;
-    transition: background-color 0.3s ease-in-out;
-}
-
-.pl-warden-calendar-button:hover {
-    background-color: #3D8AE1;
-}
-
-/* Calendar UI Styling */
-.pl-warden-popup-card .react-calendar {
-    position: absolute;
-    top: 70px;
-    left: 10px;
-    z-index: 5;
-}
-
-.pl-warden-popup-card .react-calendar__tile {
-    background-color: white;
-    border-radius: 6px;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.pl-warden-popup-card .react-calendar__tile:hover {
-    background-color: #e1f3fe;
-}
-
-/* Dropdown Container (Top Right) */
-.pl-warden-dropdown-container {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-}
-
-/* Dropdown Label */
-.pl-warden-dropdown-label {
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 8px;
-    width: 100px;
-}
-
-/* Dropdown Select */
-.pl-warden-dropdown {
-    padding: 8px;
-    font-size: 16px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: white;
-    margin-right: 20px;
-    ;
-}
-
-.select{
+/* Header Area */
+.hl-warden-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1.5px solid var(--hl-border);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hl-header-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.hl-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 237, 213, 0.7);
+  border: 1px solid var(--hl-border-strong);
+  color: var(--hl-text-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.hl-pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--hl-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--hl-primary-hover);
+}
+
+.hl-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.hl-subtitle {
+  font-size: 0.95rem;
+  color: var(--hl-text-muted);
+  margin: 6px 0 0 0;
+}
+
+/* Gender Switcher */
+.hl-gender-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--hl-surface);
+  border: 1.5px solid var(--hl-border-strong);
+  padding: 6px 14px;
+  border-radius: var(--hl-radius);
+  box-shadow: var(--hl-shadow);
+  gap: 8px;
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.hl-toggle-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hl-text-subtle);
+  transition: color 0.2s ease;
+}
+
+.hl-toggle-tag.active {
+  color: var(--hl-primary);
+}
+
+.hl-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.hl-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hl-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #a73d1a; /* Boys active state */
+  transition: 0.3s;
+  border-radius: 22px;
+}
+
+.hl-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.hl-switch input:checked + .hl-slider {
+  background-color: #ea580c; /* Girls active state */
+}
+
+.hl-switch input:checked + .hl-slider:before {
+  transform: translateX(22px);
+}
+
+/* Filter Controls */
+.hl-filter-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hl-filter-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hl-text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hl-select-box {
+  background: var(--hl-surface);
+  border: 1.5px solid var(--hl-border-strong);
+  color: var(--hl-text-dark);
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border-radius: var(--hl-radius);
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--hl-shadow);
+  transition: all 0.25s ease;
+  height: 42px;
+}
+
+.hl-select-box:hover,
+.hl-select-box:focus {
+  border-color: var(--hl-primary);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+/* Metric Cards Section */
+.hl-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.hl-metric-card {
+  background: var(--hl-surface);
+  border: 1px solid var(--hl-border);
+  border-radius: var(--hl-radius);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--hl-shadow);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hl-metric-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--hl-primary);
+}
+
+.hl-metric-card.danger::before {
+  background: var(--hl-danger);
+}
+
+.hl-metric-card.interactive {
+  cursor: pointer;
+}
+
+.hl-metric-card.interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--hl-shadow-hover);
+  border-color: var(--hl-border-strong);
+  background: var(--hl-surface-alt);
+}
+
+.hl-card-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
-/* Dropdown Hover Effect */
-.pl-warden-dropdown:hover {
-    border-color: #8884d8;
+.hl-card-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hl-text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-/* Dropdown Focus Effect */
-.pl-warden-dropdown:focus {
-    outline: none;
-    border-color: #0056b3;
+.hl-card-tag {
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--hl-input-bg);
+  color: var(--hl-primary);
+  border: 1px solid var(--hl-border);
 }
 
-/* Title Container (Top Left) */
-.pl-warden-title-container {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    font-size: 30px;
-    font-weight: bold;
-    color: #333;
+.hl-metric-number {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+  margin: 14px 0 0 0;
+  line-height: 1;
 }
 
-
-/* Enlarged modal card to fit pie chart */
-.pl-warden-pie-chart-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    position: relative;
+.hl-card-footer {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(249, 115, 22, 0.15);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--hl-text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* Ensure Pie Chart is centered */
-.pl-warden-dashboard-container .recharts-pie {
-    margin-right: 50px;
-    /* Space between pie and legend */
+.hl-card-footer.passive {
+  color: var(--hl-text-subtle);
+  font-weight: normal;
 }
 
-/* Header container for Year Dropdown & Toggle Button */
-.pl-warden-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    /* Align to left */
-    gap: 20px;
-    /* Spacing between elements */
+/* Analytics Panel (Charts & Legend) */
+.hl-chart-card {
+  background: var(--hl-surface);
+  border: 1px solid var(--hl-border);
+  border-radius: var(--hl-radius);
+  padding: 32px;
+  box-shadow: var(--hl-shadow);
 }
 
-/* Parent container for the toggle switch */
-.pl-warden-dashboard-container .toggle-container {
-    display: flex;
-    align-items:center;
+.hl-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-/* Labels for Boys & Girls */
-.pl-warden-dashboard-container .toggle-label {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    margin: 0 8px;
+.hl-chart-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--hl-text-dark);
 }
 
-/* Switch container */
-.pl-warden-dashboard-container .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 25px;
+.hl-chart-sub {
+  margin: 4px 0 0 0;
+  font-size: 0.88rem;
+  color: var(--hl-text-muted);
 }
 
-/* Hide default checkbox */
-.pl-warden-dashboard-container .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.hl-total-badge {
+  background: var(--hl-input-bg);
+  border: 1.5px solid var(--hl-border-strong);
+  padding: 6px 14px;
+  border-radius: var(--hl-radius);
+  font-size: 0.88rem;
+  font-weight: bold;
+  color: var(--hl-text-dark);
 }
 
-/* The slider (sliding button) */
-.pl-warden-dashboard-container .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #0088FE;
-    /* Default blue (Boys) */
-    transition: 0.4s;
-    border-radius: 25px;
+.hl-chart-content-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 32px;
 }
 
-/* The round indicator inside the switch */
-.pl-warden-dashboard-container .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
+.hl-chart-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* When checked, slide the indicator to the right & change color */
-.pl-warden-dashboard-container input:checked+.slider {
-    background-color: #FF4081;
-    /* Pink (Girls) */
+.hl-chart-hub-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.pl-warden-dashboard-container input:checked+.slider:before {
-    transform: translateX(25px);
+.hl-hub-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--hl-text-subtle);
 }
 
-.pl-warden-name-list-popup {
+.hl-hub-count {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+  line-height: 1;
+  margin: 4px 0;
+}
+
+/* Legend items */
+.hl-legend-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hl-legend-pill {
+  background: var(--hl-surface-alt);
+  border: 1px solid var(--hl-border);
+  border-radius: var(--hl-radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hl-legend-pill:hover {
+  background: #ffedd5;
+  border-color: var(--hl-border-strong);
+  transform: translateX(4px);
+}
+
+.hl-color-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.hl-legend-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hl-legend-name {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--hl-text-dark);
+}
+
+.hl-legend-sub {
+  font-size: 0.75rem;
+  color: var(--hl-text-subtle);
+}
+
+.hl-legend-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+}
+
+/* Tooltip Customization */
+.hl-tooltip-box {
+  background: #111111;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hl-tooltip-title {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Modals & Dialogs */
+.hl-modal-mask {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  padding: 24px;
-  width: 300px;
-  max-width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-.pl-warden-name-list-popup h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333333;
-  margin-bottom: 16px;
+.hl-modal-box {
+  background: var(--hl-surface);
+  border: 1.5px solid var(--hl-border-strong);
+  border-radius: var(--hl-radius);
+  box-shadow: var(--hl-shadow-hover);
+  width: 100%;
+  max-width: 520px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hl-popup-box {
+  max-width: 650px;
+}
+
+.hl-modal-head {
+  padding: 20px 24px;
+  border-bottom: 1.5px solid var(--hl-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--hl-surface-alt);
+}
+
+.hl-modal-head h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+}
+
+.hl-btn-close {
+  background: var(--hl-primary);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.hl-btn-close:hover {
+  background: var(--hl-primary-hover);
+}
+
+.hl-scroll-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+.hl-roster-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hl-roster-entry {
+  background: var(--hl-surface-alt);
+  border: 1px solid var(--hl-border);
+  padding: 12px 16px;
+  border-radius: var(--hl-radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hl-roster-name {
+  font-weight: bold;
+  color: var(--hl-text-dark);
+}
+
+.hl-roster-index {
+  color: var(--hl-text-muted);
+  margin-right: 8px;
+  font-weight: normal;
+}
+
+.hl-tags-tray {
+  display: flex;
+  gap: 6px;
+}
+
+.hl-tag {
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.hl-tag.danger {
+  background: #fee2e2;
+  color: var(--hl-danger);
+  border: 1px solid #fca5a5;
+}
+
+.hl-tag.info {
+  background: #ffedd5;
+  color: var(--hl-text-dark);
+  border: 1px solid var(--hl-border);
+}
+
+/* Date Action in Popup */
+.hl-date-strip {
+  padding: 16px 24px 0 24px;
+  position: relative;
+}
+
+.hl-date-toggle-btn {
+  background: var(--hl-primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.hl-date-toggle-btn:hover {
+  background: var(--hl-primary-hover);
+}
+
+.hl-calendar-wrapper {
+  position: absolute;
+  top: 55px;
+  left: 24px;
+  z-index: 100;
+  box-shadow: var(--hl-shadow-hover);
+  border: 1px solid var(--hl-border);
+  border-radius: var(--hl-radius);
+  overflow: hidden;
+}
+
+/* Modal 3-Pill Summary */
+.hl-summary-pods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px 24px;
+}
+
+.hl-summary-pod {
+  background: var(--hl-surface-alt);
+  border: 1px solid var(--hl-border);
+  border-radius: var(--hl-radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.pl-warden-name-list-popup ul {
-  list-style-type: none;
+.hl-summary-pod:hover {
+  background: #ffedd5;
+  border-color: var(--hl-border-strong);
+  transform: translateY(-2px);
+}
+
+.hl-summary-pod span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--hl-text-dark);
+}
+
+.hl-summary-pod strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--hl-text-dark);
+  margin: 4px 0;
+}
+
+.hl-summary-pod.danger strong {
+  color: var(--hl-danger);
+}
+
+.hl-summary-pod small {
+  font-size: 0.7rem;
+  color: var(--hl-primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Embedded Inner List */
+.hl-submodal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 251, 244, 0.96);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.hl-submodal-content {
+  width: 100%;
+  max-width: 380px;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hl-border-strong);
+  border-radius: var(--hl-radius);
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: var(--hl-shadow);
+}
+
+.hl-submodal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.hl-submodal-head h4 {
+  margin: 0;
+  color: var(--hl-text-dark);
+  font-weight: bold;
+}
+
+.hl-submodal-scroll {
+  overflow-y: auto;
+  border: 1px solid var(--hl-input-bg);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.hl-submodal-scroll ul {
+  list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.pl-warden-name-list-popup ul li {
-  font-size: 14px;
-  color: #555555;
-  padding: 8px 12px;
-  margin: 4px 0;
-  background-color: #f9f9f9;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
-}
-
-.pl-warden-name-list-popup ul li:hover {
-  background-color: #e0e0e0;
-}
-
-.pl-warden-name-list-popup ul li:last-child {
-  margin-bottom: 16px;
-}
-
-.pl-warden-name-list-popup button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
+.hl-submodal-scroll li {
+  padding: 8px;
+  border-bottom: 1px solid var(--hl-bg-canvas);
+  font-size: 0.9rem;
+  color: var(--hl-text-dark);
   font-weight: 500;
-  color: #ffffff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.pl-warden-name-list-popup button:hover {
-  background-color: #0056b3;
+/* React Calendar Theme Overrides */
+.react-calendar {
+  border: 1px solid var(--hl-border-strong) !important;
+  font-family: Arial, sans-serif !important;
+  background-color: #ffffff !important;
 }
 
-.pl-warden-name-list-popup button:active {
-  background-color: #004080;
+.react-calendar__tile--active,
+.react-calendar__tile--now {
+  background: var(--hl-primary) !important;
+  color: #ffffff !important;
 }
-/* Mobile devices (up to 600px) */
 
-@media screen and (max-width: 1200px) {
-    .pl-warden-dashboard-container {
-      padding: 20px;
-    }
-  
-    .pl-warden-chart-container {
-      transform: scale(0.9);
-      margin-top: 0;
-      width: 100%;
-    }
-  
-    .pl-warden-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      padding: 20px;
-    }
-  
-    .pl-warden-card {
-      width: 200px;
-      margin: 0;
-      height: 180px;
-    }
+.react-calendar__tile:hover {
+  background-color: #ffedd5 !important;
+  color: var(--hl-text-dark) !important;
+}
 
-    .pl-warden-dashboard-container .recharts-pie-sector:hover {
-      opacity: 0.85;
-      transform: scale(1.05);
-      transition: transform 0.2s ease-in-out;
-    }
+/* Responsive Rules */
+@media (max-width: 900px) {
+  .hl-chart-content-split {
+    grid-template-columns: 1fr;
   }
-  
-  @media screen and (max-width: 768px) {
-    .pl-warden-dashboard-container {
-      gap: 0px;
-    }
+}
 
-    .pl-warden-title-container {
-      position: relative;
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-  
-    .pl-warden-dropdown-container {
-      position: relative;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      /* gap: 10px; */
-      margin-bottom: 20px;
-      right: 0;
-    }
-  
-    .pl-warden-dropdown {
-      width: 150px;
-      margin-right: 0;
-    }
-  
-    .pl-warden-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      padding: 15px;
-    }
-  
-    .pl-warden-card {
-      width: 100%;
-      height: 150px;
-      width: 200px;
-      margin: 0;
-    }
-  
-    .pl-warden-chart-container {
-      transform: scale(0.8);
-      width: 120%;
-    }
-  
-    .pl-warden-modal-card,
-    .pl-warden-popup-card {
-      width: 90%;
-      max-width: 350px;
-      padding: 20px;
-      height: auto;
-      min-height: 300px;
-    }
-  
-    .pl-warden-pie-chart-container {
-      transform: scale(1);
-      margin-top: 0px;
-    }
-  
-    .recharts-legend-wrapper {
-      transform: scale(0.8);
-    }
+@media (max-width: 768px) {
+  .hl-warden-dashboard {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 16px;
+    margin-top: 55px;
   }
-  
-  @media screen and (max-width: 480px) {
-    .pl-warden-title-container {
-      font-size: 20px;
-    }
-  
-    .pl-warden-dropdown-container {
-      flex-direction: row;
-      /* gap: 8px; */
-    }
-  
-    .pl-warden-dropdown-label {
-      font-size: 14px;
-      white-space: nowrap;
-      width: 80px;
-    }
-  
-    .pl-warden-dropdown {
-      width: 120px;
-      font-size: 14px;
-    }
-  
-    .pl-warden-cards {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
-  
-    .pl-warden-card {
-      height: 130px;
-    }
-  
-    .pl-warden-card-title {
-      font-size: 18px;
-    }
-  
-    .pl-warden-card-number {
-      font-size: 24px;
-    }
-  
-    .pl-warden-chart-container {
-      transform: scale(0.9);
-      width: 140%;
-    }
-  
-    .pl-warden-modal-card,
-    .pl-warden-popup-card {
-      width: 95%;
-      padding: 15px;
-    }
-  
-    .pl-warden-popup-count h4,
-    .pl-warden-popup-returning h4,
-    .pl-warden-popup-overtime h4 {
-      font-size: 16px;
-    }
-  
-    .pl-warden-pie-chart-container {
-      transform: scale(1);
-      margin-top: 0px;
-    }
+
+  .hl-warden-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
+  .hl-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .hl-filter-control {
+    width: 100%;
+  }
+
+  .hl-select-box {
+    width: 100%;
+  }
+
+  .hl-summary-pods {
+    grid-template-columns: 1fr;
+  }
+}
