@@ -1,7 +1,21 @@
-import React, { useState } from "react";
-import "./WardenProfile.css";
+import React, { useState, useEffect } from "react";
+import "./SupWardenProfile.css";
+import axiosInstance from "../../../api/axios";
+import Swal from "sweetalert2";
+
+const yearToAlphabet = {
+    '1': 'First Year',
+    '2': 'Second Year',
+    '3': 'Third Year',
+    '4': 'Fourth Year',
+    '10': 'MBA',
+    '9': 'ME',
+    'overall': 'Overall'
+};
 
 function WardenProfile() {
+    const [wardens, setWardens] = useState([]);
+    const [loadingWardens, setLoadingWardens] = useState(true);
 
     const wardenResponse = {
         warden: {
@@ -31,12 +45,39 @@ function WardenProfile() {
 
     const warden = wardenResponse.warden;
 
+    useEffect(() => {
+        const fetchWardens = async () => {
+            try {
+                const response = await axiosInstance.get(
+                    "/api/fetch_warden_details"
+                );
+
+                setWardens(response.data.wardens || []);
+
+            } catch (error) {
+                console.error("Error fetching wardens:", error);
+
+                Swal.fire({
+                    title: "Error ❌",
+                    text: "Failed to fetch warden details.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+
+            } finally {
+                setLoadingWardens(false);
+            }
+        };
+
+        fetchWardens();
+    }, []);
+
     return (
-        <div className="student-container">
+        <div className="w-full min-h-screen bg-[#f5f6f8] px-4 py-5 md:px-5 lg:ml-64 lg:w-[calc(100%-16rem)]">
 
-            <div className="student-main">
+            <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-6">
 
-                <div className="student-form-container">
+                <div className="w-full rounded-[18px] bg-white p-4 shadow-md sm:p-5 lg:p-7">
 
                     <h2 className="student-title">
                         Profile Details
@@ -156,7 +197,7 @@ function WardenProfile() {
                         </div>
                         <div className="student-form-group">
 
-                            <label>Incharge of</label>  
+                            <label>Incharge of</label>
 
                             <input
                                 type="text"
@@ -215,7 +256,71 @@ function WardenProfile() {
                     </div>
 
                 </div>
+                {/* =====================================================
+    WARDENS UNDER SUPERIOR WARDEN
+===================================================== */}
 
+                <div className="superior-wardens-container">
+
+                    <h2 className="superior-wardens-title">
+                        Wardens Under You
+                    </h2>
+
+                    {loadingWardens ? (
+
+                        <p className="superior-wardens-loading">
+                            Loading wardens...
+                        </p>
+
+                    ) : wardens.length === 0 ? (
+
+                        <p className="superior-wardens-empty">
+                            No wardens found.
+                        </p>
+
+                    ) : (
+
+                        <div className="superior-wardens-grid">
+
+                            {wardens.map((warden) => (
+
+                                <div
+                                    key={warden.unique_id}
+                                    className="superior-warden-card"
+                                >
+
+                                    <h3>
+                                        {warden.warden_name}
+                                    </h3>
+
+                                    <p>
+                                        <strong>Warden For:</strong>{" "}
+                                        {warden.primary_batch
+                                            ?.map((year) => yearToAlphabet[year] || year)
+                                            .join(", ")}
+                                    </p>
+
+                                    <p>
+                                        <strong>In Charge:</strong>{" "}
+                                        {warden.gender === "Male"
+                                            ? "Boys"
+                                            : "Girls"}
+                                    </p>
+
+                                    <p>
+                                        <strong>Joined Date:</strong>{" "}
+                                        {warden.joined_date}
+                                    </p>
+
+                                </div>
+
+                            ))}
+
+                        </div>
+
+                    )}
+
+                </div>
             </div>
 
         </div>
