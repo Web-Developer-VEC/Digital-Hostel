@@ -308,6 +308,7 @@ function WardenRequest() {
         medical_status,
         comment: comment || "",
       });
+      
 
       Swal.fire({
         title: "Declined ✅",
