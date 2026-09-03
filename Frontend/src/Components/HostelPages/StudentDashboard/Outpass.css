@@ -694,10 +694,14 @@
 @media (max-width: 768px) {
 
     /* Main page spacing — single source of clearance
-       for the fixed bottom nav bar, no stacked padding */
+       for the fixed bottom nav bar, no stacked padding.
+       margin-top is reset (the desktop -20px was pulling
+       the Draft button up under the fixed logo header) and
+       a small padding-top is added so nothing sits under it. */
     .HS-container {
         min-height: 100vh;
-        margin-top: 0;
+        margin-top: 0 !important;
+        padding-top: 2.5rem;
         overflow: visible;
         padding-bottom: 90px;
     }
@@ -774,6 +778,7 @@
         position: static;
         display: flex;
         justify-content: flex-end;
+        margin-top: 0.75rem;
         margin-bottom: 0.8rem;
         z-index: 30;
     }
