@@ -26,9 +26,13 @@ function WardenRequest() {
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpPassId, setOtpPassId] = useState(null);
-
+  const [showDocument, setShowDocument] = useState(false);
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_QR_URL;
 
+  const UrlParser = (path) => {
+    return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
+  };
   // Mapping Department Codes to Full Names
   const departmentLabels = {
     "AI&DS": "AI",
@@ -45,7 +49,7 @@ function WardenRequest() {
   };
 
   // Mapping Pass Types to Labels
-    // Mapping Pass Types to Labels
+  // Mapping Pass Types to Labels
   const passTypeLabels = {
     od: "OD",
     outpass: "Out Pass",
@@ -126,7 +130,7 @@ function WardenRequest() {
     }
   };
 
-    const handleOtpChange = (value, index) => {
+  const handleOtpChange = (value, index) => {
     // Only allow numbers
     if (!/^\d*$/.test(value)) return;
 
@@ -184,7 +188,7 @@ function WardenRequest() {
     }, 50);
   };
 
-    const handleValidateOTP = async () => {
+  const handleValidateOTP = async () => {
     const enteredOtp = otp.join("");
 
     if (enteredOtp.length !== 6) {
@@ -192,7 +196,7 @@ function WardenRequest() {
       return;
     }
 
-        try {
+    try {
       const response = await axios.post(
         `${process.env.REACT_APP_BASE_URL}/api/verify_parent_otp`,
         {
@@ -237,7 +241,7 @@ function WardenRequest() {
     }
   };
 
-    const openOtpPopup = (pass_id) => {
+  const openOtpPopup = (pass_id) => {
     setOtp(["", "", "", "", "", ""]);
     setOtpPassId(pass_id);
     setOtpError("");
@@ -307,7 +311,6 @@ function WardenRequest() {
         medical_status,
         comment: comment || "",
       });
-      
 
       Swal.fire({
         title: "Declined ✅",
@@ -515,7 +518,7 @@ function WardenRequest() {
                     if (late_count <= 5) return "AR-row-orange"; // Orange row
                     return "AR-row-red"; // Red row
                   };
-                    const getStatusClass = (status) => {
+                  const getStatusClass = (status) => {
                     const normalized = getParentApprovalStatus(status);
                     if (normalized === "approved") return "AR-status-green";
                     if (normalized === "declined") return "AR-status-red";
@@ -527,13 +530,14 @@ function WardenRequest() {
                       <tr
                         key={record.pass_id}
                         className={getRowClass(record.late_count)}
-                        onClick={() =>
+                        onClick={() => {
                           setSelectedRecord(
                             selectedRecord?.pass_id === record.pass_id
                               ? null
                               : record,
-                          )
-                        }
+                          );
+                          setShowDocument(false);
+                        }}
                       >
                         <td>{record.name}</td>
                         <td>
@@ -569,13 +573,16 @@ function WardenRequest() {
                             </span>
                           )}
                         </td>
-                                                <td>
+                        <td>
                           <span
                             className={`AR-status-circle ${getStatusClass(record.parent_approval)}`}
                           >
-                            {getParentApprovalStatus(record.parent_approval) === "approved"
+                            {getParentApprovalStatus(record.parent_approval) ===
+                            "approved"
                               ? "Accepted"
-                              : getParentApprovalStatus(record.parent_approval) === "declined"
+                              : getParentApprovalStatus(
+                                    record.parent_approval,
+                                  ) === "declined"
                                 ? "Declined"
                                 : "Pending"}
                           </span>
@@ -700,19 +707,25 @@ function WardenRequest() {
                                   </p>
                                 </div>
 
-                                                                <div>
+                                <div>
                                   <span>Parent Approval</span>
                                   <p>
-                                    {getParentApprovalStatus(record.parent_approval) === "approved"
+                                    {getParentApprovalStatus(
+                                      record.parent_approval,
+                                    ) === "approved"
                                       ? "Accepted"
-                                      : getParentApprovalStatus(record.parent_approval) === "declined"
+                                      : getParentApprovalStatus(
+                                            record.parent_approval,
+                                          ) === "declined"
                                         ? "Declined"
                                         : "Pending"}
                                   </p>
                                 </div>
                               </div>
 
-                                {getParentApprovalStatus(record.parent_approval) !== "approved" && (
+                              {getParentApprovalStatus(
+                                record.parent_approval,
+                              ) !== "approved" && (
                                 <div className="AR-parent-section">
                                   <span>Parent Approval</span>
 
@@ -771,13 +784,13 @@ function WardenRequest() {
                                 </div>
                               )}
 
-                              {(record.passtype === "od" ||
+                                                            {(record.passtype === "od" ||
                                 record.passtype === "leave") &&
                                 record.file_path && (
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      // existing document logic
+                                      setShowDocument(true);
                                     }}
                                     className="AR-document-button"
                                   >
@@ -856,7 +869,7 @@ function WardenRequest() {
                 number.
               </p>
 
-                            {/* OTP Boxes */}
+              {/* OTP Boxes */}
               <div className="AR-otp-boxes">
                 {otp.map((digit, index) => (
                   <input
@@ -886,7 +899,7 @@ function WardenRequest() {
 
               {/* Buttons */}
               <div className="AR-otp-actions">
-                  <button
+                <button
                   type="button"
                   className="AR-otp-resend"
                   onClick={async () => {
@@ -909,6 +922,62 @@ function WardenRequest() {
                 >
                   ✓ Verify OTP
                 </button>
+                           </div>
+            </div>
+          </div>
+        )}
+
+        {showDocument && selectedRecord && (
+          <div
+            className="AR-document-modal"
+            onClick={() => setShowDocument(false)}
+          >
+            <div
+              className="AR-document-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="AR-document-header">
+                <h3 className="AR-document-title">Document Preview</h3>
+                <button
+                  onClick={() => setShowDocument(false)}
+                  className="AR-close-button"
+                >
+                  <X className="AR-icon" />
+                </button>
+              </div>
+
+              <div className="AR-document-content">
+                {(() => {
+                  const fileUrl = UrlParser(selectedRecord.file_path);
+                  const fileExtension = fileUrl.split(".").pop().toLowerCase();
+
+                  if (
+                    ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
+                      fileExtension,
+                    )
+                  ) {
+                    return (
+                      <img
+                        src={fileUrl}
+                        alt="Document Preview"
+                        className="AR-document-image"
+                      />
+                    );
+                  } else if (fileExtension === "pdf") {
+                    return (
+                      <iframe
+                        src={fileUrl}
+                        title="PDF Document"
+                        className="AR-document-frame"
+                      >
+                        Your browser does not support PDF viewing.{" "}
+                        <a href={fileUrl}>Download PDF</a>
+                      </iframe>
+                    );
+                  } else {
+                    return <p>Unsupported file format.</p>;
+                  }
+                })()}
               </div>
             </div>
           </div>
