@@ -1,0 +1,9 @@
+{
+  "pass_id": "PASS-2026-000123",
+  "passtype": "outpass",
+  "from": "2026-09-04T16:00:00",
+  "to": "2026-09-04T20:00:00",
+  "place_to_visit": "Chennai",
+  "reason_type": "Shopping",
+  "reason_for_visit": "Personal shopping"
+}
