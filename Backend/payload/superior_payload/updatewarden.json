@@ -1,0 +1,10 @@
+{
+  "unique_id": "001",
+  "warden_name": "Kumar",
+  "phone_number": "9876543210",
+  "gender": "Male",
+  "primary_batch": "[\"2026\",\"2027\"]",
+  "secondary_batch": "[\"2028\"]",
+  "joined_date": "2026-09-03",
+  "active": true
+}
