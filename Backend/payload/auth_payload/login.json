@@ -1,0 +1,23 @@
+[
+    {
+  "registration_number": "23AI001",
+  "password": "Student@123",
+  "type": "student"
+},
+{
+  "registration_number": "001",
+  "password": "Warden@123",
+  "type": "warden"
+},
+{
+  "registration_number": "HEAD001",
+  "password": "Superior@123",
+  "type": "superior"
+},
+{
+  "registration_number": "SEC001",
+  "password": "Security@123",
+  "type": "security"
+}
+
+]
