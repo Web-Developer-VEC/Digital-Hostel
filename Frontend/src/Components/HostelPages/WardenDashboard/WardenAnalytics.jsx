@@ -14,8 +14,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { getRequest } from "../../../api/axios";
 
-// Custom palette corresponding to your login brand colors:
-// Terracotta, Rust, Tangerine, Muted Amber
+
 const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 
 const DashboardCard = ({ title, number, tag, isInteractive, isDanger, onClick }) => {
@@ -62,7 +61,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log("Fetched Data",fetchData);
+  console.log("Fetched Data", fetchData);
 
   const ReasonTypeMapping = {
     od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
@@ -72,7 +71,7 @@ const Dashboard = () => {
   };
 
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -94,21 +93,49 @@ const Dashboard = () => {
     setSelectedYear(event.target.value);
   };
 
+  const fireSwal = (config) => {
+    return Swal.fire({
+      background: "#fefbf4",
+      color: "#7c2d12",
+      confirmButtonColor: "#a73d1a",
+      ...config
+    });
+  };
+
   // pass measure fetching
-  useEffect(()=>{
-    const fetchData = async ()=>{
+  useEffect(() => {
+    const fetchPassMeasures = async () => {
+      try {
+        const response = await getRequest("/api/pass_measures_warden");
 
-      try{
-        const response = await getRequest('/api/pass_measures_warden');
-        const fetchedData = response.data;
-        
-        const years = Object.keys(fetchedData?.data)
-        
-        setYears(years);
+        console.log("RAW API RESPONSE:", response);
+        console.log("API DATA:", response.data);
 
-        setFetchData(fetchedData?.data);
+        const backendData = response.data;
+
+        // Backend returns:
+        // {
+        //   "2023-2027": {...},
+        //   "overall": {...}
+        // }
+
+        const availableYears = Object.keys(backendData || {});
+
+        console.log("AVAILABLE YEARS:", availableYears);
+
+        setYears(availableYears);
+        setFetchData(backendData);
+
+        // Keep overall selected if available
+        if (backendData?.overall) {
+          setSelectedYear("overall");
+        } else if (availableYears.length > 0) {
+          setSelectedYear(availableYears[0]);
+        }
+
       } catch (err) {
-        console.error("Error Fetching data", err);
+        console.error("Error Fetching pass measures:", err);
+
         fireSwal({
           title: "Network Error",
           text: "Failed to fetch pass analytics data. Please refresh.",
@@ -117,10 +144,11 @@ const Dashboard = () => {
         });
       }
     };
-    fetchMeasures();
+
+    fetchPassMeasures();
   }, []);
 
-  const passMeasure = fetchData ? fetchData[selectedYear] : {};
+  const passMeasure = fetchData?.[selectedYear] || {};
 
   const cardData = [
     {
@@ -158,11 +186,23 @@ const Dashboard = () => {
   ];
 
   const chartData = [
-    { name: "OD", value: passMeasure?.passTypeCounts?.od?.count || 0 },
-    { name: "Leave", value: passMeasure?.passTypeCounts?.leave?.count || 0 },
-    { name: "Stay Pass", value: passMeasure?.passTypeCounts?.staypass?.count || 0 },
-    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count || 0 }
-  ];
+  {
+    name: "OD",
+    value: passMeasure?.passTypeCounts?.od?.count ?? 0
+  },
+  {
+    name: "Leave",
+    value: passMeasure?.passTypeCounts?.leave?.count ?? 0
+  },
+  {
+    name: "Stay Pass",
+    value: passMeasure?.passTypeCounts?.staypass?.count ?? 0
+  },
+  {
+    name: "Out Pass",
+    value: passMeasure?.passTypeCounts?.outpass?.count ?? 0
+  }
+];
 
   const totalPassCount = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
@@ -389,7 +429,7 @@ const Dashboard = () => {
       {/* Top Header */}
       <header className="hl-warden-header">
         <div>
-          
+
           <h1 className="hl-title">Pass Measures & Analytics</h1>
           <p className="hl-subtitle">
             Hostel warden administrative overview and pass clearance audits
