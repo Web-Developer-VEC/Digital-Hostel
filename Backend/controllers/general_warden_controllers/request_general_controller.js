@@ -192,6 +192,7 @@ async function WardenDecision(req, res) {
       if (medical_status === true) {
         updateData.reason_type = "medical";
       }
+      updateData.request_completed = true;
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
