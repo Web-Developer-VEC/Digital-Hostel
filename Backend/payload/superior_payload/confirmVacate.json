@@ -1,0 +1,10 @@
+[
+    {
+  "student_id": "23AI001",
+  "action": "approve"
+},
+{
+  "student_id": "23AI001",
+  "action": "decline"
+}
+]

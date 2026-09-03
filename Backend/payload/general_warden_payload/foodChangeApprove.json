@@ -1,0 +1,12 @@
+[
+    {
+  "registration_number": "23AI001",
+  "name": "Student Name",
+  "action": "approve"
+},
+{
+  "registration_number": "23AI001",
+  "name": "Student Name",
+  "action": "decline"
+}
+]

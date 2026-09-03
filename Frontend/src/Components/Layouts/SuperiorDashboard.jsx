@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import HostelSidebar from "../HostelPages/HostelSidebar.jsx";
 import SuperiorRequest from "../HostelPages/SuperiorDashboard/SuperiorRequest.jsx";
+import SupWardenProfile from "../HostelPages/SuperiorDashboard/SupWardenProfile.jsx";
 import SuperiorWarden from "../HostelPages/SuperiorDashboard/WardenProfile.jsx";
 import SuperiorStudent from "../HostelPages/SuperiorDashboard/SuperiorStudent.jsx";
 import SuperiorAnalytics from "../HostelPages/SuperiorDashboard/SuperiorAnalytics.jsx";
@@ -21,6 +22,7 @@ const SuperiorLayout = () => {
       <div className="dashboard-content">
         <Routes>
           <Route index element={<Navigate to="wardens" replace />} />
+          <Route path="profile" element={<SupWardenProfile />} />
           <Route path="wardens" element={<SuperiorWarden />} />
           <Route path="requests" element={<SuperiorRequest />} />
           <Route path="attendance" element={<SuperiorAttentance/>} />

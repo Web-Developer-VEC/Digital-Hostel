@@ -35,16 +35,16 @@ async function fetchPassWarden(req, res) {
     }
 
     let query = {};
-
+    
     if (date) {
       const targetDate = date ? new Date(date) : new Date();
 
       const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
       const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-      query.request_completed = true;
+     
       query.request_time = { $gte: startOfDay, $lte: endOfDay };
-
+      query.request_completed=true
       if (usertype === "superior") {
         if (warden_id && warden_id !== "overall") {
           query.authorised_warden_id = warden_id;
@@ -53,10 +53,11 @@ async function fetchPassWarden(req, res) {
         }
       } else {
         query.gender = warden_data.gender;
-        query.batch = {
+        query.year = {
           $in: warden_data.primary_batch || warden_data.primary_year || [],
         };
       }
+     console.log("nian",query);
       const oldPasses = await passCollection.find(query).toArray();
       return res
         .status(200)
@@ -86,9 +87,8 @@ async function fetchPassWarden(req, res) {
       query.year = { $in: target_batches };
     }
 
-    console.log(JSON.stringify(query, null, 2));
+    console.log(query);
     const pendingPasses = await passCollection.find(query).toArray();
-
     if (pendingPasses.length === 0) {
       return res.status(200).json({
         message: "No pending passes found",
@@ -138,7 +138,7 @@ async function WardenDecision(req, res) {
     }
 
     const passData = await passCollection.findOne({ pass_id: pass_id });
-
+    
     if (!passData) {
       return res.status(404).json({ error: "Pass not found" });
     }
@@ -150,7 +150,6 @@ async function WardenDecision(req, res) {
       : (warden_data.primary_batch || warden_data.primary_year || []).some(
           (b) => b?.toString() === passData.year?.toString(),
         );
-
     if (!isIncluded) {
       return res.status(400).json({
         error: `Warden is accessing a pass outside assigned ${isSuperior ? "year" : "batch"}`,
@@ -182,6 +181,9 @@ async function WardenDecision(req, res) {
       // if (passData.parent_approval != "approved") {
       //   return res.status(400).json({ message: "Parents Approval Needed!" });
       // }
+      if (passData.parent_approval != "Approved") {
+        return res.status(400).json({ message: "Parents Approval Needed!" });
+      }
       const qrPath = await generateQR(pass_id, passData.registration_number);
 
       updateData.qrcode_path = qrPath;
@@ -190,6 +192,7 @@ async function WardenDecision(req, res) {
       if (medical_status === true) {
         updateData.reason_type = "medical";
       }
+    
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
@@ -202,6 +205,7 @@ async function WardenDecision(req, res) {
     if (action === "reject") {
       updateData.qrcode_path = null;
       updateData.qrcode_status = false;
+      updateData.request_completed=true;
     }
 
     await passCollection.updateOne({ pass_id }, { $set: updateData });
