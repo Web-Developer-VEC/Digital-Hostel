@@ -367,20 +367,17 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
             )}
 
             {/* LOGOUT */}
+            <button
+              type="button"
+              className="Hostel-mobile-dock-item logout-mobile"
+              onClick={handleLogout}
+            >
+              <div className="Hostel-mobile-dock-icon">
+                <CiLogout />
+              </div>
 
-            {role !== "warden" && (
-              <button
-                type="button"
-                className="Hostel-mobile-dock-item logout-mobile"
-                onClick={handleLogout}
-              >
-                <div className="Hostel-mobile-dock-icon">
-                  <CiLogout />
-                </div>
-
-                <span className="Hostel-mobile-dock-label">Logout</span>
-              </button>
-            )}
+              <span className="Hostel-mobile-dock-label">Logout</span>
+            </button>
           </nav>
 
           {/* =====================================================
