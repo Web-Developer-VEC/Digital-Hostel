@@ -35,16 +35,16 @@ async function fetchPassWarden(req, res) {
     }
 
     let query = {};
-
+    
     if (date) {
       const targetDate = date ? new Date(date) : new Date();
 
       const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
       const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-      query.request_completed = true;
+     
       query.request_time = { $gte: startOfDay, $lte: endOfDay };
-
+      query.request_completed=true
       if (usertype === "superior") {
         if (warden_id && warden_id !== "overall") {
           query.authorised_warden_id = warden_id;
@@ -53,7 +53,7 @@ async function fetchPassWarden(req, res) {
         }
       } else {
         query.gender = warden_data.gender;
-        query.batch = {
+        query.year = {
           $in: warden_data.primary_batch || warden_data.primary_year || [],
         };
       }
@@ -192,7 +192,7 @@ async function WardenDecision(req, res) {
       if (medical_status === true) {
         updateData.reason_type = "medical";
       }
-      updateData.request_completed = true;
+    
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
@@ -205,6 +205,7 @@ async function WardenDecision(req, res) {
     if (action === "reject") {
       updateData.qrcode_path = null;
       updateData.qrcode_status = false;
+      updateData.request_completed=true;
     }
 
     await passCollection.updateOne({ pass_id }, { $set: updateData });
