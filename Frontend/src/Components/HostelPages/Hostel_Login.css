@@ -1,147 +1,1058 @@
-/* Global styles */
-body,
-html {
+/* =========================================================
+   DIGITAL HOSTEL MANAGEMENT SYSTEM
+   PREMIUM MAROON + GOLD LOGIN UI
+========================================================= */
+
+
+/* =========================================================
+   ROOT & RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  height: 100%;
-  font-family: Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
-/* HostelLogin component */
+body {
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   MAIN BACKGROUND
+========================================================= */
+
 .HL-hostel-login {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  margin-top: -20px;
-}
-
-/* DynamicBackground component */
-.HL-dynamic-background {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  z-index: -1;
-}
+  position: relative;
+  overflow: hidden;
 
-/* Main content */
-.HL-main-content {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
+
+  background:
+    radial-gradient(
+      circle at 5% 90%,
+      rgba(128, 0, 0, 0.08) 0%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 95% 5%,
+      rgba(184, 134, 11, 0.12) 0%,
+      transparent 25%
+    ),
+    linear-gradient(
+      135deg,
+      #fdfbf7 0%,
+      #f7f1e5 45%,
+      #fffdf8 100%
+    );
+}
+
+
+/* =========================================================
+   PREMIUM BACKGROUND DECORATION
+========================================================= */
+
+.HL-hostel-login::before {
+  content: "";
+
+  position: absolute;
+
+  width: 600px;
+  height: 600px;
+
+  border-radius: 50%;
+
+  top: -350px;
+  right: -250px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(128, 0, 0, 0.09) 0%,
+      rgba(128, 0, 0, 0.04) 35%,
+      transparent 70%
+    );
+
+  pointer-events: none;
+
+  animation:
+    HL-backgroundFloat 15s ease-in-out infinite alternate;
+}
+
+
+.HL-hostel-login::after {
+  content: "";
+
+  position: absolute;
+
+  width: 500px;
+  height: 500px;
+
+  border-radius: 50%;
+
+  bottom: -300px;
+  left: -200px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(218, 165, 32, 0.12) 0%,
+      rgba(218, 165, 32, 0.04) 40%,
+      transparent 70%
+    );
+
+  pointer-events: none;
+
+  animation:
+    HL-backgroundFloatReverse 18s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   DISABLE THREE.JS SKY BACKGROUND
+   CSS BACKGROUND LOOKS MUCH CLEANER
+========================================================= */
+
+.HL-dynamic-background {
+  display: none;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.HL-main-content {
+  width: 100%;
+  min-height: 100vh;
+
+  position: relative;
+  z-index: 5;
+
+  display: flex;
+  flex-direction: column;
+
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  z-index: 10;
-  background: #fefbf4;
+
+  padding: 2rem 1rem;
 }
 
-/* AnimatedLogo component */
+
+/* =========================================================
+   LOGO CONTAINER
+========================================================= */
+
 .HL-logo-container {
-  margin-bottom: 2rem;
+  position: relative;
+  margin-bottom: 1.8rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+
+/* Outer Ring */
+
+.HL-logo-container::before {
+  content: "";
+
+  position: absolute;
+
+  width: 112px;
+  height: 112px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(184, 134, 11, 0.22);
+
+  animation:
+    HL-logoRing 3s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
 
 .HL-animated-logo {
-  width: 8rem;
-  height: 8rem;
-  background-color:#a73d1a;
+  width: 82px;
+  height: 82px;
+
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  position: relative;
+  z-index: 2;
+
+  background:
+    linear-gradient(
+      145deg,
+      #6e0000,
+      #8f0808,
+      #650000
+    );
+
+  border:
+    2px solid rgba(218, 165, 32, 0.7);
+
+  box-shadow:
+    0 12px 28px rgba(128, 0, 0, 0.25),
+    0 0 0 5px rgba(184, 134, 11, 0.07),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15);
 }
+
 
 .HL-logo-icon {
-  width: 4rem;
-  height: 4rem;
-  color: white;
+  width: 38px;
+  height: 38px;
+
+  color: #f5c842;
+
+  filter:
+    drop-shadow(
+      0 2px 5px rgba(0, 0, 0, 0.2)
+    );
 }
 
-/* LoginForm component */
+
+/* =========================================================
+   LOGIN CARD
+========================================================= */
+
 .HL-login-form {
   width: 100%;
-  max-width: 24rem;
-  backdrop-filter: blur(16px);
-  background-color: white;
-  padding: 2.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  max-width: 400px;
+
+  position: relative;
+  z-index: 5;
+
+  padding: 2.2rem 2rem;
+
+  border-radius: 20px;
+
+  background:
+    rgba(255, 255, 255, 0.88);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+
+  border:
+    1px solid rgba(128, 0, 0, 0.08);
+
+  box-shadow:
+    0 25px 55px rgba(58, 35, 15, 0.13),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
-.HL-form-title {
-  font-size: 2rem;
-  font-weight: bold;
-  text-align: center;
-  color: #7c2d12;
-  margin-bottom: 2rem;
+
+.HL-login-form:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 30px 65px rgba(58, 35, 15, 0.16),
+    0 6px 18px rgba(0, 0, 0, 0.04);
 }
+
+
+/* =========================================================
+   FORM TITLE
+========================================================= */
+
+.HL-form-title {
+  margin: 0 0 1.9rem;
+
+  text-align: center;
+
+  font-size: 1.85rem;
+  font-weight: 750;
+
+  color: #760707;
+
+  letter-spacing: -0.7px;
+
+  opacity: 0;
+
+  animation:
+    HL-titleReveal
+    0.9s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    0.2s
+    forwards;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
 
 .HL-form-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+
+  gap: 1.15rem;
 }
+
 
 .HL-form-group {
   display: flex;
   flex-direction: column;
+
   gap: 0.5rem;
 }
 
+
+/* =========================================================
+   LABEL
+========================================================= */
+
 .HL-form-label {
-  font-size: 1rem;
-  color: #9a3412;
+  font-size: 0.82rem;
+
+  font-weight: 650;
+
+  color: #6d3030;
+
+  letter-spacing: 0.15px;
 }
+
+
+/* =========================================================
+   CUSTOM DROPDOWN
+========================================================= */
+
+.HL-custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+
+/* Dropdown Trigger */
+
+.HL-dropdown-trigger {
+  width: 100%;
+  height: 52px;
+
+  padding: 0 0.9rem;
+
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+
+  background:
+    #fcfaf6;
+
+  border:
+    1px solid #e5dccb;
+
+  color: #512626;
+
+  transition:
+    border 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+.HL-dropdown-trigger:hover {
+  border-color:
+    rgba(184, 134, 11, 0.55);
+
+  background:
+    #ffffff;
+}
+
+
+.HL-dropdown-active {
+  background:
+    #ffffff;
+
+  border-color:
+    #b8860b;
+
+  box-shadow:
+    0 0 0 4px rgba(184, 134, 11, 0.1);
+}
+
+
+/* Selected Dropdown */
+
+.HL-dropdown-selected {
+  display: flex;
+  align-items: center;
+
+  gap: 0.75rem;
+
+  font-size: 0.9rem;
+
+  font-weight: 600;
+}
+
+
+/* Selected Icon */
+
+.HL-dropdown-icon {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(128, 0, 0, 0.07);
+
+  color:
+    #800000;
+}
+
+
+/* Chevron */
+
+.HL-dropdown-chevron {
+  color: #800000;
+
+  transition:
+    transform 0.3s ease;
+}
+
+
+.HL-chevron-rotate {
+  transform:
+    rotate(180deg);
+}
+
+
+/* =========================================================
+   DROPDOWN MENU
+========================================================= */
+
+.HL-dropdown-menu {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+
+  z-index: 100;
+
+  padding: 0.45rem;
+
+  border-radius: 14px;
+
+  background:
+    rgba(255, 255, 255, 0.98);
+
+  border:
+    1px solid rgba(128, 0, 0, 0.08);
+
+  box-shadow:
+    0 18px 40px rgba(50, 30, 10, 0.15);
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   DROPDOWN OPTION
+========================================================= */
+
+.HL-dropdown-option {
+  width: 100%;
+
+  padding: 0.7rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: none;
+  border-radius: 10px;
+
+  background:
+    transparent;
+
+  color:
+    #572828;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.HL-dropdown-option:hover {
+  background:
+    rgba(128, 0, 0, 0.05);
+
+  transform:
+    translateX(3px);
+}
+
+
+.HL-option-left {
+  display: flex;
+  align-items: center;
+
+  gap: 0.7rem;
+
+  font-size: 0.88rem;
+
+  font-weight: 550;
+}
+
+
+.HL-option-icon {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  color:
+    #800000;
+
+  background:
+    rgba(184, 134, 11, 0.1);
+}
+
+
+/* Selected Option */
+
+.HL-option-selected {
+  background:
+    rgba(184, 134, 11, 0.08);
+}
+
+
+.HL-selected-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background:
+    #b8860b;
+
+  box-shadow:
+    0 0 0 4px rgba(184, 134, 11, 0.12);
+}
+
+
+/* =========================================================
+   INPUT WRAPPERS
+========================================================= */
+
+.HL-input-wrapper,
+.HL-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+
+/* =========================================================
+   INPUT ICONS
+========================================================= */
+
+.HL-input-icon {
+  position: absolute;
+
+  left: 1rem;
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  color:
+    #9a7a6f;
+
+  pointer-events: none;
+
+  z-index: 2;
+
+  transition:
+    color 0.25s ease;
+}
+
+
+/* =========================================================
+   FORM INPUT
+========================================================= */
 
 .HL-form-input {
-  font-size: 1rem;
-  padding: 0.75rem;
-  background-color: rgba(255, 237, 213, 0.3);
-  border: 1px solid rgba(249, 115, 22, 0.5);
-  border-radius: 0.25rem;
-  color: #7c2d12;
+  width: 100%;
+  height: 52px;
+
+  padding: 0 1rem;
+
+  border-radius: 12px;
+
+  border:
+    1px solid #e5dccb;
+
+  background:
+    #fcfaf6;
+
+  color:
+    #3f2020;
+
+  font-size: 0.9rem;
+
+  transition:
+    border 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
-.HL-form-input::placeholder {
-  color: rgba(124, 45, 18, 0.5);
+
+.HL-input-with-icon {
+  padding-left: 2.9rem;
 }
+
+
+.HL-password-input {
+  padding-left: 2.9rem;
+  padding-right: 3rem;
+}
+
+
+.HL-form-input::placeholder {
+  color:
+    #b4a49c;
+}
+
+
+/* Focus */
 
 .HL-form-input:focus {
   outline: none;
-  border-color:  #7c2d12;
+
+  background:
+    #ffffff;
+
+  border-color:
+    #b8860b;
+
+  box-shadow:
+    0 0 0 4px rgba(184, 134, 11, 0.1);
 }
 
-.HL-form-links {
+
+/* Input icon focus */
+
+.HL-input-wrapper:focus-within .HL-input-icon,
+.HL-password-wrapper:focus-within .HL-input-icon {
+  color:
+    #800000;
+}
+
+
+/* =========================================================
+   PASSWORD TOGGLE
+========================================================= */
+
+.HL-password-toggle {
+  position: absolute;
+
+  right: 0.75rem;
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: 8px;
+
+  background:
+    transparent;
+
+  color:
+    #9a7a6f;
+
   display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.HL-form-link {
-  color: #9a3412;
-  text-decoration: none;
+
+.HL-password-toggle:hover {
+  background:
+    rgba(128, 0, 0, 0.06);
+
+  color:
+    #800000;
 }
 
-.HL-form-link:hover {
-  color: #a73d1a;
-  text-decoration: underline;
+
+.HL-password-toggle:active {
+  transform:
+    translateY(-50%)
+    scale(0.9);
 }
+
+
+/* =========================================================
+   LOGIN BUTTON
+========================================================= */
 
 .HL-form-button {
   width: 100%;
-  background-color: #a73d1a;
-  color: white;
-  font-size: 1rem;
-  padding: 0.75rem;
+  height: 52px;
+
+  position: relative;
+
+  overflow: hidden;
+
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 12px;
+
   cursor: pointer;
-  transition: background-color 0.3s ease;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6e0000 0%,
+      #8d0909 50%,
+      #700000 100%
+    );
+
+  color:
+    #ffffff;
+
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  letter-spacing: 0.4px;
+
+  box-shadow:
+    0 10px 20px rgba(128, 0, 0, 0.2);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+
+/* Button Shine */
+
+.HL-form-button::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: -100%;
+
+  width: 60%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.18),
+      transparent
+    );
+
+  transform:
+    skewX(-20deg);
+
+  transition:
+    left 0.65s ease;
+}
+
+
+.HL-form-button:hover::before {
+  left: 150%;
+}
+
+
 .HL-form-button:hover {
-  background-color: #ea580c;
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 14px 28px rgba(128, 0, 0, 0.27);
+}
+
+
+.HL-form-button:active {
+  transform:
+    translateY(1px);
+}
+
+
+/* =========================================================
+   LOGIN MESSAGE
+========================================================= */
+
+.HL-login-message {
+  margin: 0.8rem 0 0;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+
+  color:
+    #800000;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes HL-titleReveal {
+
+  0% {
+    opacity: 0;
+
+    transform:
+      translateY(20px);
+
+    filter:
+      blur(5px);
+
+    letter-spacing:
+      3px;
+  }
+
+  70% {
+    opacity: 1;
+
+    transform:
+      translateY(-2px);
+
+    filter:
+      blur(0);
+  }
+
+  100% {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+
+    filter:
+      blur(0);
+
+    letter-spacing:
+      -0.7px;
+  }
+}
+
+
+@keyframes HL-logoRing {
+
+  0%,
+  100% {
+    transform:
+      scale(0.92);
+
+    opacity:
+      0.35;
+  }
+
+  50% {
+    transform:
+      scale(1.08);
+
+    opacity:
+      0.8;
+  }
+}
+
+
+@keyframes HL-backgroundFloat {
+
+  from {
+    transform:
+      translate(0, 0);
+  }
+
+  to {
+    transform:
+      translate(-40px, 50px);
+  }
+}
+
+
+@keyframes HL-backgroundFloatReverse {
+
+  from {
+    transform:
+      translate(0, 0);
+  }
+
+  to {
+    transform:
+      translate(50px, -40px);
+  }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .HL-main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .HL-login-form {
+    max-width: 400px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .HL-main-content {
+    padding: 1.2rem 0.8rem;
+  }
+
+  .HL-logo-container {
+    margin-bottom: 1.6rem;
+  }
+
+  .HL-animated-logo {
+    width: 76px;
+    height: 76px;
+  }
+
+  .HL-logo-container::before {
+    width: 104px;
+    height: 104px;
+  }
+
+  .HL-logo-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .HL-login-form {
+    padding: 1.8rem 1.1rem;
+
+    border-radius: 18px;
+
+    max-width: 100%;
+  }
+
+  .HL-form-title {
+    font-size: 1.65rem;
+
+    margin-bottom: 1.6rem;
+  }
+
+  .HL-form-content {
+    gap: 1rem;
+  }
+
+  .HL-form-input,
+  .HL-dropdown-trigger,
+  .HL-form-button {
+    height: 50px;
+  }
+
+  .HL-hostel-login::before {
+    width: 400px;
+    height: 400px;
+  }
+
+  .HL-hostel-login::after {
+    width: 350px;
+    height: 350px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .HL-login-form {
+    padding:
+      1.5rem
+      0.9rem;
+  }
+
+  .HL-form-title {
+    font-size: 1.5rem;
+  }
+
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+
 }

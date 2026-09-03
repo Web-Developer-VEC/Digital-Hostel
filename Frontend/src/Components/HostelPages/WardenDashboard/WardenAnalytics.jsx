@@ -11,7 +11,8 @@ import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
 import "./WardenAnalytics.css";
 import axios from "axios";
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import { getRequest } from "../../../api/axios";
 
 // Custom palette corresponding to your login brand colors:
 // Terracotta, Rust, Tangerine, Muted Amber
@@ -61,47 +62,51 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  console.log("Fetched Data",fetchData);
+
+  const ReasonTypeMapping = {
+    od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
+    leave: ['Function', 'Medical', 'Exams', 'Emergency', 'Others'],
+    outpass: ['Shopping', 'Classes', 'Internship', 'Medical', 'Others'],
+    staypass: ['Holiday', 'Weekend Holiday', 'Semester Holiday', 'Festival Holiday', 'Others'],
+  };
+
   const yearToAlphabet = {
-    "1": "First Year",
-    "2": "Second Year",
-    "3": "Third Year",
-    "4": "Fourth Year",
-    "10": "MBA First Year",
-    "9": "MBA Second Year",
-    "8": "ME First Year",
-    "7": "ME Second Year",
-    overall: "Overall"
+    '1': 'First Year', 
+    '2': 'Second Year',
+    '3': 'Third Year',
+    '4': 'Fourth Year',
+    '10': 'MBA First Year',
+    '9': 'MBA Second year',
+    '8': 'ME First Year',
+    '7': 'ME Second Year',
+    'overall': 'Overall'
   };
 
   const passTypeParse = {
-    od: "OD Pass",
-    outpass: "Out Pass",
-    staypass: "Stay Pass",
-    leave: "Leave"
-  };
+    'od': 'OD',
+    'outpass': 'Out Pass',
+    'staypass': 'Stay Pass',
+    'leave': 'Leave'
+  }
 
   const handleYearChange = (event) => {
     setSelectedYear(event.target.value);
   };
 
-  // Synchronized with login branding for alert dialogs
-  const fireSwal = (config) => {
-    return Swal.fire({
-      background: "#fefbf4",
-      color: "#7c2d12",
-      confirmButtonColor: "#a73d1a",
-      ...config
-    });
-  };
+  // pass measure fetching
+  useEffect(()=>{
+    const fetchData = async ()=>{
 
-  useEffect(() => {
-    const fetchMeasures = async () => {
-      try {
-        const response = await axios.get("/api/pass_measures_warden");
-        const fetched = response.data;
-        const yearKeys = Object.keys(fetched?.data || {});
-        setYears(yearKeys);
-        setFetchData(fetched?.data);
+      try{
+        const response = await getRequest('/api/pass_measures_warden');
+        const fetchedData = response.data;
+        
+        const years = Object.keys(fetchedData?.data)
+        
+        setYears(years);
+
+        setFetchData(fetchedData?.data);
       } catch (err) {
         console.error("Error Fetching data", err);
         fireSwal({
