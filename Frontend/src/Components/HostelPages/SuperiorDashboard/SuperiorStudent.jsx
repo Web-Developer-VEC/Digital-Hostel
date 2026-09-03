@@ -1,212 +1,33 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, Download, Edit2, Filter, Footprints, Home, Save, Search, Trash2, X } from 'lucide-react';
+import { Download, Filter, Footprints, Home, Search, X } from 'lucide-react';
 import './SuperiorStudent.css';
 import axiosInstance from '../../../api/axios';
 import DownloadPdf from '../pdf';
 import Swal from 'sweetalert2';
 
-function StudentTile({ student, onSave, onDelete, format }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedStudent, setEditedStudent] = useState(student);
-
-  const BASE_URL = process.env.REACT_APP_QR_URL;
-
-  const UrlParser = (path) => {
-    return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
-  };
-
-
-  useEffect(() => {
-    setEditedStudent(student);
-  }, [student]);
-
-  const handleSave = () => {
-    onSave(editedStudent);
-    setIsEditing(false);
-  };
-
-  const handleExpandToggle = () => {
-    if (!isExpanded) {
-      setIsExpanded(true);
-    } else {
-      setIsExpanded(false);
-      setIsEditing(false); // Reset editing state when collapsing
-      setEditedStudent(student); // Reset any unsaved changes
-    }
-  };
-
-  return (
-    <div className="superior-student-tile">
-      <div className="logo">
-        <div className="tooltip-container">
-          {student.transitStatus ? (
-            <Footprints size={18} className="transit-icon" />
-          ) : (
-            <Home size={18} className="home-icon" />
-          )}
-
-          <span className="tooltip">
-            {student.transitStatus ? "In Transit" : "In Hostel"}
-          </span>
-        </div>
-      </div>
-      <div className="superior-student-header">
-        <img src={UrlParser(student.photo)} alt={student.name} />
-        <div className="superior-student-basic-info">
-          {isEditing ? (
-            <div className="superior-edit-form">
-              <input
-                type="text"
-                value={editedStudent.name}
-                onChange={(e) => setEditedStudent({ ...editedStudent, name: e.target.value })}
-              />
-              <input
-                type="text"
-                value={editedStudent.admissionNumber}
-                onChange={(e) => setEditedStudent({ ...editedStudent, admissionNumber: e.target.value })}
-              />
-              <input
-                type="text"
-                value={editedStudent.registrationNumber}
-                onChange={(e) => setEditedStudent({ ...editedStudent, registrationNumber: e.target.value })}
-              />
-              <input
-                type="text"
-                value={editedStudent.department}
-                onChange={(e) => setEditedStudent({ ...editedStudent, department: e.target.value })}
-              />
-            </div>
-          ) : (
-            <>
-              <h3>{student.name}</h3>
-              <p>Adm No: {student.admissionNumber}</p>
-              <p>Reg No: {student.registrationNumber}</p>
-              <p>Dept: {student.department}</p>
-              <p>Year: {student.year}</p>
-              <p>Room: {student.roomNumber}</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {isExpanded && (
-        <div className="superior-student-details">
-          {isEditing ? (
-            <div className="superior-edit-form">
-              <input
-                type="text"
-                value={editedStudent.roomNumber}
-                onChange={(e) => setEditedStudent({ ...editedStudent, roomNumber: e.target.value })}
-                placeholder="Room Number"
-              />
-              <input
-                type="text"
-                value={editedStudent.studentMobile}
-                onChange={(e) => setEditedStudent({ ...editedStudent, studentMobile: e.target.value })}
-                placeholder="Student Mobile"
-              />
-              <input
-                type="text"
-                value={editedStudent.parentMobile}
-                onChange={(e) => setEditedStudent({ ...editedStudent, parentMobile: e.target.value })}
-                placeholder="Parent Mobile"
-              />
-              <input
-                type="text"
-                value={editedStudent.area}
-                onChange={(e) => setEditedStudent({ ...editedStudent, area: e.target.value })}
-                placeholder="Area"
-              />
-              <select
-                value={editedStudent.foodType}
-                onChange={(e) => setEditedStudent({ ...editedStudent, foodType: e.target.value })}
-                className="block w-full px-4 py-2 border border-red-500 bg-white text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              >
-                <option value="Veg">Vegetarian</option>
-                <option value="Non-Veg">Non-Vegetarian</option>
-              </select>
-            </div>
-          ) : (
-            <>
-              <p>Transit Status: {student.transitStatus ? <span>In Transit</span> : <span>In Hostel</span>}</p>
-              {/* Display pass details only if passInfo exists and has non-null values */}
-              {student.passInfo && (student.passInfo.passtype || student.passInfo.from || student.passInfo.to) && (
-                <>
-                  <div className="details-info-item">
-                    <span className="details-label">Pass Type:</span>
-                    <span>{student.passInfo.passtype || "N/A"}</span>
-                  </div>
-                  <div className="details-info-item">
-                    <span className="details-label">From:</span>
-                    <span >{format(student.passInfo?.from).date} at {format(student.passInfo?.from).time}</span>
-                  </div>
-                  <div className="details-info-item">
-                    <span className="details-label">To:</span>
-                    <span >{format(student.passInfo?.to).date} at {format(student.passInfo?.to).time}</span>
-                  </div>
-                </>
-              )}
-              <p>Student Mobile: <a href={`tel:${student.studentMobile}`} className='no-underline text-black'>{student.studentMobile}</a></p>
-              <p>Parent Mobile: <a href={`tel:${student.parentMobile}`} className='no-underline text-black'>{student.parentMobile}</a></p>
-              <p>Area: {student.area}</p>
-              <p>Food Type: {student.foodType === "Veg" ? "Vegetarian" : student.foodType === "Non-Veg" ? "Non-Vegetarian" : student.foodType}</p>
-            </>
-          )}
-        </div>
-      )}
-
-      <div className="superior-student-actions">
-        <button onClick={handleExpandToggle} className="superior-view-button">
-          {!isEditing && (
-            isExpanded ? (
-              <>
-                <ChevronUp className="superior-icon" /> View Less
-              </>
-            ) : (
-              <>
-                <ChevronDown className="superior-icon" /> View More
-              </>
-            ))
-          }
-        </button>
-        {isExpanded && (
-          isEditing ? (
-            <>
-              <button onClick={() => setIsEditing(false)} className="superior-delete-button">
-                <X className="superior-icon" /> Cancel
-              </button>
-
-              <button onClick={() => onDelete(student.name)} className="superior-delete-button">
-                <Trash2 className="superior-icon" /> Delete
-              </button>
-
-              <button onClick={handleSave} className="superior-save-button">
-                <Save className="superior-icon" /> Save
-              </button>
-            </>
-          ) : (
-            <button onClick={() => setIsEditing(true)} className="superior-edit-button">
-              <Edit2 className="superior-icon" /> Edit
-            </button>
-          )
-        )}
-      </div>
-    </div>
-  );
-}
-
+// Helper to get initials for the Avatar
+const getInitials = (name) => {
+  if (!name) return "ST";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length > 1) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
 
 function SuperiorStudent() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGender, setSelectedGender] = useState('male');
-  const [students, setStudents] = useState(null);
+  const [students, setStudents] = useState({ male: [], female: [] });
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Control modal visibility
-  const [tempYear, setTempYear] = useState(""); // Store selected year before confirmation
-  const [selectedYear, setSelectedYear] = useState("");
-  const [uniqueBatches, setUniqueBatches] = useState([]);
+  
+  // States
+  const [selectedGender, setSelectedGender] = useState('Male'); // Default to Boys
+  const [selectedStudent, setSelectedStudent] = useState(null); // Modal state
+  
+  // State for Inline Editing Food Type
+  const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' }); 
+
   const [filters, setFilters] = useState({
     year: 'All',
     department: 'All',
@@ -238,50 +59,67 @@ function SuperiorStudent() {
           admissionNumber: student.admin_number,
           registrationNumber: student.registration_number,
           gender: student.gender,
-          year: yearToAlphabet[student.year],
+          year: yearToAlphabet[student.year] || student.year,
           department: student.department,
           roomNumber: student.room_number,
           studentMobile: student.phone_number_student,
           parentMobile: student.phone_number_parent,
           area: student.city,
-          foodType: student.foodtype || "",
+          foodType: student.foodtype || "Not Specified",
           transitStatus: student.transit_status,
           vacateStatus: student.vacate_status,
           passInfo: student.pass_info || {},
           batch: student.batch
         }));
 
-        const batches = [...new Set(formattedData.map(student => student.batch))];
-        setUniqueBatches(batches);
-
         setStudents({
-          male: formattedData?.filter(student => student.gender === "Male"),
-          female: formattedData?.filter(student => student.gender === "Female")
+          male: formattedData.filter(student => student.gender === "Male"),
+          female: formattedData.filter(student => student.gender === "Female")
         });
 
       } catch (err) {
         console.error('Error fetching data', err);
       }
     };
-
     fetchData();
   }, []);
 
+  const activeStudents = selectedGender === 'Male' ? (students.male || []) : (students.female || []);
+
+  const filteredStudents = activeStudents.filter(student => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTermLower) ||
+      student.admissionNumber.toLowerCase().includes(searchTermLower) ||
+      (student.area && student.area.toLowerCase().includes(searchTermLower)) ||
+      student.roomNumber?.toString().includes(searchTermLower) ||
+      student.department?.toLowerCase().includes(searchTermLower);
+
+    const matchesYear = filters.year === "All" || student.year === yearToAlphabet[filters.year];
+    const matchesDepartment = filters.department === "All" || student.department === filters.department;
+    const matchesFoodType = filters.foodType === "All" || student.foodType === filters.foodType;
+    
+    const matchesTransitStatus =
+      filters.transitStatus === "All" ||
+      (filters.transitStatus === "true" && student.transitStatus) ||
+      (filters.transitStatus === "false" && !student.transitStatus);
+
+    return matchesSearch && matchesYear && matchesDepartment && matchesFoodType && matchesTransitStatus;
+  });
+
   const handleDelete = async (registration_number, studentName) => {
     const result = await Swal.fire({
-      title: "Delete Student?",
-      text: `Are you sure you want to delete ${studentName}? This action cannot be undone.`,
+      title: "Mark Vacate?",
+      text: `Are you sure you want to vacate ${studentName}? This action cannot be undone.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc3545",
+      confirmButtonColor: "#7f1d1d",
       cancelButtonColor: "#6c757d",
-      confirmButtonText: "Yes, Delete",
+      confirmButtonText: "Yes, Vacate",
       cancelButtonText: "Cancel"
     });
 
-    if (!result.isConfirmed) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     try {
       const response = await axiosInstance.post("/api/delete_student", {
@@ -291,8 +129,8 @@ function SuperiorStudent() {
 
       if (response.status === 200) {
         Swal.fire({
-          title: "Deleted! ✅",
-          text: "Student data deleted successfully.",
+          title: "Vacated! ✅",
+          text: "Student has been vacated successfully.",
           icon: "success",
           timer: 2000,
           showConfirmButton: false
@@ -301,369 +139,295 @@ function SuperiorStudent() {
         });
       }
     } catch (error) {
-      console.error("❌ Error deleting student:", error);
+      console.error("Error deleting student:", error);
     }
   };
 
-
-  // Handle year selection
-  const handleYearChange = (event) => {
-    const year = event.target.value;
-
-    // If "Increment Student Year" is selected, do nothing
-    if (year === "") {
-      return;
-    }
-
-    setTempYear(year); // Store the selected year
-    setIsModalOpen(true); // Open confirmation modal
-  };
-
-  const confirmYearChange = async () => {
-    setIsModalOpen(false);
-    console.log("temp Year", tempYear);
-
-    Swal.fire({
-      title: "Processing ⏳",
-      text: "Incrementing student year...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      const response = await axiosInstance.post("/api/increment_student_year", {
-        batch: tempYear
-      });
-
-      if (response.status === 200) {
-        Swal.fire({
-          title: "Success! ✅",
-          text: `Student year for batch ${tempYear} has been incremented successfully.`,
-          icon: "success",
-          confirmButtonText: "OK"
-        }).then(() => {
-          window.location.reload();
-        });
-      }
-    } catch (error) {
-      console.error("Error updating year:", error);
-    }
-  };
-
-  const ConfirmationModal = ({ onConfirm, onCancel }) => (
-    <div className="AR-confirmation-modal-overlay">
-      <div className="AR-confirmation-modal">
-        <h3>Confirm Year Increment</h3>
-        <p>Are you sure you want to increment the student year {tempYear} ?</p>
-        <div className="AR-confirmation-buttons">
-          <button onClick={onCancel} className="AR-button AR-button-secondary">
-            Cancel
-          </button>
-          <button onClick={onConfirm} className="AR-button AR-button-primary">
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-
-  const filteredStudents = students?.[selectedGender]?.filter(student => {
-
-    const searchTermLower = searchTerm.toLowerCase();
-
-    const matchesSearch =
-      student.name.toLowerCase().includes(searchTermLower) ||
-      student.admissionNumber.toLowerCase().includes(searchTermLower) ||
-      student.area.toLowerCase().includes(searchTermLower) ||
-      student.roomNumber.toString().includes(searchTermLower) ||
-      student.studentMobile.toString().includes(searchTermLower) ||
-      student.parentMobile.toString().includes(searchTermLower) ||
-      student.foodType.toString().includes(searchTermLower) ||
-      student.registrationNumber.toString().includes(searchTermLower) ||
-      student.department?.toLowerCase().includes(searchTermLower);
-
-    const matchesYear =
-      filters.year === "All" || student.year === yearToAlphabet[filters.year];
-
-    const matchesDepartment =
-      filters.department === "All" || student.department === filters.department;
-
-    const matchesFoodType =
-      filters.foodType === "All" || student.foodType === filters.foodType;
-
-    const matchesTransitStatus =
-      filters.transitStatus === "All" ||
-      (filters.transitStatus === "true" && student.transitStatus) ||
-      (filters.transitStatus === "false" && !student.transitStatus);
-
-    const matchesPassType =
-      filters.passType === 'All' ||
-      (filters.passType === 'staypass' && student.passInfo.passtype === 'staypass') ||
-      (filters.passType === 'outpass' && student.passInfo.passtype === 'outpass') ||
-      (filters.passType === 'od' && student.passInfo.passtype === 'od') ||
-      (filters.passType === 'leave' && student.passInfo.passtype === 'leave');
-
-    return matchesSearch && matchesYear && matchesDepartment && matchesFoodType && matchesTransitStatus && matchesPassType;
-  }) || [];
-
-
-
-  const handleSaveStudent = async (editedStudent, originalStudent) => {
-    const updateFields = {};
-
-    if (editedStudent.name !== originalStudent.name) {
-      updateFields.name = editedStudent.name;
-    }
-    if (editedStudent.admissionNumber !== originalStudent.admissionNumber) {
-      updateFields.admin_number = editedStudent.admissionNumber;
-    }
-    if (editedStudent.registrationNumber !== originalStudent.registrationNumber) {
-      updateFields.registration_number = editedStudent.registrationNumber
-    }
-    if (editedStudent.year !== originalStudent.year) {
-      updateFields.year = editedStudent.year;
-    }
-    if (editedStudent.department !== originalStudent.department) {
-      updateFields.department = editedStudent.department;
-    }
-    if (editedStudent.roomNumber !== originalStudent.roomNumber) {
-      updateFields.room_number = editedStudent.roomNumber;
-    }
-    if (editedStudent.studentMobile !== originalStudent.studentMobile) {
-      updateFields.phone_number_student = editedStudent.studentMobile;
-    }
-    if (editedStudent.parentMobile !== originalStudent.parentMobile) {
-      updateFields.phone_number_parent = editedStudent.parentMobile;
-    }
-    if (editedStudent.area !== originalStudent.area) {
-      updateFields.city = editedStudent.area;
-    }
-    if (editedStudent.foodType !== originalStudent.foodType) {
-      updateFields.foodtype = editedStudent.foodType;
-    }
-
-    if (Object.keys(updateFields).length === 0) {
-      Swal.fire({
-        title: "No Changes",
-        text: "No changes detected to save.",
-        icon: "info",
-        confirmButtonText: "OK"
-      });
-      return;
-    }
-
-    // Show loading alert
-    Swal.fire({
-      title: "Saving ⏳",
-      text: "Updating student profile...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+  const handleSaveStudentField = async (field, newValue, successMessage = "Updated successfully!") => {
+    if (!selectedStudent) return;
+    
+    const updateFields = {
+      [field]: newValue
+    };
 
     try {
       const response = await axiosInstance.post('/api/update_student_by_warden', {
-        registration_number: originalStudent.registrationNumber,
+        registration_number: selectedStudent.registrationNumber,
         ...updateFields,
       });
 
       if (response.status === 200) {
+        const formattedFood = newValue === 'Veg' ? 'Vegetarian' : (newValue === 'Non-Veg' ? 'Non-Vegetarian' : newValue);
+        
+        setSelectedStudent(prev => ({ ...prev, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood }));
+        
+        setStudents(prev => ({
+          male: prev.male.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s),
+          female: prev.female.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s)
+        }));
+
         Swal.fire({
           title: "Success! ✅",
-          text: "Student profile updated successfully.",
+          text: successMessage,
           icon: "success",
-          timer: 2000,
+          timer: 1500,
           showConfirmButton: false
-        }).then(() => {
-          setStudents((prevStudents) => ({
-            ...prevStudents,
-            [selectedGender]: prevStudents?.[selectedGender]?.map((student) =>
-              student.id === originalStudent.id ? { ...student, ...updateFields } : student
-            )
-          }));
-          window.location.reload();
         });
       }
     } catch (error) {
       console.error('Error updating student:', error);
+      Swal.fire("Error", "Failed to update record.", "error");
     }
   };
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return { date: "N/A", time: "N/A" }; // Handle missing values
-
-    const dateObj = new Date(dateTime);
-    return {
-      date: dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }), // Example: "21 February 2025"
-      time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) // Example: "09:00 AM"
-    };
+  const editRoom = async () => {
+    const { value: newRoom } = await Swal.fire({
+      title: 'Edit Room Number',
+      input: 'text',
+      inputValue: selectedStudent.roomNumber,
+      showCancelButton: true,
+      confirmButtonColor: '#fdcc03',
+    });
+    if (newRoom && newRoom !== selectedStudent.roomNumber) {
+      handleSaveStudentField('room_number', newRoom, "Room number updated successfully.");
+    }
   };
 
+  const startEditFood = () => {
+    const rawValue = selectedStudent.foodType === 'Vegetarian' ? 'Veg' : (selectedStudent.foodType === 'Non-Vegetarian' ? 'Non-Veg' : selectedStudent.foodType);
+    setInlineEdit({ field: 'foodType', value: rawValue });
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineEdit({ field: null, value: '' });
+  };
+
+  // Two-step confirmation flow matching your reference screenshots
+  const confirmEditFood = async () => {
+    const currentRaw = selectedStudent.foodType === 'Vegetarian' ? 'Veg' : (selectedStudent.foodType === 'Non-Vegetarian' ? 'Non-Veg' : selectedStudent.foodType);
+    
+    if (inlineEdit.value === currentRaw) {
+      cancelInlineEdit();
+      return;
+    }
+
+    const oldLabel = selectedStudent.foodType;
+    const newLabel = inlineEdit.value === 'Veg' ? 'Vegetarian' : 'Non-Vegetarian';
+
+    const result = await Swal.fire({
+      title: 'Change Food Type?',
+      html: `Are you sure you want to change the food type for <b>${selectedStudent.name}</b>?<br><br><span style="color: #10b981; font-weight: 600;">${oldLabel}</span> &rarr; <span style="color: #ef4444; font-weight: 600;">${newLabel}</span>`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981', 
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Change',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      await handleSaveStudentField('foodtype', inlineEdit.value, "Food type updated successfully.");
+      cancelInlineEdit();
+    }
+  };
 
   return (
-    <>
-      <div className="superior-container">
-        <div className="superior-content">
-          <div className="superior-header">
-            <div className="details-search">
-              <Search className="details-search-icon" />
-              <input
-                type="text"
-                placeholder="Search students by anything"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="details-search-input"
-              />
+    <div className="superior-container">
+      <div className="superior-content">
+        
+        {/* Top Header Row */}
+        <div className="warden-header-controls">
+          <div className="search-wrapper">
+            <Search className="search-icon" size={18} />
+            <input
+              type="text"
+              placeholder="Search students by anything"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          <div className="header-actions">
+            <div className="gender-toggle">
+              <button
+                className={`gender-btn ${selectedGender === 'Male' ? 'active' : ''}`}
+                onClick={() => setSelectedGender('Male')}
+              >
+                Boys
+              </button>
+              <button
+                className={`gender-btn ${selectedGender === 'Female' ? 'active' : ''}`}
+                onClick={() => setSelectedGender('Female')}
+              >
+                Girls
+              </button>
             </div>
 
-            <div className='buttons'>
-              <div className="superior-buttons">
-                <button
-                  onClick={() => setSelectedGender('male')}
-                  className={selectedGender === 'male' ? 'superior-active' : ''}
-                >
-                  Boys
-                </button>
-                <button
-                  onClick={() => setSelectedGender('female')}
-                  className={selectedGender === 'female' ? 'superior-active' : ''}
-                >
-                  Girls
-                </button>
-                <select onChange={handleYearChange} value={selectedYear} className='custom-select'>
-                  <option value="">Increment Student Year</option>
-                  {uniqueBatches.map((batch) => (
-                    <option key={batch} value={batch}>
-                      {batch}
-                    </option>
-                  ))}
-                </select>
+            <button className="action-btn">
+              <Download size={18} />
+              <DownloadPdf studentData={filteredStudents} />
+            </button>
+            
+            <div className="filter-wrapper" ref={filterRef}>
+              <button className="action-btn" onClick={() => setShowFilters(!showFilters)}>
+                <Filter size={18} /> Filters
+              </button>
+              
+              {showFilters && (
+                <div className="filter-popup">
+                  <div className="filter-section">
+                    <label>Year</label>
+                    <select value={filters.year} onChange={(e) => setFilters({ ...filters, year: e.target.value })}>
+                      <option value="All">All Years</option>
+                      <option value="1">First Year</option>
+                      <option value="2">Second Year</option>
+                      <option value="3">Third Year</option>
+                      <option value="4">Fourth Year</option>
+                    </select>
+                  </div>
+                  <div className="filter-section">
+                    <label>Department</label>
+                    <select value={filters.department} onChange={(e) => setFilters({ ...filters, department: e.target.value })}>
+                      <option value="All">All Depts</option>
+                      <option value="CSE">CSE</option>
+                      <option value="IT">IT</option>
+                      <option value="ECE">ECE</option>
+                      <option value="EEE">EEE</option>
+                      <option value="MECH">Mechanical</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
+        {/* Grid Layout */}
+        <div className="students-grid">
+          {filteredStudents.map(student => (
+            <div key={student.id} className="student-card">
+              <div className="status-icon-top">
+                {student.transitStatus ? (
+                  <Footprints size={18} color="#f59e0b" />
+                ) : (
+                  <Home size={18} color="#3b82f6" />
+                )}
               </div>
-              <div className='buttons-2'>
-                <button className='filter-button download'>
-                  <Download />
-                  <DownloadPdf studentData={filteredStudents} />
-                </button>
-                <div className="details-filter" ref={filterRef}>
-                  <button
-                    className="filter-button"
-                    onClick={() => setShowFilters(!showFilters)}
-                  >
-                    <Filter size={20} />
-                    Filters
-                  </button>
+              
+              <div className="card-info-row">
+                <div className="avatar-circle">
+                  {getInitials(student.name)}
+                </div>
+                <div className="card-details">
+                  <h3 title={student.name}>{student.name}</h3>
+                  <p>Admission No: {student.admissionNumber}</p>
+                  <p>{student.year}</p>
+                  <p>{student.department}</p>
+                </div>
+              </div>
+              
+              <button className="view-more-btn" onClick={() => setSelectedStudent(student)}>
+                View More
+              </button>
+            </div>
+          ))}
+        </div>
 
-                  {showFilters && (
-                    <div className="filter-popup">
-                      <div className="filter-section">
-                        <label className="filter-label">Year</label>
-                        <select
-                          value={filters.yearyear}
-                          onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-                          className="filter-select"
-                        >
-                          <option value="All">All Years</option>
-                          <option value="1">First Year</option>
-                          <option value="2">Second Year</option>
-                          <option value="3">Third Year</option>
-                          <option value="4">Fourth Year</option>
-                        </select>
-                      </div>
+        {/* Details Modal */}
+        {selectedStudent && (
+          <div className="modal-overlay" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="close-modal-btn" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
+                <X size={20} color="#ef4444" />
+              </button>
 
-                      <div className="filter-section">
-                        <label className="filter-label">Department</label>
-                        <select
-                          className="filter-select"
-                          value={filters.department}
-                          onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                        >
-                          <option value="All">All Departments</option>
-                          <option value="AI&DS">AI</option>
-                          <option value="AUTO">Automobile</option>
-                          <option value="CIVIL">Civil</option>
-                          <option value="CSE">Computer Science</option>
-                          <option value="CYBER">Cyber</option>
-                          <option value="ECE">ECE</option>
-                          <option value="EEE">EEE</option>
-                          <option value="EIE">EIE</option>
-                          <option value="IT">IT</option>
-                          <option value="MECH">Mechanical</option>
-                          <option value="MBA">MBA</option>
-                        </select>
-                      </div>
+              <div className="modal-header">
+                <div className="avatar-circle modal-avatar">
+                  {getInitials(selectedStudent.name)}
+                </div>
+                <div className="modal-header-text">
+                  <h2>{selectedStudent.name}</h2>
+                  <p className="modal-meta">{selectedStudent.year} • {selectedStudent.department}</p>
+                  <p className="modal-subtext">Admission No. {selectedStudent.admissionNumber}</p>
+                </div>
+              </div>
 
-                      <div className="filter-section">
-                        <label className="filter-label">Food Type</label>
+              <hr className="modal-divider" />
+
+              <div className="modal-body">
+                <h4 className="section-title">HOSTEL</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">ROOM</span>
+                    <span className="info-value">{selectedStudent.roomNumber || 'N/A'}</span>
+                    <span className="edit-link" onClick={editRoom}>Edit</span>
+                  </div>
+                  
+                  {/* Inline Food Type Editor with Tick and Cross buttons */}
+                  <div className="info-item">
+                    <span className="info-label">FOOD</span>
+                    {inlineEdit.field === 'foodType' ? (
+                      <div className="inline-edit-group">
                         <select
-                          className="filter-select"
-                          value={filters.foodType}
-                          onChange={(e) => setFilters({ ...filters, foodType: e.target.value })}
+                          className="inline-select"
+                          value={inlineEdit.value}
+                          onChange={(e) => setInlineEdit({ ...inlineEdit, value: e.target.value })}
                         >
-                          <option value="All">All Types</option>
                           <option value="Veg">Vegetarian</option>
                           <option value="Non-Veg">Non-Vegetarian</option>
                         </select>
+                        <button className="inline-btn inline-confirm" onClick={confirmEditFood} title="Save">✓</button>
+                        <button className="inline-btn inline-cancel" onClick={cancelInlineEdit} title="Cancel">✕</button>
                       </div>
-                      {/* Transit Status Filter */}
-                      <div className="filter-section">
-                        <label className="filter-label">Transit Status</label>
-                        <select
-                          className="filter-select"
-                          value={filters.transitStatus}
-                          onChange={(e) => setFilters({ ...filters, transitStatus: e.target.value })}
-                        >
-                          <option value="All">All Students</option>
-                          <option value="true">In Transit</option>
-                          <option value="false">In Hostel</option>
-                        </select>
-                      </div>
-                      <div className="filter-section">
-                        <label className="filter-label">Pass Type</label>
-                        <select
-                          className="filter-select"
-                          value={filters.passType}
-                          onChange={(e) => setFilters({ ...filters, passType: e.target.value })}
-                        >
-                          <option value="All">All Students</option>
-                          <option value="staypass">Stay Pass</option>
-                          <option value="outpass">Out Pass</option>
-                          <option value="od">OD</option>
-                          <option value="leave">Leave</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
+                    ) : (
+                      <>
+                        <span className="info-value">{selectedStudent.foodType}</span>
+                        <span className="edit-link" onClick={startEditFood}>Edit</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="info-item">
+                    <span className="info-label">STATUS</span>
+                    <span className="info-value status-indicator">
+                      <span className={`status-dot ${selectedStudent.transitStatus ? 'transit' : 'hostel'}`}></span>
+                      {selectedStudent.transitStatus ? 'In Transit' : 'In Hostel'}
+                    </span>
+                  </div>
                 </div>
+
+                <h4 className="section-title">CONTACT</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">STUDENT</span>
+                    <span className="info-value">{selectedStudent.studentMobile || 'N/A'}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">PARENT</span>
+                    <span className="info-value">{selectedStudent.parentMobile || 'N/A'}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">AREA</span>
+                    <span className="info-value">{selectedStudent.area || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-vaccate" onClick={() => handleDelete(selectedStudent.registrationNumber, selectedStudent.name)}>
+                  Mark Vaccate
+                </button>
+                <button className="btn-close" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
+                  Close
+                </button>
               </div>
             </div>
           </div>
+        )}
 
-
-          {isModalOpen && (
-            <ConfirmationModal
-              onConfirm={confirmYearChange}
-              onCancel={() => setIsModalOpen(false)}
-            />
-          )}
-          <div className="superior-students-grid">
-            {filteredStudents?.map(student => (
-              <StudentTile
-                key={student.id}
-                student={student}
-                onSave={(editedStudent) => handleSaveStudent(editedStudent, student)}
-                onDelete={() => handleDelete(student.registrationNumber, student.name)}
-                format={formatDateTime}
-              />
-            ))}
-          </div>
-        </div>
       </div>
-    </>
+    </div>
   );
 }
 

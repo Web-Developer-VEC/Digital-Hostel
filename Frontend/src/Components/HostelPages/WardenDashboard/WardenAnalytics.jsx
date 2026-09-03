@@ -1,42 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
-import Calendar from "react-calendar"; // Import the calendar component
-import "react-calendar/dist/Calendar.css"; // Import the calendar styles
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
-import "./WardenAnalytics.css";
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { getRequest } from "../../../api/axios";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Colors for the donut chart
+// Professional, muted categorical palette
+const PALETTE = ["#0d6efd", "#198754", "#ffc107", "#dc3545", "#6c757d"];
 
-const Card = ({ title, number, onClick }) => {
-  return (
-    <div className="pl-warden-card" onClick={onClick}>
-      <h2 className="pl-warden-card-title">{title}</h2>
-      <p className="pl-warden-card-number">{number}</p>
-    </div>
-  );
+const SWAL_THEME = {
+  customClass: {
+    popup: "admin-swal-card",
+    confirmButton: "admin-swal-action",
+  },
+  buttonsStyling: false,
 };
 
-const Dashboard = () => {
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [showNames, setShowNames] = useState(false);
-  const [highlightedData, setHighlightedData] = useState(null);
-  const [showChartPopup, setShowChartPopup] = useState(false);
-  const [chartPopupData, setChartPopupData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0] 
-  );
-  const [nameList, setNameList] = useState(null);
-  const [showCalendar, setShowCalendar] = useState(false);
+const COHORT_LABELS = {
+  1: "1st Year",
+  2: "2nd Year",
+  3: "3rd Year",
+  4: "4th Year",
+  10: "MBA 1st",
+  9: "MBA 2nd",
+  8: "ME 1st",
+  7: "ME 2nd",
+  overall: "All Hostels",
+};
+
+const PASS_NAMES = {
+  od: "On Duty",
+  outpass: "Out Pass",
+  staypass: "Stay Pass",
+  leave: "Official Leave",
+};
+
+export default function WardenAnalyticsDashboard() {
   const [selectedYear, setSelectedYear] = useState("overall");
+  const [years, setYears] = useState([]);
   const [fetchData, setFetchData] = useState(null);
-  const [years, setYears] = useState(null);
-  const [waitingMember, setWaitingMember] = useState(null)
-  const [lateMember,setLateMember] = useState(null);
-  const [showNameList, setShowNameList] = useState(false);
-  const [nameListData, setNameListData] = useState([]);
+
+  // Modal Sheet States
+  const [activeModal, setActiveModal] = useState(null); // 'movement' | 'pass_analysis'
+  const [selectedMovement, setSelectedMovement] = useState(null);
+  const [selectedPass, setSelectedPass] = useState(null);
   const [fetchedPassAnalysis, setFetchedPassAnalysis] = useState(null);
+  const [activeRosterTab, setActiveRosterTab] = useState("total");
+
+  // Filter States
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [hoveredSlice, setHoveredSlice] = useState(null);
+
+  // Networking
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -77,503 +95,458 @@ const Dashboard = () => {
     const fetchData = async ()=>{
 
       try{
-        const response = await axios.get('/api/pass_measures_warden');
+        const response = await getRequest('/api/pass_measures_warden');
         const fetchedData = response.data;
-
+        
         const years = Object.keys(fetchedData?.data)
         
         setYears(years);
 
         setFetchData(fetchedData?.data);
       } catch (err) {
-        console.error("Error Fetching data",err);
+        console.error(err);
         Swal.fire({
-          title: "Error ❌",
-          text: "Failed to fetch pass analytics data. Please refresh the page.",
+          ...SWAL_THEME,
+          title: "Connection Lost",
+          text: "Unable to sync with gate systems. Please reload.",
           icon: "error",
-          confirmButtonText: "OK"
+          confirmButtonText: "Okay",
         });
       }
-    }
-    fetchData();
-  },[]);
+    };
+    fetchAnalytics();
+  }, []);
 
-  const passMeasure = fetchData ? fetchData[selectedYear] : {};
+  const passMeasure = fetchData?.[selectedYear] || {};
 
-  const cardData = [
-    { title: "Outgoing", number: passMeasure?.exitTimeCount },
-    { title: "Arrive", number: passMeasure?.reEntryTimeCount },
+  const gateCards = [
     {
-      title: "Waiting",
-      number: passMeasure?.activeOutsideCount,
+      id: "outgoing",
+      title: "Departed Today",
+      detail: "Gate exits processed",
+      value: passMeasure?.exitTimeCount ?? 0,
+      badge: "Normal",
+      tone: "neutral",
+      isLive: false,
+    },
+    {
+      id: "arrived",
+      title: "Checked In",
+      detail: "Returned through gate",
+      value: passMeasure?.reEntryTimeCount ?? 0,
+      badge: "Cleared",
+      tone: "success",
+      isLive: false,
+    },
+    {
+      id: "outside",
+      title: "Currently Outside",
+      detail: "Active off-campus students",
+      value: passMeasure?.activeOutsideCount ?? 0,
+      badge: "Tracking",
+      tone: "warning",
+      isLive: true,
       names: passMeasure?.activeOutsideDetails,
     },
     {
-      title: "Overtime",
-      number: passMeasure?.overdueReturnCount,
-      names: passMeasure?.overdueReturnDetails
+      id: "overtime",
+      title: "Curfew Overdue",
+      detail: "Passed allowed return hour",
+      value: passMeasure?.overdueReturnCount ?? 0,
+      badge: "Action Req.",
+      tone: "danger",
+      isLive: true,
+      names: passMeasure?.overdueReturnDetails,
     },
   ];
 
-  const chartData = [
-    { name: "OD", value: passMeasure?.passTypeCounts?.od?.count },
-    { name: "Leave", value: passMeasure?.passTypeCounts?.leave?.count },
-    { name: "Stay Pass", value: passMeasure?.passTypeCounts?.staypass?.count },
-    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count },
+  const passTypes = [
+    { name: "OD", value: passMeasure?.passTypeCounts?.od?.count || 0 },
+    { name: "Leave", value: passMeasure?.passTypeCounts?.leave?.count || 0 },
+    { name: "Stay Pass", value: passMeasure?.passTypeCounts?.staypass?.count || 0 },
+    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count || 0 },
   ];
 
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "#";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+  const totalPassCount = passTypes.reduce((sum, item) => sum + Number(item.value || 0), 0);
+
+  const handleCardInspect = (card) => {
+    if (!card.isLive) return;
+    setSelectedMovement(card);
+    setActiveModal("movement");
   };
 
-
-  const handleCardClick = (card) => {
-    if (card.title === "Waiting" || card.title === "Overtime") {
-      setSelectedCard(card);
-      setShowNames(true);
-    } else {
-      setShowNames(false);
-    }
-  };
-
-  const closeModal = () => {
-    setShowNames(false);
-    setShowChartPopup(false);
-  };
-
-  const handlePieMouseEnter = (data) => {
-    if (window.innerWidth < 769) return; // Prevent hover effect on mobile
-    setHighlightedData(data);
-  };
-
-  const handlePieMouseLeave = () => {
-    setHighlightedData(null);
-  };
-
-  const handlePieClick = async (data) => {
-    if (!data || !data.value) {
+  const handlePassInspect = async (item) => {
+    if (!item?.value) {
       Swal.fire({
-        title: "No Data 📋",
-        text: "No data available for this pass type.",
+        ...SWAL_THEME,
+        title: "No Data",
+        text: `Zero recorded passes for ${item.name} today.`,
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "Close",
       });
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
+    setSelectedPass(item);
+    setActiveModal("pass_analysis");
 
-    console.log("Type",data.name.trim().toLowerCase().replace(/\s+/g, ''));
-    console.log("year",selectedYear);
-
-    // Show loading alert
-    Swal.fire({
-      title: "Loading ⏳",
-      text: "Fetching pass analysis data...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-    
-  
     try {
-      const response = await axios.post('/api/pass_analysis_warden', {
-        type: data.name.trim().toLowerCase().replace(/\s+/g, ''), // Pass type (e.g., "od", "leave")
-        year: selectedYear, // Selected year (e.g., "1", "2", "3", "4")
-      }, { withCredentials: true });
-  
-      if (response.status === 200) {
-        Swal.close(); // Close loading alert
-        const fetchedData = response.data;
-        setFetchedPassAnalysis(fetchedData);
-  
-        // Update the modal content with fetched data
-        const popupChartData = Object.entries(fetchedData.reasonTypeCounts || {}).map(([reason, count]) => ({
-          name: reason,
-          value: count,
-          color: getRandomColor(),
-        }));
-  
-        setChartPopupData({
-          title: data.name,
-          count: data.value,
-          dates: [], // You can update this if needed
-          popupChartData,
-        });
-  
-        setShowChartPopup(true);
-      } else {
-        throw new Error(response.data.error || "Failed to fetch pass analysis data");
-      }
-    } catch (error) {
-      console.error("Error fetching pass analysis data:", error);
-      Swal.fire({
-        title: "Error ❌",
-        text: error.response?.data?.message || "Failed to fetch pass analysis data. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK"
-      });
-      setError(error.message || "Failed to fetch data. Please try again.");
+      const formatted = item.name.trim().toLowerCase().replace(/\s+/g, "");
+      const res = await axios.post(
+        "/api/pass_analysis_warden",
+        { type: formatted, year: selectedYear },
+        { withCredentials: true }
+      );
+      setFetchedPassAnalysis(res.data || {});
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to fetch pass breakdown.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDateChange = async (date) => {
-    const formattedDate = format(date, "yyyy-MM-dd");  // Converts to yyyy-mm-dd
-    
-    setSelectedDate(formattedDate);
-    setShowCalendar(false); // Hide the calendar after selecting the date
-  
+    const formatted = format(date, "yyyy-MM-dd");
+    setSelectedDate(formatted);
+    setShowCalendar(false);
     setIsLoading(true);
     setError(null);
 
-    // Show loading alert
-    Swal.fire({
-      title: "Loading ⏳",
-      text: "Fetching data for selected date...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-  
     try {
-      const response = await axios.post('/api/pass_analysis_by_date_warden', {
-        type: chartPopupData?.title.trim().toLowerCase().replace(/\s+/g, ''), // Pass type (e.g., "od", "leave")
-        year: selectedYear, // Selected year (e.g., "1", "2", "3", "4")
-        date: formattedDate, // Selected date
-      }, { withCredentials: true });
-  
-      if (response.status === 200) {
-        Swal.close(); // Close loading alert
-        const fetchedData = response.data;
-        
-        setFetchedPassAnalysis(fetchedData);
-        
-        // Update the modal content with fetched data
-        const popupChartData = Object.entries(fetchedData.reasonTypeCounts || {}).map(([reason, count]) => ({
-          name: reason,
-          value: count,
-          color: getRandomColor(),
-        }));
-        
-        setChartPopupData(prev => ({
-          ...prev,
-          popupChartData,
-        }));
-      } else {
-        throw new Error(response.data.error || "Failed to fetch pass analysis data");
-      }
-    } catch (error) {
-      console.error("Error fetching pass analysis data:", error);
-      Swal.fire({
-        title: "Error ❌",
-        text: error.response?.data?.message || "Failed to fetch data for the selected date. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK"
-      });
-      setError(error.message || "Failed to fetch data. Please try again.");
+      const formattedType = selectedPass?.name?.trim().toLowerCase().replace(/\s+/g, "");
+      const res = await axios.post(
+        "/api/pass_analysis_by_date_warden",
+        { type: formattedType, year: selectedYear, date: formatted },
+        { withCredentials: true }
+      );
+      setFetchedPassAnalysis(res.data || {});
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to retrieve date log.");
     } finally {
       setIsLoading(false);
     }
   };
-  
 
-  const handleToggleCalendar = () => {
-    setShowCalendar((prev) => !prev); // Toggle calendar visibility
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedMovement(null);
+    setSelectedPass(null);
+    setShowCalendar(false);
+    setActiveRosterTab("total");
+    setError(null);
   };
 
-  const handleTotalClick = () => {
-    const names = fetchedPassAnalysis?.activePasses?.names || [];
-    if (names.length === 0) {
-      Swal.fire({
-        title: "No Data 📋",
-        text: "No students found in this category.",
-        icon: "info",
-        confirmButtonText: "OK"
-      });
-      return;
-    }
-    setNameListData(names);
-    setShowNameList(true);
+  const getRosterList = () => {
+    if (activeRosterTab === "total") return fetchedPassAnalysis?.activePasses?.names || [];
+    if (activeRosterTab === "returning") return fetchedPassAnalysis?.toFieldMatch?.names || [];
+    if (activeRosterTab === "overtime") return fetchedPassAnalysis?.overduePasses?.names || [];
+    return [];
   };
-  
-  const handleReturningClick = () => {
-    const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
-    if (names.length === 0) {
-      Swal.fire({
-        title: "No Data 📋",
-        text: "No students found in this category.",
-        icon: "info",
-        confirmButtonText: "OK"
-      });
-      return;
-    }
-    setNameListData(names);
-    setShowNameList(true);
-  };
-  
-  const handleOvertimeClick = () => {
-    const names = fetchedPassAnalysis?.overduePasses?.names || [];
-    if (names.length === 0) {
-      Swal.fire({
-        title: "No Data 📋",
-        text: "No students found in this category.",
-        icon: "info",
-        confirmButtonText: "OK"
-      });
-      return;
-    }
-    setNameListData(names);
-    setShowNameList(true);
-  };
-  
+
+  const currentRosterList = getRosterList();
+
+  const reasonData = Object.entries(fetchedPassAnalysis?.reasonTypeCounts || {}).map(
+    ([reason, count], idx) => ({
+      name: reason,
+      value: count,
+      color: PALETTE[idx % PALETTE.length],
+    })
+  );
 
   return (
-    <div
-      className={`pl-warden-dashboard-container ${
-        showChartPopup ? "pl-warden-blurred-background" : ""
-      }`}
-    >
-      <div className="pl-warden-title-container">Analytics</div>
-      <div className="pl-warden-dropdown-container">
-        <label className="pl-warden-dropdown-label">Select Year:</label>
-        <select
-          className="pl-warden-dropdown"
-          value={selectedYear}
-          onChange={handleYearChange}
-        >
-          {years?.map((year) => (
-            <option key={year} value={year}>
-              {yearToAlphabet[year]}
-            </option>
-          ))}
-        </select>
-      </div>
-      {/* Cards Section */}
-      <div className="pl-warden-cards">
-        {cardData.map((card, index) => (
-          <Card
-            key={index}
-            title={card.title}
-            number={card.number}
-            onClick={() => handleCardClick(card)}
-          />
-        ))}
-      </div>
-
-      {/* Donut Chart Section */}
-      <div className="pl-warden-chart-container">
-        <PieChart width={900} height={500}>
-          <Pie
-            data={chartData}
-            cx="50%" // Center it within its container
-            cy="40%"
-            innerRadius={130}
-            outerRadius={200}
-            fill="#8884d8"
-            paddingAngle={5}
-            dataKey="value"
-            onMouseEnter={handlePieMouseEnter}
-            onMouseLeave={handlePieMouseLeave}
-            onClick={handlePieClick}
-          >
-            {chartData.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-                className={
-                  highlightedData && highlightedData.name === entry.name
-                    ? "highlighted"
-                    : ""
-                }
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend
-            align="right"
-            verticalAlign="middle"
-            layout="vertical"
-            // onClick={handleLegendClick}
-            wrapperStyle={{
-              display: "flex",
-              flexDirection: "column", // 🔥 Stack items in a single column
-              width: "150px", // Adjust width for better alignment
-              position: "absolute",
-              right: 30, // Aligns legend to the right
-              top: "40%", // Centers vertically
-              transform: "translateY(-50%)",
-              fontSize: "20px", // Adjust font size for better readability
-              fontWeight: "bold",
-              textAlign: "left", // Align text to the left
-              justifyContent: "center", // Centers items properly
-              alignItems: "flex-start", // Aligns text properly
-              lineHeight: "2rem", // Adds spacing between legend items
-            }}
-          />
-        </PieChart>
-      </div>
-
-      {/* Modal for Waiting & Overtime */}
-      {showNames && selectedCard && (
-        <div className="pl-warden-modal-overlay" onClick={closeModal}>
-          <div
-            className="pl-warden-modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button className="pl-warden-close-button" onClick={closeModal}>
-              ×
-            </button>
-            <h3>{selectedCard.title} Names:</h3>
-            <ul>
-              {selectedCard.names.names.map((entry, i) => (
-                <li key={i} className="text-left">
-                  <strong>{i + 1}.</strong> 
-                  {typeof entry === "string" ? entry : entry.name}{" "}
-                  {selectedCard.names.late_by && (
-                    <span className="pl-warden-time">({selectedCard.names.late_by[i]})</span>
-                  )}
-                  {selectedCard.names.passtypes && (
-                    <span className="pl-warden-time">({passTypeParse[selectedCard.names.passtypes[i]]})</span>
-                  )}
-                </li>
+    <div className="admin-layout-container">
+      <div className="admin-content-wrapper">
+        
+        {/* Page Header */}
+        <header className="page-header">
+          <div className="header-titles">
+            <h1>Campus Residence Control</h1>
+            <p>Monitor gate access, active outpasses, and student curfews.</p>
+          </div>
+          <div className="header-actions">
+            <label className="select-label">Cohort Filter:</label>
+            <select
+              className="admin-select"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              {years.map((yr) => (
+                <option key={yr} value={yr}>
+                  {COHORT_LABELS[yr] || yr}
+                </option>
               ))}
-            </ul>
+            </select>
+          </div>
+        </header>
+
+        {/* Real-Time Metrics */}
+        <section className="dashboard-section">
+          <h2 className="section-title">Active Gate Metrics</h2>
+          <div className="metrics-grid">
+            {gateCards.map((card) => (
+              <div
+                key={card.id}
+                className={`stat-card border-${card.tone} ${card.isLive ? "interactive" : ""}`}
+                onClick={() => handleCardInspect(card)}
+              >
+                <div className="stat-header">
+                  <span className="stat-title">{card.title}</span>
+                  <span className={`badge badge-${card.tone}`}>{card.badge}</span>
+                </div>
+                <div className="stat-value">{card.value}</div>
+                <div className="stat-footer">
+                  <span className="stat-detail">{card.detail}</span>
+                  {card.isLive && <span className="stat-link">View List &rarr;</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pass Distribution Panel */}
+        <section className="dashboard-section">
+          <div className="section-header-row">
+            <h2 className="section-title">Pass Distribution Matrix</h2>
+            <div className="total-badge">
+              <strong>{totalPassCount}</strong> Passes Registered Today
+            </div>
+          </div>
+
+          <div className="analytics-panel">
+            {/* Chart Column */}
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={passTypes}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={95}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                    onMouseEnter={(d) => setHoveredSlice(d.name)}
+                    onMouseLeave={() => setHoveredSlice(null)}
+                    onClick={(d) => handlePassInspect(d)}
+                  >
+                    {passTypes.map((item, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PALETTE[index % PALETTE.length]}
+                        opacity={hoveredSlice && hoveredSlice !== item.name ? 0.4 : 1}
+                        style={{ cursor: "pointer", transition: "opacity 0.2s" }}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "#fff",
+                      border: "1px solid #dee2e6",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="chart-center-label">
+                <span className="center-value">{totalPassCount}</span>
+                <span className="center-text">Total Passes</span>
+              </div>
+            </div>
+
+            {/* Progress Bars Column */}
+            <div className="bars-container">
+              {passTypes.map((item, idx) => {
+                const percentage = totalPassCount > 0 ? Math.round((item.value / totalPassCount) * 100) : 0;
+                const color = PALETTE[idx % PALETTE.length];
+
+                return (
+                  <div key={item.name} className="progress-row" onClick={() => handlePassInspect(item)}>
+                    <div className="progress-header">
+                      <div className="progress-label">
+                        <span className="color-dot" style={{ backgroundColor: color }} />
+                        {item.name}
+                      </div>
+                      <div className="progress-stats">
+                        <strong>{item.value}</strong>
+                        <span className="text-muted">({percentage}%)</span>
+                      </div>
+                    </div>
+                    <div className="progress-track">
+                      <div className="progress-fill" style={{ width: `${percentage}%`, backgroundColor: color }} />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="help-text">Click on any category to view detailed logs and student rosters.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* --- MODALS --- */}
+
+      {/* 1. Gate Movement Roster Modal */}
+      {activeModal === "movement" && selectedMovement && (
+        <div className="admin-modal-overlay" onClick={closeModal}>
+          <div className="admin-modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">{selectedMovement.title}</h3>
+                <p className="modal-subtitle">Gate Records Analysis</p>
+              </div>
+              <button className="btn-close" onClick={closeModal}>&times;</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="table-summary-bar">
+                Total found in category: <strong>{selectedMovement.value} Students</strong>
+              </div>
+              
+              <div className="data-table-wrapper">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th width="10%">#</th>
+                      <th width="60%">Student Name</th>
+                      <th width="30%" className="text-right">Status / Class</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMovement.names?.names?.length ? (
+                      selectedMovement.names.names.map((entry, i) => (
+                        <tr key={i}>
+                          <td className="text-muted">{String(i + 1).padStart(2, "0")}</td>
+                          <td className="font-weight-bold">{typeof entry === "string" ? entry : entry.name}</td>
+                          <td className="text-right text-primary">
+                            {selectedMovement.names?.late_by?.[i] ||
+                              (selectedMovement.names?.passtypes?.[i]
+                                ? PASS_NAMES[selectedMovement.names.passtypes[i]]
+                                : "Regular Gate")}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center text-muted py-4">No log entries found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Modal for Chart Data */}
-      {showChartPopup && chartPopupData && (
-      <div className="pl-warden-modal-overlay" onClick={closeModal}>
-        <div
-          className="pl-warden-popup-card"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button className="pl-warden-close-button" onClick={closeModal}>
-            ×
-          </button>
-          {/* Date Selector Button */}
-          {chartPopupData.title != "Out Pass" && (
-            <button className="pl-warden-toggle-button" onClick={handleToggleCalendar}>
-              {new Date(selectedDate).toISOString().split("T")[0]}
-            </button>
-          )}
-          {/* Calendar (only shown when `showCalendar` is true) */}
-          {showCalendar && (
-            <Calendar
-              onChange={handleDateChange}
-              value={new Date(selectedDate)} // Ensure selectedDate is formatted correctly
-            />
-          )}
-
-          {isLoading && <p>Loading...</p>}
-          {error && <p className="pl-warden-error">{error}</p>}
-
-          {!isLoading && !error && (
-            <>
-              <h3 className="pl-warden-popup-title">
-                {chartPopupData.title} Details
-              </h3>
-
-              <div className="pl-warden-popup-count" onClick={handleTotalClick}>
-                <h4>Total Count:</h4>
-                <p>
-                  <strong>{fetchedPassAnalysis?.activePasses?.count || 0}</strong>
-                </p>
+      {/* 2. Pass Drilldown Analytics Modal */}
+      {activeModal === "pass_analysis" && selectedPass && (
+        <div className="admin-modal-overlay" onClick={closeModal}>
+          <div className="admin-modal-dialog modal-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">{selectedPass.name} Analytics</h3>
+                <p className="modal-subtitle">Detailed pass telemetry and roster distribution</p>
               </div>
+              <button className="btn-close" onClick={closeModal}>&times;</button>
+            </div>
 
-              <div className="pl-warden-popup-returning" onClick={handleReturningClick}>
-              {chartPopupData.title != "Out Pass" ? (
-                  <h4>Returning ({selectedDate}):</h4>
-                ) : (
-                  <h4>Returning Students:</h4>
-                )}
-                <p>
-                  <strong>{fetchedPassAnalysis?.toFieldMatch?.count || 0}</strong>
-                </p>
-              </div>
-
-              <div className="pl-warden-popup-overtime" onClick={handleOvertimeClick}>
-              {chartPopupData.title != "Out Pass" ? (
-                <h4>OverDay ({selectedDate}):</h4>
-              ) : (
-                <h4>Over Time:</h4>
-              )}
-                <p>
-                  <strong>{fetchedPassAnalysis?.overduePasses?.count || 0}</strong>
-                </p>
-              </div>
-
-              {showNameList && (
-                <div className="pl-warden-name-list-popup">
-                  <h4>Names:</h4>
-                  <ul>
-                    {nameListData.length > 0 ? (
-                      nameListData.map((name, index) => <li key={index}>{name}</li>)
-                    ) : (
-                      <li>No names available</li>
-                    )}
-                  </ul>
-                  <button onClick={() => setShowNameList(false)}>Close</button>
+            {/* Date Picker Bar */}
+            {selectedPass.name !== "Out Pass" && (
+              <div className="modal-toolbar">
+                <span className="toolbar-label">Audit Date:</span>
+                <div className="dropdown-container">
+                  <button className="btn-default" onClick={() => setShowCalendar(!showCalendar)}>
+                    {selectedDate} &#9662;
+                  </button>
+                  {showCalendar && (
+                    <div className="calendar-dropdown">
+                      <Calendar onChange={handleDateChange} value={new Date(selectedDate)} />
+                    </div>
+                  )}
                 </div>
-              )}
-
-              <div className="pl-warden-pie-chart-container">
-                <PieChart width={500} height={250}>
-                  <Pie
-                    data={
-                      chartPopupData?.popupChartData || [
-                        { name: "No Data", value: 1 },
-                      ]
-                    }
-                    cx="40%"
-                    cy="55%"
-                    innerRadius={0}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {chartPopupData?.popupChartData?.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend
-                    className="pl-warden-recharts-pie"
-                    align="right"
-                    verticalAlign="middle"
-                    layout="vertical"
-                    wrapperStyle={{
-                      right: 0,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      position: "absolute",
-                      fontSize: "20px",
-                      fontWeight: "bold",
-                    }}
-                  />
-                </PieChart>
               </div>
-            </>
-          )}
+            )}
+
+            <div className="modal-body bg-light">
+              {isLoading && <div className="state-message">Loading diagnostic logs...</div>}
+              {error && <div className="state-message text-danger">{error}</div>}
+
+              {!isLoading && !error && (
+                <>
+                  {/* Segmented Controls */}
+                  <div className="segmented-controls">
+                    <button
+                      className={`segment-btn ${activeRosterTab === "total" ? "active" : ""}`}
+                      onClick={() => setActiveRosterTab("total")}
+                    >
+                      <span className="segment-label">Active Passes</span>
+                      <span className="segment-value">{fetchedPassAnalysis?.activePasses?.count || 0}</span>
+                    </button>
+                    <button
+                      className={`segment-btn ${activeRosterTab === "returning" ? "active" : ""}`}
+                      onClick={() => setActiveRosterTab("returning")}
+                    >
+                      <span className="segment-label">Scheduled Returning</span>
+                      <span className="segment-value">{fetchedPassAnalysis?.toFieldMatch?.count || 0}</span>
+                    </button>
+                    <button
+                      className={`segment-btn danger ${activeRosterTab === "overtime" ? "active" : ""}`}
+                      onClick={() => setActiveRosterTab("overtime")}
+                    >
+                      <span className="segment-label">Overstayed</span>
+                      <span className="segment-value">{fetchedPassAnalysis?.overduePasses?.count || 0}</span>
+                    </button>
+                  </div>
+
+                  <div className="split-panel">
+                    {/* Left: Reasons */}
+                    <div className="panel-card">
+                      <h4 className="panel-title">Stated Reasons</h4>
+                      <div className="list-group">
+                        {reasonData.length ? (
+                          reasonData.map((r) => (
+                            <div key={r.name} className="list-group-item">
+                              <div className="item-left">
+                                <span className="color-dot" style={{ backgroundColor: r.color }} />
+                                {r.name}
+                              </div>
+                              <div className="item-right font-weight-bold">{r.value}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-muted p-3">No reasons logged.</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: Roster */}
+                    <div className="panel-card">
+                      <h4 className="panel-title">Roster ({activeRosterTab.toUpperCase()})</h4>
+                      <div className="list-group">
+                        {currentRosterList.length ? (
+                          currentRosterList.map((st, i) => (
+                            <div key={i} className="list-group-item">
+                              <span className="text-muted mr-2">{String(i + 1).padStart(2, "0")}</span>
+                              <span>{st}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-muted p-3">No students found.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
-};
-
-export default Dashboard;
+}

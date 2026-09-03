@@ -179,9 +179,9 @@ async function WardenDecision(req, res) {
     }
 
     if (action === "approve") {
-      if (passData.parent_approval != "approved") {
-        return res.status(400).json({ message: "Parents Approval Needed!" });
-      }
+      // if (passData.parent_approval != "approved") {
+      //   return res.status(400).json({ message: "Parents Approval Needed!" });
+      // }
       const qrPath = await generateQR(pass_id, passData.registration_number);
 
       updateData.qrcode_path = qrPath;
