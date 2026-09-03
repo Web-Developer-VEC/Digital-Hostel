@@ -113,11 +113,11 @@ const App = () => {
     }, [location]);
 
     if (!isOnline) {
-        return (
-          <div className="h-screen flex items-center justify-center md:mt-[15%] md:block">
-            <LoadComp txt={"You are offline"} />
-          </div>
-        );
+//         return (
+//           <div className="h-screen flex items-center justify-center md:mt-[15%] md:block">
+//             <LoadComp txt={"You are offline"} />
+//           </div>
+//         );
     }
 
     return (

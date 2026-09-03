@@ -14,14 +14,14 @@ import { useState } from "react";
 
 const SuperiorLayout = () => {
 
-    const [activeNav, setActiveNav] = useState("wardens");
+    const [activeNav, setActiveNav] = useState("profile");
   
   return (
     <div className="dashboard-container">
       <HostelSidebar role="superior" activeNav={activeNav} setActiveNav={setActiveNav}/>
       <div className="dashboard-content">
         <Routes>
-          <Route index element={<Navigate to="wardens" replace />} />
+          <Route index element={<Navigate to="profile" replace />} />
           <Route path="profile" element={<SupWardenProfile />} />
           <Route path="wardens" element={<SuperiorWarden />} />
           <Route path="requests" element={<SuperiorRequest />} />

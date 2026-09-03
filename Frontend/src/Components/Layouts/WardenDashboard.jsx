@@ -11,14 +11,14 @@ import TutorialPage2 from "../HostelPages/WardenDashboard/TutorialPage2.jsx";
 import { useState } from "react";
 
 const WardenLayout = () => {
-  const [activeNav, setActiveNav] = useState("analytics");
+  const [activeNav, setActiveNav] = useState("profile");
 
   return (
     <div className="dashboard-container">
       <HostelSidebar role="warden" activeNav={activeNav} setActiveNav={setActiveNav} />
       <div className="dashboard-content">
         <Routes>
-          <Route index element={<Navigate to="analytics" replace />} />
+          <Route index element={<Navigate to="profile" replace />} />
           <Route path="profile" element={<WardenProfile />} />
           <Route path="analytics" element={<WardenAnalytics />} />
           <Route path="request" element={<WardenRequest />} />
