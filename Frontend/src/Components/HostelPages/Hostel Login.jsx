@@ -588,8 +588,12 @@ function LoginForm() {
             type="submit"
             className="HL-form-button"
           >
-            Log In
+            LogIn
           </button>
+
+          <p onClick={() => navigate("/forget-password")} >
+            Forgot Password?
+          </p>
 
           {message && (
             <p className="HL-login-message">

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Search, X, FileText, Send } from "lucide-react";
 import "./WardenRequest.css";
-
+import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import axiosInstance, { getRequest, postRequest } from "../../../api/axios";
+import { getRequest, postRequest } from "../../../api/axios";
 
 function WardenRequest() {
   const [records, setRecords] = useState([]);

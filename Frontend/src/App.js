@@ -134,21 +134,21 @@ const App = () => {
                             <DynamicTitle/>
                             <Routes>
                                 <Route path="/" drk element={<HostelLoginDigital load={load} toggle={toggle} theme={theme} />}/>
+                                <Route path="/forget-password" element={<ForgotPassword/>}/>
                                 {/* Hostel Pages */}
                                 <Route path="/hostel/student/*" element={<StudentLayout />} />
                                 <Route path="/hostel/warden/*" element={<WardenLayout />} />
                                 <Route path="/hostel/superior/*" element={<SuperiorLayout />} />
                                 <Route path="/hostel/security/*" element={<SecurityLayout />} />
                                 {/* <Route path="/hostel/login" element={<HostelLoginDigital/>}/> */}
-                                <Route path="/hostel/forget-password" element={<ForgotPassword/>}/>\
 
                                 <Route path="/errorlog" element={<ErrorLogPage />} />
 
-                                {/*  404 - Page not found  */}
-                                <Route path="*" element={<NotFound />} />
                                 {/* Rate limit page */}
                                 <Route path="/ratelimit" element={<RateLimitReach />} />
                                 <Route path="/hit_logs" element={<HitLogs />} />
+                                {/*  404 - Page not found  */}
+                                <Route path="*" element={<NotFound />} />
                             </Routes>
                           
                         </MainContentWrapper>
