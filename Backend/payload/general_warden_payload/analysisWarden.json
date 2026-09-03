@@ -1,0 +1,27 @@
+[
+    {
+  "type": "outpass",
+  "year": "2",
+  "date": "2026-09-03"
+},
+{
+  "type": "staypass",
+  "year": "3",
+  "date": "2026-09-03"
+},
+{
+  "type": "od",
+  "year": "4",
+  "date": "2026-09-03"
+},
+{
+  "type": "leave",
+  "year": "1",
+  "date": "2026-09-03"
+},
+{
+  "type": "outpass",
+  "year": "overall",
+  "date": "2026-09-03"
+}
+]
