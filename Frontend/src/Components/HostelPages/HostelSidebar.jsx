@@ -59,6 +59,13 @@ const navItems = {
 
   warden: [
     {
+      path: "/hostel/warden/profile",
+      label: "Profile",
+      mobileLabel: "Profile",
+      icon: <User />,
+      showProfileCard: true,
+    },
+    {
       path: "/hostel/warden/analytics",
       label: "Analytics",
       mobileLabel: "Analytics",
@@ -91,6 +98,13 @@ const navItems = {
   ],
 
   superior: [
+    {
+      path: "/hostel/superior/profile",
+      label: "Profile",
+      mobileLabel: "Profile",
+      icon: <User />,
+      showProfileCard: true,
+    },
     {
       path: "/hostel/superior/wardens",
       label: "Wardens",
@@ -140,9 +154,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isMobile, setIsMobile] = useState(
-    window.innerWidth <= 768
-  );
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const [showProfile, setShowProfile] = useState(false);
   const [wardenSlidebar, setWardenSlidebar] = useState(null);
@@ -155,7 +167,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/sidebar_warden");
-        
+
         setWardenSlidebar(response.data);
       } catch (err) {
         console.error("Failed to fetch warden data:", err);
@@ -166,6 +178,36 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
       fetchData();
     }
   }, [role]);
+
+  /* WARDEN'S OWN PROFILE (for the Profile hover card) */
+  /* LOGGED-IN USER'S OWN PROFILE (for the Profile hover card — warden or superior) */
+  const [selfProfile, setSelfProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchSelfProfile = async () => {
+      try {
+        const endpoint =
+          role === "superior"
+            ? "/api/superior_self_profile" // 👈 replace with your actual superior endpoint
+            : "/api/warden_self_profile"; // 👈 replace with your actual warden endpoint
+
+        const response = await axios.get(endpoint);
+        setSelfProfile(response.data);
+      } catch (err) {
+        console.error("Failed to fetch self profile:", err);
+      }
+    };
+
+    if (role === "warden" || role === "superior") {
+      fetchSelfProfile();
+    }
+  }, [role]);
+
+  const wardenSelfName = selfProfile?.warden_name || "Profile";
+  const wardenSelfId = selfProfile?.unique_id || "N/A";
+  const wardenSelfImage = selfProfile?.image_path
+    ? base_url + selfProfile.image_path
+    : "https://via.placeholder.com/150";
 
   /* =========================================================
      RESPONSIVE CHECK
@@ -244,28 +286,23 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     return romanMap[num] || num;
   };
 
-  const primaryYearArray = Array.isArray(
-    wardenSlidebar?.["primary batch"]
-  )
+  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary batch"])
     ? wardenSlidebar["primary batch"]
     : Array.isArray(wardenSlidebar?.["primary year"])
-    ? wardenSlidebar["primary year"]
-    : [];
+      ? wardenSlidebar["primary year"]
+      : [];
 
-  const primaryYears =
-    primaryYearArray.map(toRoman).join(", ") || "N/A";
+  const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
 
-  const yearLabel =
-    primaryYearArray.length === 1 ? "year" : "years";
+  const yearLabel = primaryYearArray.length === 1 ? "year" : "years";
 
   /* =========================================================
      IMAGE SOURCE
      Change this if your project requires UrlParser
   ========================================================= */
 
-  const wardenImage =  base_url +
-    wardenSlidebar?.image_path ||
-    "https://via.placeholder.com/150";
+  const wardenImage =
+    base_url + wardenSlidebar?.image_path || "https://via.placeholder.com/150";
 
   /* =========================================================
      RETURN
@@ -302,9 +339,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                     }
                   }}
                 >
-                  <div className="Hostel-mobile-dock-icon">
-                    {item.icon}
-                  </div>
+                  <div className="Hostel-mobile-dock-icon">{item.icon}</div>
 
                   <span className="Hostel-mobile-dock-label">
                     {item.mobileLabel || item.label}
@@ -327,9 +362,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                   <User />
                 </div>
 
-                <span className="Hostel-mobile-dock-label">
-                  Warden
-                </span>
+                <span className="Hostel-mobile-dock-label">Warden</span>
               </button>
             )}
 
@@ -345,9 +378,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                   <CiLogout />
                 </div>
 
-                <span className="Hostel-mobile-dock-label">
-                  Logout
-                </span>
+                <span className="Hostel-mobile-dock-label">Logout</span>
               </button>
             )}
           </nav>
@@ -378,9 +409,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
 
                     <span
                       className={`warden-online-dot ${
-                        wardenSlidebar?.["Active Status"]
-                          ? "online"
-                          : "offline"
+                        wardenSlidebar?.["Active Status"] ? "online" : "offline"
                       }`}
                     />
                   </div>
@@ -390,9 +419,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                       YOUR WARDEN
                     </span>
 
-                    <h3>
-                      {wardenSlidebar?.name || "Warden"}
-                    </h3>
+                    <h3>{wardenSlidebar?.name || "Warden"}</h3>
 
                     <p>
                       Handling {primaryYears} {yearLabel}
@@ -420,8 +447,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                     <span>Contact Warden</span>
 
                     <strong>
-                      {wardenSlidebar?.["Phone number"] ||
-                        "Not Available"}
+                      {wardenSlidebar?.["Phone number"] || "Not Available"}
                     </strong>
                   </div>
                 </a>
@@ -433,9 +459,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
 
                   <span
                     className={`warden-popup-status ${
-                      wardenSlidebar?.["Active Status"]
-                        ? "active"
-                        : "inactive"
+                      wardenSlidebar?.["Active Status"] ? "active" : "inactive"
                     }`}
                   >
                     <span className="status-dot" />
@@ -481,9 +505,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                 </div>
 
                 <div className="warden-sidebar-info">
-                  <span className="warden-title">
-                    YOUR WARDEN
-                  </span>
+                  <span className="warden-title">YOUR WARDEN</span>
 
                   <h3 className="sidebar-warden-name">
                     {wardenSlidebar?.name || "Warden"}
@@ -512,8 +534,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                   <Phone size={15} />
 
                   <span>
-                    {wardenSlidebar?.["Phone number"] ||
-                      "Not Available"}
+                    {wardenSlidebar?.["Phone number"] || "Not Available"}
                   </span>
                 </a>
 
@@ -524,16 +545,12 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
 
                   <span
                     className={`warden-status ${
-                      wardenSlidebar?.["Active Status"]
-                        ? "active"
-                        : "inactive"
+                      wardenSlidebar?.["Active Status"] ? "active" : "inactive"
                     }`}
                   >
                     <span className="warden-status-dot" />
 
-                    {wardenSlidebar?.["Active Status"]
-                      ? "Active"
-                      : "Inactive"}
+                    {wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
@@ -550,27 +567,44 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                 {items.map((item) => {
                   const isActive =
                     location.pathname === item.path ||
-                    location.pathname.startsWith(
-                      `${item.path}/`
-                    );
+                    location.pathname.startsWith(`${item.path}/`);
 
                   return (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      className={`Hostel-nav-button ${
-                        isActive ? "Hostel-nav-active" : ""
-                      }`}
-                      onClick={() => {
-                        if (setActiveNav) {
-                          setActiveNav(item.path);
-                        }
-                      }}
-                    >
-                      {item.icon}
+                    <div key={item.path} className="Hostel-nav-item-wrapper">
+                      <NavLink
+                        to={item.path}
+                        className={`Hostel-nav-button ${
+                          isActive ? "Hostel-nav-active" : ""
+                        }`}
+                        onClick={() => {
+                          if (setActiveNav) {
+                            setActiveNav(item.path);
+                          }
+                        }}
+                      >
+                        {item.icon}
 
-                      <span>{item.label}</span>
-                    </NavLink>
+                        <span>{item.label}</span>
+                      </NavLink>
+
+                      {item.showProfileCard && (
+                        <div className="Hostel-nav-flyout-card">
+                          <img
+                            src={wardenSelfImage}
+                            alt={wardenSelfName}
+                            className="Hostel-nav-flyout-photo"
+                          />
+                          <div className="Hostel-nav-flyout-info">
+                            <p className="Hostel-nav-flyout-name">
+                              {wardenSelfName}
+                            </p>
+                            <p className="Hostel-nav-flyout-id">
+                              ID: {wardenSelfId}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
 
@@ -583,9 +617,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                 >
                   <CiLogout className="Hostel-icon" />
 
-                  <span className="Logout-button">
-                    Logout
-                  </span>
+                  <span className="Logout-button">Logout</span>
                 </button>
               </nav>
             </div>
