@@ -673,3 +673,562 @@ textarea::placeholder {
   justify-content: space-between;
   width: 100%;
 }
+
+.AR-details-row {
+  background: #ffffff;
+}
+
+.AR-details-row > td {
+  padding: 0 !important;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.AR-inline-details {
+  width: 100%;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.AR-inline-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.AR-inline-details-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.AR-inline-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 60px;
+  row-gap: 20px;
+}
+
+.AR-inline-details-grid > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  min-height: 30px;
+}
+
+.AR-inline-details-grid span,
+.AR-parent-section > span,
+.AR-warden-note > span,
+.AR-additional-info > span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.AR-inline-details-grid p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.AR-parent-section {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.AR-send-otp-button {
+  border: none;
+  background: #FDCC03;
+  color: #151516;
+  padding: 9px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  gap:2px;
+}
+
+.AR-send-otp-button:hover {
+  background-color: maroon;
+  color: #f3f4f6;
+}
+
+.AR-warden-note {
+  margin-top: 20px;
+}
+
+.AR-warden-note > span {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.AR-warden-note textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+}
+
+.AR-warden-note textarea:focus {
+  border-color: #9ca3af;
+}
+
+.AR-additional-info {
+  margin-top: 20px;
+}
+
+.AR-additional-info > span {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.AR-additional-info p {
+  margin: 0;
+  color: #111827;
+}
+
+.AR-medical-checkbox {
+  margin-top: 20px;
+}
+
+.AR-medical-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.AR-inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.AR-decline-button,
+.AR-accept-button {
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.AR-decline-button {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.AR-accept-button {
+  background: #16a34a;
+  color: white;
+}
+
+.AR-decline-button:hover {
+  background: #e5e7eb;
+}
+
+.AR-accept-button:hover {
+  background: #15803d;
+}
+
+.AR-otp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.AR-otp-popup {
+  width: 380px;
+  background: white;
+  padding: 28px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.AR-otp-popup h3 {
+  margin: 0 0 8px;
+}
+
+.AR-otp-popup p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.AR-otp-popup input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 5px;
+  outline: none;
+}
+
+.AR-otp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.AR-otp-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.AR-otp-actions button:last-child {
+  background: #FDCC03;
+  color: black;
+}
+
+.AR-otp-actions button:last-child:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+
+/* ================================
+   OTP POPUP
+================================ */
+
+.AR-otp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+
+  animation: AR-otp-fade-in 0.2s ease;
+}
+
+@keyframes AR-otp-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* Popup */
+
+.AR-otp-popup {
+  position: relative;
+
+  width: 420px;
+  max-width: calc(100% - 32px);
+
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  padding: 36px 32px 30px;
+
+  text-align: center;
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.20);
+
+  animation: AR-otp-popup-in 0.25s ease;
+}
+
+@keyframes AR-otp-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* Close */
+
+.AR-otp-close {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.AR-otp-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+
+/* Icon */
+
+.AR-otp-icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 16px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 30px;
+}
+
+
+/* Heading */
+
+.AR-otp-popup h2 {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+
+/* Description */
+
+.AR-otp-description {
+  margin: 10px auto 25px;
+
+  max-width: 330px;
+
+  color: #64748b;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* OTP Boxes */
+
+.AR-otp-boxes {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  margin: 10px 0 14px;
+}
+
+.AR-otp-input {
+  width: 48px;
+  height: 56px;
+
+  border: 2px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  background: #f8fafc;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: 700;
+
+  color: #0f172a;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.AR-otp-input:focus {
+  border-color: #2563eb;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.AR-otp-input.AR-otp-filled {
+  border-color: #2563eb;
+
+  background: #eff6ff;
+}
+
+.AR-otp-input.AR-otp-invalid {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+
+/* Helper */
+
+.AR-otp-error {
+  margin: 0 0 14px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Helper */
+
+.AR-otp-helper {
+  margin: 0 0 24px;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+/* Buttons */
+
+.AR-otp-actions {
+  display: flex;
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+.AR-otp-actions button {
+  flex: 1;
+
+  height: 46px;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+
+/* Resend */
+
+.AR-otp-resend {
+  border: 1px solid #e2e8f0;
+
+  background: #ffffff;
+
+  color: #475569;
+}
+
+.AR-otp-resend:hover {
+  background: #f8fafc;
+}
+.AR-otp-resend:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+
+/* Verify */
+
+.AR-otp-verify {
+  border: none;
+
+  background: maroon;
+
+  color:white;
+
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.AR-otp-verify:hover:not(:disabled) {
+  background: maroon;
+  color:white;
+
+  transform: translateY(-1px);
+}
+
+.AR-otp-verify:disabled {
+  background: #cbd5e1;
+
+  color: #ffffff;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+}
+
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+  .AR-otp-popup {
+    padding: 32px 20px 25px;
+  }
+
+  .AR-otp-boxes {
+    gap: 6px;
+  }
+
+  .AR-otp-input {
+    width: 42px;
+    height: 50px;
+
+    font-size: 20px;
+  }
+
+}

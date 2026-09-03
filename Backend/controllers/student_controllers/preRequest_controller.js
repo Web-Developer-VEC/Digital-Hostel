@@ -22,8 +22,9 @@ async function getStudentPass(req, res) {
     if (passes.length === 0) {
       return res.status(404).json({ message: "No passes found" });
     }
-
+    console.log(passes);
     return res.status(200).json({ passes });
+  
   } catch (err) {
     console.error("❌ Error:", err);
     return res.status(500).json({ error: "Internal Server error" });
