@@ -28,6 +28,12 @@ function SuperiorStudent() {
   // State for Inline Editing Food Type
   const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' }); 
 
+  // Increment Student Year states
+  const [isModalOpen, setIsModalOpen] = useState(false); // Control confirmation modal visibility
+  const [tempYear, setTempYear] = useState(""); // Store selected batch before confirmation
+  const [selectedYear, setSelectedYear] = useState("");
+  const [uniqueBatches, setUniqueBatches] = useState([]);
+
   const [filters, setFilters] = useState({
     year: 'All',
     department: 'All',
@@ -71,6 +77,9 @@ function SuperiorStudent() {
           passInfo: student.pass_info || {},
           batch: student.batch
         }));
+
+        const batches = [...new Set(formattedData.map(student => student.batch))];
+        setUniqueBatches(batches);
 
         setStudents({
           male: formattedData.filter(student => student.gender === "Male"),
@@ -143,6 +152,68 @@ function SuperiorStudent() {
     }
   };
 
+  // Handle batch selection for incrementing student year
+  const handleYearChange = (event) => {
+    const year = event.target.value;
+
+    // If "Increment Student Year" placeholder is selected, do nothing
+    if (year === "") {
+      return;
+    }
+
+    setTempYear(year); // Store the selected batch
+    setIsModalOpen(true); // Open confirmation modal
+  };
+
+  const confirmYearChange = async () => {
+    setIsModalOpen(false);
+
+    Swal.fire({
+      title: "Processing ⏳",
+      text: "Incrementing student year...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response = await axiosInstance.post("/api/increment_student_year", {
+        batch: tempYear
+      });
+
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Success! ✅",
+          text: `Student year for batch ${tempYear} has been incremented successfully.`,
+          icon: "success",
+          confirmButtonText: "OK"
+        }).then(() => {
+          window.location.reload();
+        });
+      }
+    } catch (error) {
+      console.error("Error updating year:", error);
+    }
+  };
+
+  const ConfirmationModal = ({ onConfirm, onCancel }) => (
+    <div className="AR-confirmation-modal-overlay">
+      <div className="AR-confirmation-modal">
+        <h3>Confirm Year Increment</h3>
+        <p>Are you sure you want to increment the student year {tempYear} ?</p>
+        <div className="AR-confirmation-buttons">
+          <button onClick={onCancel} className="AR-button AR-button-secondary">
+            Cancel
+          </button>
+          <button onClick={onConfirm} className="AR-button AR-button-primary">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const handleSaveStudentField = async (field, newValue, successMessage = "Updated successfully!") => {
     if (!selectedStudent) return;
     
@@ -180,17 +251,28 @@ function SuperiorStudent() {
     }
   };
 
-  const editRoom = async () => {
-    const { value: newRoom } = await Swal.fire({
-      title: 'Edit Room Number',
-      input: 'text',
-      inputValue: selectedStudent.roomNumber,
-      showCancelButton: true,
-      confirmButtonColor: '#fdcc03',
-    });
-    if (newRoom && newRoom !== selectedStudent.roomNumber) {
-      handleSaveStudentField('room_number', newRoom, "Room number updated successfully.");
+  // Room number — inline edit, matching Hostelstudents.jsx exactly
+  // (a text input with a checkmark/cross, no separate popup).
+  const [editingRoom, setEditingRoom] = useState(false);
+  const [tempRoom, setTempRoom] = useState('');
+
+  const startEditRoom = () => {
+    setTempRoom(selectedStudent.roomNumber || '');
+    setEditingRoom(true);
+  };
+
+  const cancelEditRoom = () => {
+    setEditingRoom(false);
+    setTempRoom('');
+  };
+
+  const confirmEditRoom = async () => {
+    if (!tempRoom || tempRoom === selectedStudent.roomNumber) {
+      cancelEditRoom();
+      return;
     }
+    await handleSaveStudentField('room_number', tempRoom, "Room number updated successfully.");
+    cancelEditRoom();
   };
 
   const startEditFood = () => {
@@ -202,33 +284,43 @@ function SuperiorStudent() {
     setInlineEdit({ field: null, value: '' });
   };
 
-  // Two-step confirmation flow matching your reference screenshots
+  const closeModal = () => {
+    setSelectedStudent(null);
+    cancelInlineEdit();
+    cancelEditRoom();
+  };
+
+  // Modal behavior parity with the Hostel Students popup: Escape closes it,
+  // and the page behind it can't scroll while it's open.
+  useEffect(() => {
+    if (!selectedStudent) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedStudent]);
+
+  // Food type — saves directly on the checkmark, same as Hostelstudents.jsx
+  // (no extra "are you sure" dialog in between).
   const confirmEditFood = async () => {
     const currentRaw = selectedStudent.foodType === 'Vegetarian' ? 'Veg' : (selectedStudent.foodType === 'Non-Vegetarian' ? 'Non-Veg' : selectedStudent.foodType);
-    
+
     if (inlineEdit.value === currentRaw) {
       cancelInlineEdit();
       return;
     }
 
-    const oldLabel = selectedStudent.foodType;
-    const newLabel = inlineEdit.value === 'Veg' ? 'Vegetarian' : 'Non-Vegetarian';
-
-    const result = await Swal.fire({
-      title: 'Change Food Type?',
-      html: `Are you sure you want to change the food type for <b>${selectedStudent.name}</b>?<br><br><span style="color: #10b981; font-weight: 600;">${oldLabel}</span> &rarr; <span style="color: #ef4444; font-weight: 600;">${newLabel}</span>`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#10b981', 
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, Change',
-      cancelButtonText: 'Cancel'
-    });
-
-    if (result.isConfirmed) {
-      await handleSaveStudentField('foodtype', inlineEdit.value, "Food type updated successfully.");
-      cancelInlineEdit();
-    }
+    await handleSaveStudentField('foodtype', inlineEdit.value, "Food type updated successfully.");
+    cancelInlineEdit();
   };
 
   return (
@@ -263,6 +355,15 @@ function SuperiorStudent() {
                 Girls
               </button>
             </div>
+
+            <select onChange={handleYearChange} value={selectedYear} className="year-select">
+              <option value="">Increment Student Year</option>
+              {uniqueBatches.map((batch) => (
+                <option key={batch} value={batch}>
+                  {batch}
+                </option>
+              ))}
+            </select>
 
             <button className="action-btn">
               <Download size={18} />
@@ -303,6 +404,13 @@ function SuperiorStudent() {
           </div>
         </div>
 
+        {isModalOpen && (
+          <ConfirmationModal
+            onConfirm={confirmYearChange}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        )}
+
         {/* Grid Layout */}
         <div className="students-grid">
           {filteredStudents.map(student => (
@@ -336,10 +444,10 @@ function SuperiorStudent() {
 
         {/* Details Modal */}
         {selectedStudent && (
-          <div className="modal-overlay" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
+          <div className="modal-overlay" onClick={closeModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="close-modal-btn" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
-                <X size={20} color="#ef4444" />
+              <button className="close-modal-btn" onClick={closeModal}>
+                <X size={20} />
               </button>
 
               <div className="modal-header">
@@ -360,8 +468,23 @@ function SuperiorStudent() {
                 <div className="info-grid">
                   <div className="info-item">
                     <span className="info-label">ROOM</span>
-                    <span className="info-value">{selectedStudent.roomNumber || 'N/A'}</span>
-                    <span className="edit-link" onClick={editRoom}>Edit</span>
+                    {editingRoom ? (
+                      <div className="inline-edit-group">
+                        <input
+                          type="text"
+                          className="inline-input"
+                          value={tempRoom}
+                          onChange={(e) => setTempRoom(e.target.value)}
+                        />
+                        <button className="inline-btn inline-confirm" onClick={confirmEditRoom} title="Save">✓</button>
+                        <button className="inline-btn inline-cancel" onClick={cancelEditRoom} title="Cancel">✕</button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="info-value">{selectedStudent.roomNumber || 'N/A'}</span>
+                        <span className="edit-link" onClick={startEditRoom}>Edit</span>
+                      </>
+                    )}
                   </div>
                   
                   {/* Inline Food Type Editor with Tick and Cross buttons */}
@@ -418,7 +541,7 @@ function SuperiorStudent() {
                 <button className="btn-vaccate" onClick={() => handleDelete(selectedStudent.registrationNumber, selectedStudent.name)}>
                   Mark Vaccate
                 </button>
-                <button className="btn-close" onClick={() => { setSelectedStudent(null); cancelInlineEdit(); }}>
+                <button className="btn-close" onClick={closeModal}>
                   Close
                 </button>
               </div>

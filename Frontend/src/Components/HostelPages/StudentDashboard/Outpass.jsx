@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   User,
   FileText,
   Clock,
   CheckCircle2,
   Upload,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import "./Outpass.css";
@@ -44,6 +47,351 @@ const getCurrentDateTime = () => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+const pad2 = (n) => String(n).padStart(2, "0");
+
+const formatDisplayDateTime = (value) => {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+
+  return d.toLocaleString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+
+function CustomDateTimePicker({ value, onChange, onClose }) {
+  const initial = value ? new Date(value) : new Date();
+
+  const [pickerStep, setPickerStep] = useState("date"); // "date" | "time"
+  const [selectedDate, setSelectedDate] = useState(initial);
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(initial.getFullYear(), initial.getMonth(), 1)
+  );
+  const [hour, setHour] = useState(initial.getHours() % 12 || 12);
+  const [minute, setMinute] = useState(initial.getMinutes());
+  const [period, setPeriod] = useState(
+    initial.getHours() >= 12 ? "PM" : "AM"
+  );
+  const [clockMode, setClockMode] = useState("hour"); // "hour" | "minute"
+
+  const daysInMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0
+  ).getDate();
+
+  const firstDay = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1
+  ).getDay();
+
+  const monthName = currentMonth.toLocaleString("default", {
+    month: "long",
+  });
+
+  // Today, stripped to midnight, used only to grey out past dates.
+  // Time selection is intentionally left unrestricted.
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  const isDateDisabled = (day) => {
+    const candidate = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day
+    );
+    candidate.setHours(0, 0, 0, 0);
+    return candidate < todayMidnight;
+  };
+
+  const selectDate = (day) => {
+    if (isDateDisabled(day)) return;
+
+    const newDate = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day
+    );
+
+    setSelectedDate(newDate);
+    setPickerStep("time");
+    setClockMode("hour");
+  };
+
+  const selectHour = (h) => {
+    setHour(h);
+    setClockMode("minute");
+  };
+
+  const selectMinute = (m) => {
+    setMinute(m);
+  };
+
+  const confirm = () => {
+    let h = hour % 12;
+    if (period === "PM") h += 12;
+
+    const finalDate = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      h,
+      minute
+    );
+
+    const formatted = `${finalDate.getFullYear()}-${pad2(
+      finalDate.getMonth() + 1
+    )}-${pad2(finalDate.getDate())}T${pad2(finalDate.getHours())}:${pad2(
+      finalDate.getMinutes()
+    )}`;
+
+    onChange(formatted);
+    onClose();
+  };
+
+  const getClockStyle = (index, total) => {
+    const angle = (index / total) * 360 - 90;
+    const radius = 40;
+
+    const x = 50 + radius * Math.cos((angle * Math.PI) / 180);
+    const y = 50 + radius * Math.sin((angle * Math.PI) / 180);
+
+    return { left: `${x}%`, top: `${y}%` };
+  };
+
+  return createPortal(
+    <div className="HS-picker-backdrop" onClick={onClose}>
+      <div
+        className="HS-datetime-picker"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* LEFT SIDE — always shows the date & time picked so far */}
+        <div className="HS-picker-left">
+          <div className="HS-picker-weekday">
+            {selectedDate.toLocaleString("default", { weekday: "long" })}
+          </div>
+
+          <div className="HS-picker-month">
+            {selectedDate.toLocaleString("default", { month: "short" })}
+          </div>
+
+          <div className="HS-picker-day">{selectedDate.getDate()}</div>
+
+          <div className="HS-picker-year">
+            {selectedDate.getFullYear()}
+          </div>
+
+          <div className="HS-picker-left-time">
+            Time
+            <strong>
+              {pad2(hour)}:{pad2(minute)} {period}
+            </strong>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE — calendar first, then clock */}
+        <div className="HS-picker-right">
+          {pickerStep === "date" && (
+            <>
+              <div className="HS-calendar-header">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() - 1,
+                        1
+                      )
+                    )
+                  }
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                <span>
+                  {monthName} {currentMonth.getFullYear()}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentMonth(
+                      new Date(
+                        currentMonth.getFullYear(),
+                        currentMonth.getMonth() + 1,
+                        1
+                      )
+                    )
+                  }
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
+              <div className="HS-calendar-weekdays">
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))}
+              </div>
+
+              <div className="HS-calendar-days">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <span key={`empty-${i}`} />
+                ))}
+
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1;
+
+                  const isSelected =
+                    selectedDate.getDate() === day &&
+                    selectedDate.getMonth() === currentMonth.getMonth() &&
+                    selectedDate.getFullYear() ===
+                      currentMonth.getFullYear();
+
+                  const isToday =
+                    new Date().toDateString() ===
+                    new Date(
+                      currentMonth.getFullYear(),
+                      currentMonth.getMonth(),
+                      day
+                    ).toDateString();
+
+                  return (
+                    <button
+                      type="button"
+                      key={day}
+                      className={`HS-calendar-day ${
+                        isSelected ? "HS-calendar-selected" : ""
+                      } ${isToday && !isSelected ? "HS-calendar-today" : ""}`}
+                      onClick={() => selectDate(day)}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {pickerStep === "time" && (
+            <div className="HS-clock-container">
+              <div className="HS-time-title">Select Time</div>
+
+              <div className="HS-time-display">
+                <button
+                  type="button"
+                  className={clockMode === "hour" ? "HS-time-active" : ""}
+                  onClick={() => setClockMode("hour")}
+                >
+                  {pad2(hour)}
+                </button>
+
+                <span>:</span>
+
+                <button
+                  type="button"
+                  className={clockMode === "minute" ? "HS-time-active" : ""}
+                  onClick={() => setClockMode("minute")}
+                >
+                  {pad2(minute)}
+                </button>
+
+                <div className="HS-period">
+                  <button
+                    type="button"
+                    className={period === "AM" ? "active" : ""}
+                    onClick={() => setPeriod("AM")}
+                  >
+                    AM
+                  </button>
+
+                  <button
+                    type="button"
+                    className={period === "PM" ? "active" : ""}
+                    onClick={() => setPeriod("PM")}
+                  >
+                    PM
+                  </button>
+                </div>
+              </div>
+
+              <div className="HS-clock">
+                <div className="HS-clock-center" />
+
+                {clockMode === "hour" &&
+                  Array.from({ length: 12 }, (_, i) => {
+                    const number = i + 1;
+
+                    return (
+                      <button
+                        type="button"
+                        key={number}
+                        className={`HS-clock-number ${
+                          hour === number ? "HS-clock-selected" : ""
+                        }`}
+                        style={getClockStyle(number, 12)}
+                        onClick={() => selectHour(number)}
+                      >
+                        {number}
+                      </button>
+                    );
+                  })}
+
+                {clockMode === "minute" &&
+                  Array.from({ length: 12 }, (_, i) => {
+                    const number = i * 5;
+
+                    return (
+                      <button
+                        type="button"
+                        key={number}
+                        className={`HS-clock-number ${
+                          minute === number ? "HS-clock-selected" : ""
+                        }`}
+                        style={getClockStyle(i, 12)}
+                        onClick={() => selectMinute(number)}
+                      >
+                        {pad2(number)}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <div className="HS-time-actions">
+                <button
+                  type="button"
+                  className="HS-time-back"
+                  onClick={() => setPickerStep("date")}
+                >
+                  Back
+                </button>
+
+                <div className="HS-time-actions-right">
+                  <button type="button" onClick={onClose}>
+                    Cancel
+                  </button>
+
+                  <button type="button" className="HS-time-ok" onClick={confirm}>
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function HostelPass() {
   const [verified, setVerified] = useState(false);
   const [passType, setPassType] = useState("");
@@ -60,6 +408,9 @@ function HostelPass() {
   const [existingFilePath, setExistingFilePath] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [parentApproval, setParentApproval] = useState(true);
+
+  // ONLY for the custom date/time picker popup — which field is open
+  const [activeDatePicker, setActiveDatePicker] = useState(null); // null | "from" | "to"
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -400,6 +751,16 @@ function HostelPass() {
       return;
     }
 
+    if (mobileNumber.length !== 10) {
+      showSweetAlert(
+        "Alert!",
+        "Please enter a valid 10-digit mobile number.",
+        "warning"
+      );
+
+      return;
+    }
+
     try {
       const response = await createJsonRequest(
         "/api/verify_student",
@@ -596,11 +957,17 @@ function HostelPass() {
 
                   <input
                     type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={10}
                     className="HS-input"
                     placeholder="Enter your mobile number"
-                    onChange={(e) =>
-                      setMobileNumber(e.target.value)
-                    }
+                    onChange={(e) => {
+                      const digitsOnly = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 10);
+                      setMobileNumber(digitsOnly);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -900,50 +1267,71 @@ function HostelPass() {
 
                 <div className="HS-grid">
 
-                  <div className="HS-input-group">
+                  <div className="HS-input-group" style={{ position: "relative" }}>
                     <label className="HS-label">
                       From Date & Time
                     </label>
 
-                    <input
-                      type="datetime-local"
-                      className="HS-input"
-                      value={from}
-                      onChange={handleFromChange}
-                      onKeyDown={(e) =>
-                        e.preventDefault()
-                      }
-                      onPaste={(e) =>
-                        e.preventDefault()
-                      }
-                      min={getCurrentDateTime()}
-                    />
+                    <div
+                      className="HS-datetime-display"
+                      onClick={() => setActiveDatePicker("from")}
+                    >
+                      <Clock size={16} className="HS-datetime-icon" />
+                      <span
+                        className={
+                          from ? "" : "HS-datetime-placeholder"
+                        }
+                      >
+                        {from
+                          ? formatDisplayDateTime(from)
+                          : "Select date & time"}
+                      </span>
+                    </div>
+
+                    {activeDatePicker === "from" && (
+                      <CustomDateTimePicker
+                        value={from}
+                        onChange={(val) =>
+                          handleFromChange({ target: { value: val } })
+                        }
+                        onClose={() => setActiveDatePicker(null)}
+                      />
+                    )}
                   </div>
 
-                  <div className="HS-input-group">
+                  <div className="HS-input-group" style={{ position: "relative" }}>
                     <label className="HS-label">
                       To Date & Time
                     </label>
 
-                    <input
-                      type="datetime-local"
-                      className="HS-input"
-                      value={to}
-                      onChange={handleToChange}
-                      onKeyDown={(e) =>
-                        e.preventDefault()
-                      }
-                      onPaste={(e) =>
-                        e.preventDefault()
-                      }
-                      min={
-                        passType === "outpass" && from
-                          ? from.split("T")[0] + "T00:00"
-                          : from || getCurrentDateTime()
-                      }
-                      max={getMaxToDateTime()}
-                      disabled={!from}
-                    />
+                    <div
+                      className={`HS-datetime-display ${
+                        !from ? "HS-datetime-disabled" : ""
+                      }`}
+                      onClick={() => {
+                        if (!from) return;
+                        setActiveDatePicker("to");
+                      }}
+                    >
+                      <Clock size={16} className="HS-datetime-icon" />
+                      <span
+                        className={to ? "" : "HS-datetime-placeholder"}
+                      >
+                        {to
+                          ? formatDisplayDateTime(to)
+                          : "Select date & time"}
+                      </span>
+                    </div>
+
+                    {activeDatePicker === "to" && from && (
+                      <CustomDateTimePicker
+                        value={to || from}
+                        onChange={(val) =>
+                          handleToChange({ target: { value: val } })
+                        }
+                        onClose={() => setActiveDatePicker(null)}
+                      />
+                    )}
                   </div>
 
                   <div className="HS-input-group">
