@@ -703,12 +703,12 @@
         margin-top: 0 !important;
         padding-top: 2.5rem;
         overflow: visible;
-        padding-bottom: 90px;
+        padding-bottom: 20px;
     }
 
     .HS-main {
         padding: 1rem;
-        padding-bottom: 0;
+        padding-bottom: 40px; /* just enough to clear the bottom nav */
     }
 
     .HS-content {
@@ -721,7 +721,7 @@
     .HS-card {
         margin-top: 0 !important;
         padding: 1.2rem;
-        margin-bottom: 1rem;
+        margin-bottom: 10px;
     }
 
     /* Input fields */
@@ -767,9 +767,8 @@
        and no trailing margin causing extra blank space */
     .HS-button-save {
         grid-column: 1 / -1;
-        width: 60%;
-        max-width: 220px;
-        margin: 0 auto;
+        width: 100%;
+        margin-bottom: 8px;
     }
 
     /* View Draft button — normal document flow (not absolutely

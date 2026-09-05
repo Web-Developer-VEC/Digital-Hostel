@@ -1079,12 +1079,12 @@
 
   /* MAIN */
 
-  .student-container {
+   .student-container {
     margin-top: 64px;
 
     min-height: auto;
 
-    padding-bottom: 85px;
+    padding-bottom: 280px;
 
     overflow: visible;
   }
@@ -1114,6 +1114,8 @@
     width: 100%;
 
     padding: 1.25rem;
+
+    margin-bottom: 200px;
 
     border-radius: 16px;
 
@@ -1356,6 +1358,7 @@
     padding: 1rem 0 0;
 
     margin-top: 0;
+    margin-bottom: 100px;
 
     border-top: 1px solid #e5e7eb;
 

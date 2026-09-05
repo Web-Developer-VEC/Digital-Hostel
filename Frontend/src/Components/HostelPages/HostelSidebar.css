@@ -1169,38 +1169,24 @@
   .Hostel-mobile-dock {
     position: fixed;
 
-    left: 10px;
-    right: 10px;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-    bottom: max(10px, env(safe-area-inset-bottom));
+    height: calc(58px + env(safe-area-inset-bottom));
 
-    height: 76px;
+    padding-bottom: env(safe-area-inset-bottom);
 
     display: flex;
 
-    align-items: center;
+    align-items: stretch;
     justify-content: space-evenly;
 
-    padding: 5px;
+    background: #171719;
 
-    background:
-      linear-gradient(
-        145deg,
-        rgba(35, 35, 38, 0.98),
-        rgba(20, 20, 22, 0.98)
-      );
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 
-    border:
-      1px solid rgba(255, 255, 255, 0.08);
-
-    border-radius: 20px;
-
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.32);
-
-    backdrop-filter: blur(18px);
-
-    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
 
     z-index: 2000;
   }
@@ -1213,36 +1199,35 @@
 
     min-width: 0;
 
-    height: 64px;
-
     display: flex;
     flex-direction: column;
 
     align-items: center;
     justify-content: center;
 
-    gap: 4px;
+    gap: 2px;
 
-    padding: 4px 1px;
+    padding: 6px 2px;
 
     border: none;
-
-    border-radius: 14px;
+    border-radius: 0;
 
     background: transparent;
 
-    color: #9d9da2;
+    color: #8a8a8f;
 
     text-decoration: none;
 
     font-family: inherit;
 
     cursor: pointer;
+
+    transition: color 0.2s ease;
   }
 
 
   .Hostel-mobile-dock-icon {
-    height: 25px;
+    height: 22px;
 
     display: flex;
     align-items: center;
@@ -1251,15 +1236,16 @@
 
 
   .Hostel-mobile-dock-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 
 
   .Hostel-mobile-dock-label {
     width: 100%;
 
-    font-size: 8px;
+    font-size: 10px;
+    font-weight: 500;
 
     text-align: center;
 
@@ -1274,11 +1260,9 @@
   .Hostel-mobile-dock-item.active {
     color: var(--hostel-gold);
 
-    background:
-      rgba(253, 205, 3, 0.12);
+    background: transparent;
 
-    transform:
-      translateY(-7px);
+    transform: none;
   }
 }
 
@@ -1290,26 +1274,18 @@
 @media (max-width: 420px) {
 
   .Hostel-mobile-dock {
-    left: 7px;
-    right: 7px;
-
-    height: 72px;
-  }
-
-  .Hostel-mobile-dock-item {
-    height: 60px;
+    height: calc(54px + env(safe-area-inset-bottom));
   }
 
   .Hostel-mobile-dock-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   .Hostel-mobile-dock-label {
-    font-size: 7px;
+    font-size: 9px;
   }
 }
-
 
 /* =========================================================
    ACCESSIBILITY
@@ -1375,4 +1351,275 @@
   font-size: 11px;
   margin: 0;
   color: #888;
+}
+/* =========================================================
+   MOBILE — WARDEN PROFILE POPUP
+========================================================= */
+
+.warden-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 2500;
+  animation: warden-backdrop-fade 0.25s ease both;
+}
+
+@keyframes warden-backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.warden-profile-popup {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: max(96px, calc(env(safe-area-inset-bottom) + 90px));
+
+  background:
+    linear-gradient(
+      145deg,
+      #202024 0%,
+      #171719 45%,
+      #101011 100%
+    );
+
+  border: 1px solid rgba(253, 205, 3, 0.18);
+  border-radius: 22px;
+
+  padding: 0.9rem 1.1rem 1.1rem;
+
+  box-shadow:
+    0 -10px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+
+  z-index: 2600;
+
+  animation:
+    warden-popup-rise 0.35s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+@keyframes warden-popup-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.warden-popup-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  margin: 0 auto 0.85rem;
+}
+
+.warden-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.warden-popup-image-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.warden-popup-photo {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid var(--hostel-gold);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.warden-online-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #171719;
+}
+
+.warden-online-dot.online {
+  background: #4ade80;
+}
+
+.warden-online-dot.offline {
+  background: #6b6b6f;
+}
+
+.warden-popup-info {
+  min-width: 0;
+}
+
+.warden-popup-small-title {
+  display: block;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--hostel-gold);
+  margin-bottom: 0.2rem;
+}
+
+.warden-popup-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.warden-popup-info p {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #98989e;
+}
+
+.warden-popup-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0.75rem 0;
+}
+
+.warden-contact-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.7rem 0.85rem;
+
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  text-decoration: none;
+
+  margin-bottom: 0.75rem;
+
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.warden-contact-card:active {
+  transform: scale(0.98);
+}
+
+.warden-contact-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(253, 205, 3, 0.12);
+  color: var(--hostel-gold);
+
+  flex-shrink: 0;
+}
+
+.warden-contact-card div:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.warden-contact-card span {
+  font-size: 0.68rem;
+  color: #98989e;
+}
+
+.warden-contact-card strong {
+  font-size: 0.85rem;
+  color: #ffffff;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.warden-popup-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 0.78rem;
+  color: #929298;
+
+  margin-bottom: 1rem;
+}
+
+.warden-popup-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.warden-popup-status .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.warden-popup-status.active {
+  color: #4ade80;
+}
+
+.warden-popup-status.active .status-dot {
+  background: #4ade80;
+}
+
+.warden-popup-status.inactive {
+  color: #f87171;
+}
+
+.warden-popup-status.inactive .status-dot {
+  background: #f87171;
+}
+
+.warden-popup-close {
+  width: 100%;
+
+  padding: 0.75rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.02);
+  color: #d1d1d5;
+
+  font-size: 0.85rem;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.warden-popup-close:active {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.page-transition-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
 }
