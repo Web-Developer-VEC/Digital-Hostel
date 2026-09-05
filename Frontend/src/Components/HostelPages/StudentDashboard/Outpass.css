@@ -696,12 +696,12 @@
         min-height: 100vh;
         margin-top: 0;
         overflow: visible;
-        padding-bottom: 110px; /* Space for bottom navigation */
+        padding-bottom: 20px;
     }
 
     .HS-main {
         padding: 1rem;
-        padding-bottom: 130px; /* Important: prevents Save button hiding */
+        padding-bottom: 40px; /* just enough to clear the bottom nav */
     }
 
     .HS-content {
@@ -720,7 +720,7 @@
     .HS-card {
         margin-top: 0 !important;
         padding: 1.2rem;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
     }
 
     /* Input fields */
@@ -767,7 +767,7 @@
     .HS-button-save {
         grid-column: 1 / -1;
         width: 100%;
-        margin-bottom: 30px;
+        margin-bottom: 8px;
     }
 
     /* View Draft button */
