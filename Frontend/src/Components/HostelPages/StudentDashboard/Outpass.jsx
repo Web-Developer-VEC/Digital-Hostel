@@ -14,10 +14,7 @@ import "./Outpass.css";
 import showSweetAlert from "../Alert";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import {
-  createFormDataRequest,
-  createJsonRequest,
-} from "../../../api/axios";
+import { createFormDataRequest, createJsonRequest } from "../../../api/axios";
 
 const ReasonTypeMapping = {
   od: ["Internship", "Symposium", "Hackathon", "Sports", "Others"],
@@ -63,32 +60,29 @@ const formatDisplayDateTime = (value) => {
   });
 };
 
-
 function CustomDateTimePicker({ value, onChange, onClose }) {
   const initial = value ? new Date(value) : new Date();
 
   const [pickerStep, setPickerStep] = useState("date"); // "date" | "time"
   const [selectedDate, setSelectedDate] = useState(initial);
   const [currentMonth, setCurrentMonth] = useState(
-    new Date(initial.getFullYear(), initial.getMonth(), 1)
+    new Date(initial.getFullYear(), initial.getMonth(), 1),
   );
   const [hour, setHour] = useState(initial.getHours() % 12 || 12);
   const [minute, setMinute] = useState(initial.getMinutes());
-  const [period, setPeriod] = useState(
-    initial.getHours() >= 12 ? "PM" : "AM"
-  );
+  const [period, setPeriod] = useState(initial.getHours() >= 12 ? "PM" : "AM");
   const [clockMode, setClockMode] = useState("hour"); // "hour" | "minute"
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
-    0
+    0,
   ).getDate();
 
   const firstDay = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth(),
-    1
+    1,
   ).getDay();
 
   const monthName = currentMonth.toLocaleString("default", {
@@ -104,7 +98,7 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
     const candidate = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      day
+      day,
     );
     candidate.setHours(0, 0, 0, 0);
     return candidate < todayMidnight;
@@ -116,7 +110,7 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
     const newDate = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      day
+      day,
     );
 
     setSelectedDate(newDate);
@@ -142,13 +136,13 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
       selectedDate.getMonth(),
       selectedDate.getDate(),
       h,
-      minute
+      minute,
     );
 
     const formatted = `${finalDate.getFullYear()}-${pad2(
-      finalDate.getMonth() + 1
+      finalDate.getMonth() + 1,
     )}-${pad2(finalDate.getDate())}T${pad2(finalDate.getHours())}:${pad2(
-      finalDate.getMinutes()
+      finalDate.getMinutes(),
     )}`;
 
     onChange(formatted);
@@ -167,10 +161,7 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
 
   return createPortal(
     <div className="HS-picker-backdrop" onClick={onClose}>
-      <div
-        className="HS-datetime-picker"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="HS-datetime-picker" onClick={(e) => e.stopPropagation()}>
         {/* LEFT SIDE — always shows the date & time picked so far */}
         <div className="HS-picker-left">
           <div className="HS-picker-weekday">
@@ -183,9 +174,7 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
 
           <div className="HS-picker-day">{selectedDate.getDate()}</div>
 
-          <div className="HS-picker-year">
-            {selectedDate.getFullYear()}
-          </div>
+          <div className="HS-picker-year">{selectedDate.getFullYear()}</div>
 
           <div className="HS-picker-left-time">
             Time
@@ -207,8 +196,8 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                       new Date(
                         currentMonth.getFullYear(),
                         currentMonth.getMonth() - 1,
-                        1
-                      )
+                        1,
+                      ),
                     )
                   }
                 >
@@ -226,8 +215,8 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                       new Date(
                         currentMonth.getFullYear(),
                         currentMonth.getMonth() + 1,
-                        1
-                      )
+                        1,
+                      ),
                     )
                   }
                 >
@@ -252,15 +241,14 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                   const isSelected =
                     selectedDate.getDate() === day &&
                     selectedDate.getMonth() === currentMonth.getMonth() &&
-                    selectedDate.getFullYear() ===
-                      currentMonth.getFullYear();
+                    selectedDate.getFullYear() === currentMonth.getFullYear();
 
                   const isToday =
                     new Date().toDateString() ===
                     new Date(
                       currentMonth.getFullYear(),
                       currentMonth.getMonth(),
-                      day
+                      day,
                     ).toDateString();
 
                   return (
@@ -378,7 +366,11 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                     Cancel
                   </button>
 
-                  <button type="button" className="HS-time-ok" onClick={confirm}>
+                  <button
+                    type="button"
+                    className="HS-time-ok"
+                    onClick={confirm}
+                  >
                     OK
                   </button>
                 </div>
@@ -388,7 +380,7 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -521,16 +513,13 @@ function HostelPass() {
 
     const minTimeLimit = 5 * 60;
 
-    const maxTimeLimit =
-      gender === "Female"
-        ? 18 * 60
-        : 21 * 60 + 30;
+    const maxTimeLimit = gender === "Female" ? 18 * 60 : 21 * 60 + 30;
 
     if (totalMinutes < minTimeLimit) {
       showSweetAlert(
         "Alert!",
         "From time cannot be before 5:00 AM for outpass.",
-        "error"
+        "error",
       );
 
       return false;
@@ -567,7 +556,7 @@ function HostelPass() {
       showSweetAlert(
         "Alert!",
         "Girls are not allowed to select a time after 6:00 PM for outpass.",
-        "error"
+        "error",
       );
 
       return false;
@@ -577,7 +566,7 @@ function HostelPass() {
       showSweetAlert(
         "Alert!",
         "Boys are not allowed to select a time after 9:30 PM for outpass.",
-        "error"
+        "error",
       );
 
       return false;
@@ -597,8 +586,26 @@ function HostelPass() {
     if (validateFromTime(fromDateTime, studentData?.gender)) {
       setFrom(fromDateTime);
 
-      if (to && new Date(to) < new Date(fromDateTime)) {
-        setTo("");
+      if (to) {
+        const fromDate = fromDateTime.split("T")[0];
+        const toDate = to.split("T")[0];
+
+        // Existing validation: To cannot be before From
+        if (new Date(to) < new Date(fromDateTime)) {
+          setTo("");
+          return;
+        }
+
+        // OUTPASS: Return must be on the same day
+        if (passType === "outpass" && fromDate !== toDate) {
+          setTo("");
+
+          showSweetAlert(
+            "Outpass Restriction",
+            "Outpass is valid only for one day. Please select a return time on the same date.",
+            "warning",
+          );
+        }
       }
     } else {
       setFrom("");
@@ -613,17 +620,38 @@ function HostelPass() {
       return;
     }
 
+    // To date & time cannot be earlier than From
     if (from && new Date(toDateTime) < new Date(from)) {
       showSweetAlert(
         "Alert!",
         "To date & time cannot be earlier than From date & time.",
-        "error"
+        "error",
       );
 
       setTo("");
       return;
     }
 
+    // ==========================================
+    // OUTPASS — SAME DAY RETURN RESTRICTION
+    // ==========================================
+    if (passType === "outpass" && from) {
+      const fromDate = from.split("T")[0];
+      const toDate = toDateTime.split("T")[0];
+
+      if (fromDate !== toDate) {
+        showSweetAlert(
+          "Outpass Restriction",
+          "Outpass is allowed only for one day. You must return on the same day.",
+          "warning",
+        );
+
+        setTo("");
+        return;
+      }
+    }
+
+    // Existing Outpass time validation
     if (passType === "outpass") {
       if (validateToTime(toDateTime, studentData?.gender)) {
         setTo(toDateTime);
@@ -634,39 +662,31 @@ function HostelPass() {
       return;
     }
 
+    // Staypass, OD and Leave can span multiple days
     setTo(toDateTime);
   };
-
   const fetchPassDetails = async () => {
     try {
       const response = await createJsonRequest(
         "/api/get_student_pass_by_passid",
         {
           pass_id: passid,
-        }
+        },
       );
 
       const data = response.data.pass_details;
 
       setPassType(data.passtype);
 
-      setShowDocUpload(
-        data.passtype === "od" || data.passtype === "leave"
-      );
+      setShowDocUpload(data.passtype === "od" || data.passtype === "leave");
 
       setReasonType(data.reason_type);
 
       setFrom(
-        data.from.split("T")[0] +
-          "T" +
-          data.from.split("T")[1].slice(0, 5)
+        data.from.split("T")[0] + "T" + data.from.split("T")[1].slice(0, 5),
       );
 
-      setTo(
-        data.to.split("T")[0] +
-          "T" +
-          data.to.split("T")[1].slice(0, 5)
-      );
+      setTo(data.to.split("T")[0] + "T" + data.to.split("T")[1].slice(0, 5));
 
       setPlace(data.place_to_visit);
       setReason(data.reason_for_visit);
@@ -674,12 +694,9 @@ function HostelPass() {
       setMobileNumber(data.mobile_number);
       setParentApproval(data.parent_approval === null);
 
-      const studentResponse = await createJsonRequest(
-        "/api/verify_student",
-        {
-          phone_number_student: data.mobile_number,
-        }
-      );
+      const studentResponse = await createJsonRequest("/api/verify_student", {
+        phone_number_student: data.mobile_number,
+      });
 
       if (studentResponse.data) {
         setStudentData(studentResponse.data);
@@ -695,7 +712,7 @@ function HostelPass() {
       showSweetAlert(
         "Alert!",
         "Please verify your mobile number first.",
-        "warning"
+        "warning",
       );
 
       return;
@@ -718,7 +735,7 @@ function HostelPass() {
     try {
       const response = await createFormDataRequest(
         "/api/edit_student_pass",
-        formData
+        formData,
       );
 
       if (response.status === 200) {
@@ -742,11 +759,7 @@ function HostelPass() {
 
   const handleVerify = async () => {
     if (!mobileNumber) {
-      showSweetAlert(
-        "Alert!",
-        "Please enter a mobile number.",
-        "warning"
-      );
+      showSweetAlert("Alert!", "Please enter a mobile number.", "warning");
 
       return;
     }
@@ -755,29 +768,22 @@ function HostelPass() {
       showSweetAlert(
         "Alert!",
         "Please enter a valid 10-digit mobile number.",
-        "warning"
+        "warning",
       );
 
       return;
     }
 
     try {
-      const response = await createJsonRequest(
-        "/api/verify_student",
-        {
-          phone_number_student: mobileNumber,
-        }
-      );
+      const response = await createJsonRequest("/api/verify_student", {
+        phone_number_student: mobileNumber,
+      });
 
       if (response.data) {
         setStudentData(response.data);
         setVerified(true);
 
-        showSweetAlert(
-          "Success!",
-          "Student verified successfully.",
-          "success"
-        );
+        showSweetAlert("Success!", "Student verified successfully.", "success");
       }
     } catch (error) {
       console.error("❌ Error fetching data:", error);
@@ -792,7 +798,26 @@ function HostelPass() {
       showSweetAlert(
         "Alert!",
         "Please verify your mobile number first.",
-        "warning"
+        "warning",
+      );
+
+      return;
+    }
+
+    // ==========================================
+    // MANDATORY DOCUMENT FOR OD AND LEAVE
+    // ==========================================
+    const requiresDocument = passType === "od" || passType === "leave";
+
+    const hasDocument = selectedFile || existingFilePath;
+
+    if (requiresDocument && !hasDocument) {
+      const passName = passType === "od" ? "OD" : "Leave";
+
+      showSweetAlert(
+        "Document Required",
+        `Please upload the required supporting document for your ${passName} request before proceeding.`,
+        "warning",
       );
 
       return;
@@ -808,7 +833,7 @@ function HostelPass() {
     formData.append("room_no", studentData?.room_number || "");
     formData.append(
       "registration_number",
-      studentData?.registration_number || ""
+      studentData?.registration_number || "",
     );
     formData.append("block_name", studentData?.block_name || "");
     formData.append("pass_type", passType);
@@ -828,7 +853,7 @@ function HostelPass() {
     try {
       const response = await createFormDataRequest(
         "/api/submit_pass",
-        formData
+        formData,
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -842,8 +867,7 @@ function HostelPass() {
         Swal.fire({
           title: "Success",
           text:
-            successMessages[mode] ||
-            "✅ Pass request submitted successfully!",
+            successMessages[mode] || "✅ Pass request submitted successfully!",
           icon: "success",
           showConfirmButton: false,
           timer: 1500,
@@ -861,10 +885,7 @@ function HostelPass() {
 
   const fetchDrafts = async () => {
     try {
-      const response = await createJsonRequest(
-        "/api/fetch_drafts",
-        {}
-      );
+      const response = await createJsonRequest("/api/fetch_drafts", {});
 
       const data = response.data;
 
@@ -874,8 +895,7 @@ function HostelPass() {
         setPassType(firstDraft.passtype);
 
         setShowDocUpload(
-          firstDraft.passtype === "od" ||
-            firstDraft.passtype === "leave"
+          firstDraft.passtype === "od" || firstDraft.passtype === "leave",
         );
 
         setReasonType(firstDraft.reason_type);
@@ -888,19 +908,19 @@ function HostelPass() {
           room_number: firstDraft.room_no,
           registration_number: firstDraft.registration_number,
           block_name: firstDraft.blockname,
-          batch: firstDraft.batch
+          batch: firstDraft.batch,
         });
 
         setFrom(
           firstDraft.from.split("T")[0] +
             "T" +
-            firstDraft.from.split("T")[1].slice(0, 5)
+            firstDraft.from.split("T")[1].slice(0, 5),
         );
 
         setTo(
           firstDraft.to.split("T")[0] +
             "T" +
-            firstDraft.to.split("T")[1].slice(0, 5)
+            firstDraft.to.split("T")[1].slice(0, 5),
         );
 
         setPlace(firstDraft.place_to_visit || "");
@@ -913,11 +933,7 @@ function HostelPass() {
           setExistingFilePath("");
         }
       } else {
-        showSweetAlert(
-          "Oops..!",
-          "No drafts found.",
-          "info"
-        );
+        showSweetAlert("Oops..!", "No drafts found.", "info");
       }
     } catch (error) {
       console.error("Error fetching drafts:", error);
@@ -928,7 +944,6 @@ function HostelPass() {
     <div className="HS-container">
       <div className="HS-main">
         <div className="HS-content">
-
           {!isEditMode && (
             <div className="HS-Draft-Button">
               <button
@@ -942,18 +957,13 @@ function HostelPass() {
           )}
 
           <div className="HS-card">
-            <h2 className="HS-title">
-              Outpass / Stay Pass Application
-            </h2>
+            <h2 className="HS-title">Outpass / Stay Pass Application</h2>
 
             {/* Mobile Verification */}
             <div className="HS-section">
               <div className="HS-mobile-verify">
-
                 <div className="HS-input-group">
-                  <label className="HS-label">
-                    Mobile Number
-                  </label>
+                  <label className="HS-label">Mobile Number</label>
 
                   <input
                     type="tel"
@@ -995,7 +1005,6 @@ function HostelPass() {
               </h3>
 
               <div className="HS-grid">
-
                 <div className="HS-input-group">
                   <label className="HS-label">Name</label>
                   <input
@@ -1007,23 +1016,17 @@ function HostelPass() {
                 </div>
 
                 <div className="HS-input-group">
-                  <label className="HS-label">
-                    Admission Number
-                  </label>
+                  <label className="HS-label">Admission Number</label>
                   <input
                     type="text"
                     className="HS-input"
-                    value={
-                      studentData?.registration_number || ""
-                    }
+                    value={studentData?.registration_number || ""}
                     readOnly
                   />
                 </div>
 
                 <div className="HS-input-group">
-                  <label className="HS-label">
-                    Department Name
-                  </label>
+                  <label className="HS-label">Department Name</label>
                   <input
                     type="text"
                     className="HS-input"
@@ -1053,9 +1056,7 @@ function HostelPass() {
                 </div>
 
                 <div className="HS-input-group">
-                  <label className="HS-label">
-                    Room Number
-                  </label>
+                  <label className="HS-label">Room Number</label>
                   <input
                     type="text"
                     className="HS-input"
@@ -1065,9 +1066,7 @@ function HostelPass() {
                 </div>
 
                 <div className="HS-input-group">
-                  <label className="HS-label">
-                    Block Name
-                  </label>
+                  <label className="HS-label">Block Name</label>
                   <input
                     type="text"
                     className="HS-input"
@@ -1075,7 +1074,6 @@ function HostelPass() {
                     readOnly
                   />
                 </div>
-
               </div>
             </div>
 
@@ -1087,50 +1085,36 @@ function HostelPass() {
               </h3>
 
               <div className="HS-pass-types">
-                {["outpass", "staypass", "od", "leave"].map(
-                  (type) => (
-                    <label
-                      key={type}
-                      className={`HS-pass-type ${
-                        passType === type
-                          ? "HS-pass-type-active"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="passType"
-                        value={type}
-                        className="HS-radio"
-                        checked={passType === type}
-                        onChange={() =>
-                          handlePassTypeChange(type)
-                        }
-                      />
+                {["outpass", "staypass", "od", "leave"].map((type) => (
+                  <label
+                    key={type}
+                    className={`HS-pass-type ${
+                      passType === type ? "HS-pass-type-active" : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="passType"
+                      value={type}
+                      className="HS-radio"
+                      checked={passType === type}
+                      onChange={() => handlePassTypeChange(type)}
+                    />
 
-                      <span className="HS-pass-label">
-                        {type}
-                      </span>
+                    <span className="HS-pass-label">{type}</span>
 
-                      {passType === type && (
-                        <CheckCircle2
-                          className="HS-check-icon"
-                          size={20}
-                        />
-                      )}
-                    </label>
-                  )
-                )}
+                    {passType === type && (
+                      <CheckCircle2 className="HS-check-icon" size={20} />
+                    )}
+                  </label>
+                ))}
               </div>
             </div>
 
             {/* Document Upload */}
             {showDocUpload && (
               <div className="HS-section HS-animate-expand">
-
-                <h3 className="HS-subtitle">
-                  📂 Document Upload
-                </h3>
+                <h3 className="HS-subtitle">📂 Document Upload</h3>
 
                 <div
                   className="HS-upload-box"
@@ -1153,10 +1137,7 @@ function HostelPass() {
                       htmlFor="document-upload"
                       className="HS-upload-label"
                     >
-                      <Upload
-                        className="HS-upload-icon"
-                        size={28}
-                      />
+                      <Upload className="HS-upload-icon" size={28} />
 
                       <span className="HS-upload-text">
                         Click to upload or drag and drop
@@ -1166,7 +1147,6 @@ function HostelPass() {
 
                   {existingFilePath && !selectedFile ? (
                     <div className="HS-image-preview-container">
-
                       <button
                         type="button"
                         className="HS-remove-file"
@@ -1175,9 +1155,7 @@ function HostelPass() {
                         ×
                       </button>
 
-                      {/\.(jpg|jpeg|png|gif|webp)$/i.test(
-                        existingFilePath
-                      ) ? (
+                      {/\.(jpg|jpeg|png|gif|webp)$/i.test(existingFilePath) ? (
                         <>
                           <img
                             src={UrlParser(existingFilePath)}
@@ -1205,7 +1183,6 @@ function HostelPass() {
                   {selectedFile ? (
                     selectedFile.type.startsWith("image/") ? (
                       <div className="HS-image-preview-container">
-
                         <button
                           type="button"
                           className="HS-remove-file"
@@ -1226,7 +1203,6 @@ function HostelPass() {
                       </div>
                     ) : (
                       <div className="HS-file-preview-container">
-
                         <button
                           type="button"
                           className="HS-remove-file"
@@ -1259,29 +1235,24 @@ function HostelPass() {
             {/* Pass Details */}
             {passType && (
               <div className="HS-section HS-animate-expand">
-
                 <h3 className="HS-subtitle">
                   <Clock size={20} />
                   Pass Details
                 </h3>
 
                 <div className="HS-grid">
-
-                  <div className="HS-input-group" style={{ position: "relative" }}>
-                    <label className="HS-label">
-                      From Date & Time
-                    </label>
+                  <div
+                    className="HS-input-group"
+                    style={{ position: "relative" }}
+                  >
+                    <label className="HS-label">From Date & Time</label>
 
                     <div
                       className="HS-datetime-display"
                       onClick={() => setActiveDatePicker("from")}
                     >
                       <Clock size={16} className="HS-datetime-icon" />
-                      <span
-                        className={
-                          from ? "" : "HS-datetime-placeholder"
-                        }
-                      >
+                      <span className={from ? "" : "HS-datetime-placeholder"}>
                         {from
                           ? formatDisplayDateTime(from)
                           : "Select date & time"}
@@ -1299,10 +1270,11 @@ function HostelPass() {
                     )}
                   </div>
 
-                  <div className="HS-input-group" style={{ position: "relative" }}>
-                    <label className="HS-label">
-                      To Date & Time
-                    </label>
+                  <div
+                    className="HS-input-group"
+                    style={{ position: "relative" }}
+                  >
+                    <label className="HS-label">To Date & Time</label>
 
                     <div
                       className={`HS-datetime-display ${
@@ -1314,12 +1286,8 @@ function HostelPass() {
                       }}
                     >
                       <Clock size={16} className="HS-datetime-icon" />
-                      <span
-                        className={to ? "" : "HS-datetime-placeholder"}
-                      >
-                        {to
-                          ? formatDisplayDateTime(to)
-                          : "Select date & time"}
+                      <span className={to ? "" : "HS-datetime-placeholder"}>
+                        {to ? formatDisplayDateTime(to) : "Select date & time"}
                       </span>
                     </div>
 
@@ -1335,64 +1303,46 @@ function HostelPass() {
                   </div>
 
                   <div className="HS-input-group">
-                    <label className="HS-label">
-                      Place of Visit
-                    </label>
+                    <label className="HS-label">Place of Visit</label>
 
                     <input
                       type="text"
                       className="HS-input"
                       value={place}
-                      onChange={(e) =>
-                        setPlace(e.target.value)
-                      }
+                      onChange={(e) => setPlace(e.target.value)}
                     />
                   </div>
 
                   <div className="HS-input-group">
-                    <label className="HS-label">
-                      Reason Type
-                    </label>
+                    <label className="HS-label">Reason Type</label>
 
                     <select
                       className="HS-select"
                       value={reasonType}
-                      onChange={(e) =>
-                        setReasonType(e.target.value)
-                      }
+                      onChange={(e) => setReasonType(e.target.value)}
                     >
-                      <option value="">
-                        Select Reason Type
-                      </option>
+                      <option value="">Select Reason Type</option>
 
-                      {ReasonTypeMapping[passType]?.map(
-                        (type) => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        )
-                      )}
+                      {ReasonTypeMapping[passType]?.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {reasonType === "Others" && (
                     <div className="HS-input-group HS-full-width">
-
-                      <label className="HS-label">
-                        Reason for Visit
-                      </label>
+                      <label className="HS-label">Reason for Visit</label>
 
                       <textarea
                         rows={3}
                         className="HS-textarea"
                         value={reason}
-                        onChange={(e) =>
-                          setReason(e.target.value)
-                        }
+                        onChange={(e) => setReason(e.target.value)}
                       />
                     </div>
                   )}
-
                 </div>
               </div>
             )}
@@ -1400,7 +1350,6 @@ function HostelPass() {
             {/* Action Buttons */}
             {passType && (
               <div className="HS-actions HS-animate-expand">
-
                 {isEditMode ? (
                   <>
                     <button
@@ -1413,9 +1362,7 @@ function HostelPass() {
                     {parentApproval && (
                       <button
                         className="HS-button HS-button-parent"
-                        onClick={() =>
-                          submitPassRequest("parent")
-                        }
+                        onClick={() => submitPassRequest("parent")}
                       >
                         Parent Approval
                       </button>
@@ -1425,36 +1372,28 @@ function HostelPass() {
                   <>
                     <button
                       className="HS-button HS-button-warden"
-                      onClick={() =>
-                        submitPassRequest("warden")
-                      }
+                      onClick={() => submitPassRequest("warden")}
                     >
                       Warden Approval
                     </button>
 
                     <button
                       className="HS-button HS-button-chief"
-                      onClick={() =>
-                        submitPassRequest("superior")
-                      }
+                      onClick={() => submitPassRequest("superior")}
                     >
                       Chief Warden Approval
                     </button>
 
                     <button
                       className="HS-button HS-button-save"
-                      onClick={() =>
-                        submitPassRequest("draft")
-                      }
+                      onClick={() => submitPassRequest("draft")}
                     >
                       Save
                     </button>
                   </>
                 )}
-
               </div>
             )}
-
           </div>
         </div>
       </div>
