@@ -98,7 +98,10 @@ const WardenProfile = () => {
   useEffect(() => {
     if (!isYearsDropdownOpen) return;
     const handleClickOutside = (e) => {
-      if (yearsDropdownRef.current && !yearsDropdownRef.current.contains(e.target)) {
+      if (
+        yearsDropdownRef.current &&
+        !yearsDropdownRef.current.contains(e.target)
+      ) {
         setIsYearsDropdownOpen(false);
       }
     };
@@ -118,7 +121,7 @@ const WardenProfile = () => {
         const fetchedWardens = response.data.wardens;
 
         const formattedWardens = fetchedWardens.map((warden) => {
-          const pBatch = warden.primary_batch || warden.primary_year || [];
+          const pBatch = warden.primary_year || warden.primary_year || [];
           return {
             id: warden.unique_id,
             name: warden.warden_name,
@@ -277,7 +280,7 @@ const WardenProfile = () => {
       "gender",
       newWarden.inCharge === "Boys" ? "Male" : "Female",
     );
-    formData.append("primary_batch", JSON.stringify(primaryYearArray));
+    formData.append("primary_year", JSON.stringify(primaryYearArray));
     formData.append("password", newWarden.password);
     formData.append("category", "assistant");
     formData.append("joined_date", newWarden.joinedDate);
@@ -383,7 +386,7 @@ const WardenProfile = () => {
         editedWarden.inCharge === "Boys" ? "Male" : "Female";
     }
     if (editedWarden.primaryWarden !== selectedWarden.primaryYears) {
-      updateFields.primary_batch = editedWarden.primaryWarden.map((year) =>
+      updateFields.primary_year = editedWarden.primaryWarden.map((year) =>
         parseInt(year, 10),
       );
     }
@@ -415,7 +418,7 @@ const WardenProfile = () => {
 
       Object.keys(updateFields).forEach((key) => {
         if (
-          key === "primary_batch" ||
+          key === "primary_year" ||
           key === "secondary_batch" ||
           key === "primary_year" ||
           key === "secondary_year"
@@ -474,7 +477,7 @@ const WardenProfile = () => {
       );
       setReallocationWardens(response.data.warden_names);
       setPrimaryYears(
-        response.data.primary_batchs || response.data.primary_years || [],
+        response.data.primary_years || response.data.primary_years || [],
       );
     } catch (error) {
       console.error("Error fetching reallocation wardens", error);
@@ -607,7 +610,10 @@ const WardenProfile = () => {
                 </button>
               </div>
 
-              <form className="add-warden-form" onSubmit={handleAddWardenSubmit}>
+              <form
+                className="add-warden-form"
+                onSubmit={handleAddWardenSubmit}
+              >
                 {/* Photo Upload — framed square with an explicit upload button */}
                 <div className="photo-upload-section">
                   <label className="section-label">Profile Photo</label>
@@ -622,7 +628,10 @@ const WardenProfile = () => {
                       className="hidden-file-input"
                     />
 
-                    <label htmlFor="warden-photo-upload" className="avatar-frame">
+                    <label
+                      htmlFor="warden-photo-upload"
+                      className="avatar-frame"
+                    >
                       <span className="avatar-frame-photo">
                         {newWarden.photo ? (
                           <img src={newWarden.photo} alt="Warden preview" />
@@ -639,7 +648,10 @@ const WardenProfile = () => {
                       <strong>
                         {newWarden.photo ? "Photo selected" : "Profile photo"}
                       </strong>
-                      <label htmlFor="warden-photo-upload" className="avatar-frame-button">
+                      <label
+                        htmlFor="warden-photo-upload"
+                        className="avatar-frame-button"
+                      >
                         <Upload size={13} />
                         {newWarden.photo ? "Change photo" : "Upload photo"}
                       </label>
@@ -741,7 +753,8 @@ const WardenProfile = () => {
                   </div>
 
                   <div className="assignment-description">
-                    Select the academic years this warden will be responsible for.
+                    Select the academic years this warden will be responsible
+                    for.
                   </div>
 
                   <div className="premium-checkbox-grid">
@@ -770,7 +783,9 @@ const WardenProfile = () => {
                                 const updatedYears = stringYears.includes(
                                   selectedYear,
                                 )
-                                  ? stringYears.filter((y) => y !== selectedYear)
+                                  ? stringYears.filter(
+                                      (y) => y !== selectedYear,
+                                    )
                                   : [...stringYears, selectedYear];
                                 return { ...prev, primaryWarden: updatedYears };
                               });
@@ -898,7 +913,10 @@ const WardenProfile = () => {
 
                     <div className="avatar-frame-meta">
                       <strong>Profile photo</strong>
-                      <label htmlFor="edit-warden-photo" className="avatar-frame-button">
+                      <label
+                        htmlFor="edit-warden-photo"
+                        className="avatar-frame-button"
+                      >
                         <Upload size={13} />
                         Change photo
                       </label>
@@ -971,7 +989,10 @@ const WardenProfile = () => {
                                 .join(", ")
                             : "Select years"}
                         </span>
-                        <ChevronDown size={18} className="year-multiselect-chevron" />
+                        <ChevronDown
+                          size={18}
+                          className="year-multiselect-chevron"
+                        />
                       </button>
 
                       {isYearsDropdownOpen && (
@@ -1055,7 +1076,9 @@ const WardenProfile = () => {
                 <Power size={26} />
               </div>
 
-              <h3>{isDeactivating ? "Deactivate warden?" : "Activate warden?"}</h3>
+              <h3>
+                {isDeactivating ? "Deactivate warden?" : "Activate warden?"}
+              </h3>
               <p>
                 {isDeactivating ? (
                   <>
@@ -1065,8 +1088,8 @@ const WardenProfile = () => {
                   </>
                 ) : (
                   <>
-                    <strong>{pendingWarden?.name}</strong> will be marked
-                    active again and can be assigned to students right away.
+                    <strong>{pendingWarden?.name}</strong> will be marked active
+                    again and can be assigned to students right away.
                   </>
                 )}
               </p>

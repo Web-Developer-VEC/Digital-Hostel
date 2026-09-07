@@ -26,8 +26,8 @@ async function getFoodCount(req, res) {
     const target_years =
       userType === "superior"
         ? await studentCollection.distinct("year")
-        : (warden_data.primary_batch || warden_data.primary_year);
-    console.log( target_years);
+        : warden_data.primary_year || warden_data.primary_year;
+    console.log(target_years);
     let foodCounts = {};
 
     if (userType === "superior") {
@@ -38,7 +38,6 @@ async function getFoodCount(req, res) {
         let totalVegCount = 0;
         let totalNonVegCount = 0;
         for (const year of target_years) {
-        
           const vegCount = await studentCollection.countDocuments({
             foodtype: "Veg",
             year,
@@ -55,7 +54,6 @@ async function getFoodCount(req, res) {
           };
           totalVegCount += vegCount;
           totalNonVegCount += nonVegCount;
-
         }
         foodCounts[gender]["Overall"] = {
           veg_count: totalVegCount,
@@ -64,7 +62,6 @@ async function getFoodCount(req, res) {
       }
     } else {
       for (const year of target_years) {
-          
         const vegCount = await studentCollection.countDocuments({
           foodtype: "Veg",
           year,
@@ -75,9 +72,8 @@ async function getFoodCount(req, res) {
           year,
           gender: warden_data.gender,
         });
-        
+
         foodCounts[year] = { veg_count: vegCount, non_veg_count: nonVegCount };
-        
       }
     }
 

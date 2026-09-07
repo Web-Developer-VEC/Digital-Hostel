@@ -8,21 +8,43 @@ const { awsSmsClient } = require("../config/sms");
 // TEST PHONE NUMBER
 // ============================================
 
-const phoneno = process.env.PHONE;
+function formatIndianPhoneNumber(phoneNumber) {
+    if (!phoneNumber) {
+        return null;
+    }
 
-// ============================================
-// COMMON SMS FUNCTION
-// ============================================
+    // Convert to string and remove spaces, -, (, ), etc.
+    let number = String(phoneNumber).replace(/\D/g, "");
 
-const sendSMS = async (phoneNumber, message) => {
+    // Remove leading 0
+    if (number.startsWith("0")) {
+        number = number.substring(1);
+    }
+
+    // If already has 91 and total length is 12
+    if (number.startsWith("91") && number.length === 12) {
+        return `+${number}`;
+    }
+
+    // Normal Indian 10-digit mobile number
+    if (number.length === 10) {
+        return `+91${number}`;
+    }
+
+    return null;
+}
+
+
+const sendSMS = async (phone_number_parent, message) => {
   try {
+    const phoneNumber = formatIndianPhoneNumber(phone_number_parent);
     // phoneNumber is accepted but ignored during testing
     console.log("Original destination:", phoneNumber);
-    console.log("Testing destination:", phoneno);
+    console.log("Testing destination:", phoneNumber);
 
     const command = new SendTextMessageCommand({
       // Always send to .env phone during testing
-      DestinationPhoneNumber: phoneno,
+      DestinationPhoneNumber: phoneNumber,
 
       MessageBody: message,
 
@@ -55,7 +77,7 @@ const sendParentApprovalSMS = async (
   to,
   otp
 ) => {
- console.log("otp",otp);
+    const phoneNumber = formatIndianPhoneNumber(parentPhoneNumber);
  
 
   const smsMessage = `
@@ -77,12 +99,11 @@ OTP expires in 5 minutes.
 Do not share this OTP with anyone.
 `;
 
-  await sendSMS(parentPhoneNumber, smsMessage);
+  await sendSMS(phoneNumber, smsMessage);
 
   return {
     success: true,
     message: "OTP sent successfully",
-    pass_id,
   };
 };
 
@@ -91,6 +112,10 @@ Do not share this OTP with anyone.
 // ============================================
 
 const sendParentReachedSMS = async (parentPhoneNumber, name, reachedTime) => {
+
+      const phoneNumber = formatIndianPhoneNumber(parentPhoneNumber);
+
+
   const smsMessage = `
 VEC HOSTEL - Arrival Notification
 
@@ -104,7 +129,7 @@ Thank you,
 Velammal Engineering College
 `;
 
-  return await sendSMS(parentPhoneNumber, smsMessage);
+  return await sendSMS(phoneNumber, smsMessage);
 };
 
 // ============================================

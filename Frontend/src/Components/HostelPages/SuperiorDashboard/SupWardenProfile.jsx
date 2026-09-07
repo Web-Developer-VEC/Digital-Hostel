@@ -4,327 +4,318 @@ import axiosInstance from "../../../api/axios";
 import Swal from "sweetalert2";
 
 const yearToAlphabet = {
-    '1': 'First Year',
-    '2': 'Second Year',
-    '3': 'Third Year',
-    '4': 'Fourth Year',
-    '10': 'MBA',
-    '9': 'ME',
-    'overall': 'Overall'
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Fourth Year",
+  10: "MBA",
+  9: "ME",
+  overall: "Overall",
 };
 
 function WardenProfile() {
-    const [wardens, setWardens] = useState([]);
-    const [loadingWardens, setLoadingWardens] = useState(true);
+  const [wardens, setWardens] = useState([]);
+  const [loadingWardens, setLoadingWardens] = useState(true);
 
-    const wardenResponse = {
-        warden: {
-            unique_id: "001",
-            warden_name: "Krishna",
-            phone_number: 1234567890,
-
-            image_path:
-                "https://preview.redd.it/what-are-your-thoughts-on-itachi-uchiha-v0-d1v84pkpcsdb1.jpg?auto=webp&s=d666c9922aa2215836db1860e522038b0e161dde",
-
-            gender: "Male",
-            category: "assistant",
-            joined_date: "22/12/2020",
-
-            // 👇 YEARS HANDLED BY THIS WARDEN
-            handling_years: [3, 4],
-            incharge_of: "Boys"
-
-        },
-    };
+ 
 
 
-    const [formData, setFormData] = useState({
-        warden_name: wardenResponse.warden.warden_name,
-        phone_number: wardenResponse.warden.phone_number,
-    });
+  const BASE_URL = process.env.REACT_APP_QR_URL;
 
-    const warden = wardenResponse.warden;
+  // ============================================
+  // SUPERIOR WARDEN PROFILE STATE
+  // ============================================
 
-    useEffect(() => {
-        const fetchWardens = async () => {
-            try {
-                const response = await axiosInstance.get(
-                    "/api/fetch_warden_details"
-                );
+  const [warden, setWarden] = useState({
+    unique_id: "",
+    warden_name: "",
+    phone_number: "",
+    image_path: "",
+    gender: "",
+    category: "",
+    joined_date: "",
+    handling_years: [],
+    incharge_of: "",
+    email: "",
+    address: "",
+  });
 
-                setWardens(response.data.wardens || []);
+  // ============================================
+  // FORM DATA
+  // ============================================
 
-            } catch (error) {
-                console.error("Error fetching wardens:", error);
+  const [formData, setFormData] = useState({
+    warden_name: "",
+    phone_number: "",
+  });
 
-                Swal.fire({
-                    title: "Error ❌",
-                    text: "Failed to fetch warden details.",
-                    icon: "error",
-                    confirmButtonText: "OK"
-                });
+  // ============================================
+  // GET SUPERIOR WARDEN PROFILE
+  // ============================================
 
-            } finally {
-                setLoadingWardens(false);
-            }
+  useEffect(() => {
+    const getWardenProfile = async () => {
+      try {
+        const response = await axiosInstance.get("api/warden_profile");
+
+        console.log("Superior Warden Profile Response:", response.data);
+
+        // Backend sends profile inside data
+        const wardenData = response.data?.data || {};
+
+        const formattedWarden = {
+          unique_id: wardenData.warden_id || "",
+
+          warden_name: wardenData.name || "",
+
+          phone_number: wardenData.mobile_number || "",
+
+          image_path: wardenData.image_path
+            ? `${BASE_URL}${wardenData.image_path}`
+            : "",
+
+
+          category: wardenData.category || "",
+
+          joined_date: wardenData.joined_date || "",
+
+          handling_years: Array.isArray(wardenData.handling_year)
+            ? wardenData.handling_year
+            : [],
+
+          incharge_of: wardenData.gender || "",
+
+          email: wardenData.email || "",
+
+          address: wardenData.address || "",
         };
 
-        fetchWardens();
-    }, []);
+        console.log("Formatted Superior Warden Data:", formattedWarden);
 
-    return (
-        <div className="w-full min-h-screen bg-[#f5f6f8] px-4 py-5 md:px-5 lg:ml-64 lg:w-[calc(100%-16rem)]">
+        setWarden(formattedWarden);
 
-            <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-6">
+        setFormData({
+          warden_name: formattedWarden.warden_name,
+          phone_number: formattedWarden.phone_number,
+        });
+      } catch (error) {
+        console.error("❌ Failed to fetch superior warden profile");
 
-                <div className="w-full rounded-[18px] bg-white p-4 shadow-md sm:p-5 lg:p-7">
+        console.error("Full Error:", error);
 
-                    <h2 className="student-title">
-                        Profile Details
-                    </h2>
+        console.error("Backend Response:", error.response);
 
-                    <div className="student-profile-section">
+        console.error("Backend Data:", error.response?.data);
 
-                        {/* PROFILE PHOTO */}
+        console.error("Status:", error.response?.status);
+      }
+    };
 
-                        <div className="student-photo-section">
+    getWardenProfile();
+  }, []);
+  useEffect(() => {
+    const fetchWardens = async () => {
+      try {
+        const response = await axiosInstance.get("/api/fetch_warden_details");
 
-                            <img
-                                src={warden.image_path}
-                                alt={warden.warden_name}
-                                className="student-profile-photo"
-                            />
+        setWardens(response.data.wardens || []);
+      } catch (error) {
+        console.error("Error fetching wardens:", error);
 
-                        </div>
+        Swal.fire({
+          title: "Error ❌",
+          text: "Failed to fetch warden details.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      } finally {
+        setLoadingWardens(false);
+      }
+    };
 
-                        {/* PRIMARY DETAILS */}
+    fetchWardens();
+  }, []);
 
-                        <div className="student-primary-details">
+  return (
+    <div className="w-full min-h-screen bg-[#f5f6f8] px-4 py-5 md:px-5 lg:ml-64 lg:w-[calc(100%-16rem)]">
+      <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-6">
+        <div className="w-full rounded-[18px] bg-white p-4 shadow-md sm:p-5 lg:p-7">
+          <h2 className="student-title">Profile Details</h2>
 
-                            {/* NAME */}
+          <div className="student-profile-section">
+            {/* PROFILE PHOTO */}
 
-                            <div className="student-form-group">
+            <div className="student-photo-section">
+              <img
+                src={warden.image_path || "https://via.placeholder.com/150"}
+                alt={warden.warden_name || "Warden"}
+                className="student-profile-photo"
+              />
+            </div>
 
-                                <label>Name</label>
+            {/* PRIMARY DETAILS */}
 
-                                <input
-                                    type="text"
-                                    name="warden_name"
-                                    disabled
-                                    value={formData.warden_name}
-                                    className="student-input"
-                                />
+            <div className="student-primary-details">
+              {/* NAME */}
 
-                            </div>
+              <div className="student-form-group">
+                <label>Name</label>
 
-                            {/* UNIQUE ID */}
+                <input
+                  type="text"
+                  name="warden_name"
+                  disabled
+                  value={formData.warden_name}
+                  className="student-input"
+                />
+              </div>
 
-                            <div className="student-form-group">
+              {/* UNIQUE ID */}
 
-                                <label>Warden ID</label>
+              <div className="student-form-group">
+                <label>Warden ID</label>
 
-                                <input
-                                    type="text"
-                                    value={warden.unique_id}
-                                    disabled
-                                    className="student-input"
-                                />
+                <input
+                  type="text"
+                  value={warden.unique_id}
+                  disabled
+                  className="student-input"
+                />
+              </div>
 
-                            </div>
+              {/* CATEGORY */}
 
-                            {/* CATEGORY */}
+              <div className="student-form-group">
+                <label>Category</label>
 
-                            <div className="student-form-group">
+                <input
+                  type="text"
+                  value={warden.category}
+                  disabled
+                  className="student-input"
+                />
+              </div>
+            </div>
+          </div>
 
-                                <label>Category</label>
+          {/* SECONDARY DETAILS */}
 
-                                <input
-                                    type="text"
-                                    value={warden.category}
-                                    disabled
-                                    className="student-input"
-                                />
+          <div className="student-secondary-details">
+            {/* GENDER */}
 
-                            </div>
+            <div className="student-form-group">
+              <label>Gender</label>
 
-                        </div>
+              <input
+                type="text"
+                value={warden.gender}
+                disabled
+                className="student-input"
+              />
+            </div>
 
-                    </div>
+            {/* JOINED DATE */}
 
-                    <div className="student-secondary-details">
+            <div className="student-form-group">
+              <label>Joined Date</label>
 
-                        {/* GENDER */}
+              <input
+                type="text"
+                value={warden.joined_date}
+                disabled
+                className="student-input"
+              />
+            </div>
 
-                        <div className="student-form-group">
+            {/* HANDLING YEAR */}
 
-                            <label>Gender</label>
+            <div className="student-form-group">
+              <label>Handling Year</label>
 
-                            <input
-                                type="text"
-                                value={warden.gender}
-                                disabled
-                                className="student-input"
-                            />
+              <input
+                type="text"
+                value={
+                  Array.isArray(warden.handling_years)
+                    ? warden.handling_years.join(", ")
+                    : ""
+                }
+                disabled
+                className="student-input"
+              />
+            </div>
 
-                        </div>
+            {/* INCHARGE OF */}
 
-                        {/* JOINED DATE */}
+            <div className="student-form-group">
+              <label>Incharge of</label>
 
-                        <div className="student-form-group">
+              <input
+                type="text"
+                value={ Array.isArray(warden.handling_years)
+                    ? warden.handling_years.join(", ")
+                    : ""}
+                disabled
+                className="student-input"
+              />
+            </div>
 
-                            <label>Joined Date</label>
+            {/* MOBILE NUMBER */}
 
-                            <input
-                                type="text"
-                                value={warden.joined_date}
-                                disabled
-                                className="student-input"
-                            />
+            <div className="student-form-group">
+              <label>Mobile Number</label>
 
-                        </div>
+              <input
+                type="tel"
+                name="phone_number"
+                disabled
+                value={formData.phone_number}
+                className="student-input"
+              />
+            </div>
 
-                        <div className="student-form-group">
 
-                            <label>Handling Year</label>
-
-                            <input
-                                type="text"
-                                value={warden.handling_years.join(", ")}
-                                disabled
-                                className="student-input"
-                            />
-
-                        </div>
-                        <div className="student-form-group">
-
-                            <label>Incharge of</label>
-
-                            <input
-                                type="text"
-                                value={warden.incharge_of}
-                                disabled
-                                className="student-input"
-                            />
-                        </div>
-
-                        <div className="student-form-group">
-
-                            <label>
-                                Mobile Number
-                            </label>
-
-                            <input
-                                type="tel"
-                                name="phone_number"
-                                disabled
-                                value={formData.phone_number}
-                                className="student-input"
-                            />
-
-                        </div>
-
-                        <div className="student-form-group">
-
-                            <label>
-                                Email
-                            </label>
-
-                            <input
-                                type="email"
-                                value="warden@example.com"
-                                disabled
-                                className="student-input"
-                            />
-
-                        </div>
-
-                        <div className="student-form-group student-address-field">
-
-                            <label>
-                                Address
-                            </label>
-
-                            <textarea
-                                value="Chennai"
-                                disabled
-                                className="student-input student-address-input"
-                                rows="3"
-                            />
-
-                        </div>
-
-                    </div>
-
-                </div>
-                {/* =====================================================
+          </div>
+        </div>
+        {/* =====================================================
     WARDENS UNDER SUPERIOR WARDEN
 ===================================================== */}
 
-                <div className="superior-wardens-container">
+        <div className="superior-wardens-container">
+          <h2 className="superior-wardens-title">Wardens Under You</h2>
 
-                    <h2 className="superior-wardens-title">
-                        Wardens Under You
-                    </h2>
+          {loadingWardens ? (
+            <p className="superior-wardens-loading">Loading wardens...</p>
+          ) : wardens.length === 0 ? (
+            <p className="superior-wardens-empty">No wardens found.</p>
+          ) : (
+            <div className="superior-wardens-grid">
+              {wardens.map((warden) => (
+                <div key={warden.unique_id} className="superior-warden-card">
+                  <h3>{warden.warden_name}</h3>
 
-                    {loadingWardens ? (
+                  <p>
+                    <strong>Warden For:</strong>{" "}
+                    {warden.primary_batch
+                      ?.map((year) => yearToAlphabet[year] || year)
+                      .join(", ")}
+                  </p>
 
-                        <p className="superior-wardens-loading">
-                            Loading wardens...
-                        </p>
+                  <p>
+                    <strong>In Charge:</strong>{" "}
+                    {warden.gender === "Male" ? "Boys" : "Girls"}
+                  </p>
 
-                    ) : wardens.length === 0 ? (
-
-                        <p className="superior-wardens-empty">
-                            No wardens found.
-                        </p>
-
-                    ) : (
-
-                        <div className="superior-wardens-grid">
-
-                            {wardens.map((warden) => (
-
-                                <div
-                                    key={warden.unique_id}
-                                    className="superior-warden-card"
-                                >
-
-                                    <h3>
-                                        {warden.warden_name}
-                                    </h3>
-
-                                    <p>
-                                        <strong>Warden For:</strong>{" "}
-                                        {warden.primary_batch
-                                            ?.map((year) => yearToAlphabet[year] || year)
-                                            .join(", ")}
-                                    </p>
-
-                                    <p>
-                                        <strong>In Charge:</strong>{" "}
-                                        {warden.gender === "Male"
-                                            ? "Boys"
-                                            : "Girls"}
-                                    </p>
-
-                                    <p>
-                                        <strong>Joined Date:</strong>{" "}
-                                        {warden.joined_date}
-                                    </p>
-
-                                </div>
-
-                            ))}
-
-                        </div>
-
-                    )}
-
+                  <p>
+                    <strong>Joined Date:</strong> {warden.joined_date}
+                  </p>
                 </div>
+              ))}
             </div>
-
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default WardenProfile;

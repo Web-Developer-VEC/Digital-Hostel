@@ -23,18 +23,20 @@ async function getStudentData(req, res) {
     if (!warden) {
       return res.status(404).json({ error: "Warden not found" });
     }
-    if (!warden.primary_batch) {
-      return res.status(400).json({ error: "Warden primary batch not found" });
+    if (!warden.primary_year) {
+      return res.status(400).json({ error: "Warden primary year not found" });
     }
+    console.log(JSON.stringify(warden, null, 1));
 
     const student_data = await studentCollection
       .find({
-        batch: { $in: warden.primary_batch },
+        year: { $in: warden.primary_year },
         gender: warden.gender,
       })
       .toArray();
 
     if (student_data.length === 0) {
+      console.log("qwert");
       return res.status(404).json({ message: "No students found" });
     }
 
@@ -140,12 +142,10 @@ async function foodChangeDirect(req, res) {
       { $set: { foodtype: newFoodType } },
     );
 
-    return res
-      .status(200)
-      .json({
-        message: `Food type updated to ${newFoodType}`,
-        foodtype: newFoodType,
-      });
+    return res.status(200).json({
+      message: `Food type updated to ${newFoodType}`,
+      foodtype: newFoodType,
+    });
   } catch (err) {
     console.error("❌ Error:", err);
     return res.status(500).json({ error: "Internal Server error" });

@@ -51,7 +51,7 @@ async function changeFoodType(req, res) {
     const newFoodType = student.foodtype === "Veg" ? "Non-Veg" : "Veg";
 
     let warden = await wardensCollection.findOne({
-      primary_batch: { $in: [student.batch] },
+      primary_year: { $in: [student.batch] },
       gender: student.gender,
       active: true,
     });

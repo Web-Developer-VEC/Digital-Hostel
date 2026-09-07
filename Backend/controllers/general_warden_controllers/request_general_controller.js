@@ -35,16 +35,15 @@ async function fetchPassWarden(req, res) {
     }
 
     let query = {};
-    
+
     if (date) {
       const targetDate = date ? new Date(date) : new Date();
 
       const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
       const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-     
       query.request_time = { $gte: startOfDay, $lte: endOfDay };
-      query.request_completed=true
+      query.request_completed = true;
       if (usertype === "superior") {
         if (warden_id && warden_id !== "overall") {
           query.authorised_warden_id = warden_id;
@@ -54,10 +53,10 @@ async function fetchPassWarden(req, res) {
       } else {
         query.gender = warden_data.gender;
         query.year = {
-          $in: warden_data.primary_batch || warden_data.primary_year || [],
+          $in: warden_data.primary_year || warden_data.primary_year || [],
         };
       }
-     console.log("nian",query);
+      console.log("nian", query);
       const oldPasses = await passCollection.find(query).toArray();
       return res
         .status(200)
@@ -83,7 +82,7 @@ async function fetchPassWarden(req, res) {
       query.year = { $in: target_years };
     } else {
       const target_batches =
-        warden_data.primary_batch || warden_data.primary_year || [];
+        warden_data.primary_year || warden_data.primary_year || [];
       query.year = { $in: target_batches };
     }
 
@@ -138,7 +137,7 @@ async function WardenDecision(req, res) {
     }
 
     const passData = await passCollection.findOne({ pass_id: pass_id });
-    
+
     if (!passData) {
       return res.status(404).json({ error: "Pass not found" });
     }
@@ -147,7 +146,7 @@ async function WardenDecision(req, res) {
       ? (await studentCollection.distinct("year")).some(
           (y) => y?.toString() === passData.year?.toString(),
         )
-      : (warden_data.primary_batch || warden_data.primary_year || []).some(
+      : (warden_data.primary_year || warden_data.primary_year || []).some(
           (b) => b?.toString() === passData.year?.toString(),
         );
     if (!isIncluded) {
@@ -192,7 +191,7 @@ async function WardenDecision(req, res) {
       if (medical_status === true) {
         updateData.reason_type = "medical";
       }
-    
+      updateData.request_completed=true;
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
@@ -259,7 +258,7 @@ async function sendParentApprovalOTP(req, res) {
 
     const otpHash = hashOTP(otp);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-    
+
     // Save OTP details in pass document
     await PassCollection.updateOne(
       { pass_id },
@@ -276,17 +275,17 @@ async function sendParentApprovalOTP(req, res) {
       },
     );
 
-    console.log("otp",otp);
+    console.log("otp", otp);
     // Send OTP
-  //   await sendParentApprovalSMS(
-  //     pass.phone_number_parent,
-  //     pass.name,
-  //     pass.place_to_visit,
-  //     pass.reason_for_visit,
-  //     pass.from,
-  //     pass.to,
-  //     otp,
-  //  );
+    await sendParentApprovalSMS(
+      pass.phone_number_parent,
+      pass.name,
+      pass.place_to_visit,
+      pass.reason_type != "Others" ? pass.reason_type : pass.reason_for_visit,
+      pass.from,
+      pass.to,
+      otp,
+    );
 
     // Update SMS status
     await PassCollection.updateOne(
@@ -313,7 +312,6 @@ async function sendParentApprovalOTP(req, res) {
     });
   }
 }
-
 
 async function verifyParentOTP(req, res) {
   try {
@@ -416,7 +414,7 @@ async function verifyParentOTP(req, res) {
       {
         $set: {
           parent_otp_used: true,
-          parent_approval:"Approved",
+          parent_approval: "Approved",
           parent_otp_verified: true,
           parent_otp_verified_at: new Date(),
         },

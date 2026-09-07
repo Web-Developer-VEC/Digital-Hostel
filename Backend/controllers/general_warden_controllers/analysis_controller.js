@@ -34,18 +34,16 @@ async function passMeasureWarden(req, res) {
     if (warden_type === "superior") {
       primary_years = await collection.distinct("year");
     } else {
-      primary_years = warden_data.primary_batch || warden_data.primary_year;
+      primary_years = warden_data.primary_year || warden_data.primary_year;
     }
 
     if (
       warden_type != "superior" &&
       (!Array.isArray(primary_years) || primary_years.length === 0)
     ) {
-      return res
-        .status(400)
-        .json({
-          error: "Primary years must be an array with at least one value.",
-        });
+      return res.status(400).json({
+        error: "Primary years must be an array with at least one value.",
+      });
     }
 
     const currentDate = moment().utc().startOf("day").toDate();
@@ -92,7 +90,6 @@ async function passMeasureWarden(req, res) {
           })
           .project({ name: 1 })
           .toArray();
-
         // RE-ENTRY
         const reEntryData = await collection
           .find({
@@ -112,6 +109,7 @@ async function passMeasureWarden(req, res) {
           })
           .project({ name: 1, passtype: 1 })
           .toArray();
+        console.log("Overall Times :", overall);
 
         // OVERDUE
         const overdue = await collection
@@ -243,13 +241,11 @@ async function analysisWarden(req, res) {
     const primary_years =
       warden_type === "superior"
         ? await collection.distinct("year")
-        : (warden_data.primary_batch || warden_data.primary_year);
+        : warden_data.primary_year || warden_data.primary_year;
     if (!Array.isArray(primary_years) || primary_years.length === 0) {
-      return res
-        .status(400)
-        .json({
-          error: "Primary years must be an array with at least one value.",
-        });
+      return res.status(400).json({
+        error: "Primary years must be an array with at least one value.",
+      });
     }
 
     const baseDate = date ? new Date(`${date}T00:00:00.000Z`) : new Date();

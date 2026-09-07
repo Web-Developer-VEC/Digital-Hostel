@@ -19,6 +19,7 @@ const superiorWardensProfileRoute = require('./superior_routes/wardensprofile_ro
 const generalwardenrequestRoute = require('./general_warden_routes/request_routes');
 const generalwardenattendanceRoute = require('./general_warden_routes/attendance_routes');
 const generalwardenanalysisRoute = require('./general_warden_routes/analysis_routes')
+const getWardenRoute = require('./general_warden_routes/getWarden_route')
 
 
 // Routes For Hostel Page
@@ -37,6 +38,7 @@ router.use('', superiorWardensProfileRoute);
 router.use('',generalwardenanalysisRoute);
 router.use('',generalwardenattendanceRoute);
 router.use('',generalwardenrequestRoute)
+router.use('',getWardenRoute)
 
 
 module.exports = router;

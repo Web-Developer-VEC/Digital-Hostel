@@ -129,6 +129,7 @@ async function submitPass(req, res) {
       pass_id,
       name,
       mobile_number,
+      phone_number_parent:student.phone_number_parent,
       dept: department_name,
       batch,
       year: yearInt,

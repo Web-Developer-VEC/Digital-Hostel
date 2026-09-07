@@ -103,50 +103,70 @@ const Dashboard = () => {
   };
 
   // pass measure fetching
-  useEffect(() => {
-    const fetchPassMeasures = async () => {
-      try {
-        const response = await getRequest("/api/pass_measures_warden");
+useEffect(() => {
+  const fetchPassMeasures = async () => {
+    try {
+      const response = await getRequest("/api/pass_measures_warden");
 
-        console.log("RAW API RESPONSE:", response);
-        console.log("API DATA:", response.data);
+      console.log("RAW API RESPONSE:", response);
+      console.log("API DATA:", response.data);
 
-        const backendData = response.data;
+      /*
+        Backend response:
 
-        // Backend returns:
-        // {
-        //   "2023-2027": {...},
-        //   "overall": {...}
-        // }
-
-        const availableYears = Object.keys(backendData || {});
-
-        console.log("AVAILABLE YEARS:", availableYears);
-
-        setYears(availableYears);
-        setFetchData(backendData);
-
-        // Keep overall selected if available
-        if (backendData?.overall) {
-          setSelectedYear("overall");
-        } else if (availableYears.length > 0) {
-          setSelectedYear(availableYears[0]);
+        {
+          primary_years: [3, 4],
+          data: {
+            "3": {...},
+            "4": {...},
+            overall: {...}
+          }
         }
+      */
 
-      } catch (err) {
-        console.error("Error Fetching pass measures:", err);
+      const backendResponse = response.data;
 
-        fireSwal({
-          title: "Network Error",
-          text: "Failed to fetch pass analytics data. Please refresh.",
-          icon: "error",
-          confirmButtonText: "OK"
-        });
+      // IMPORTANT:
+      // Actual dashboard data is inside `data`
+      const backendData = backendResponse?.data || {};
+
+      // Use primary_years from backend
+      const primaryYears = backendResponse?.primary_years || [];
+
+      // Convert years to strings because <select> values are strings
+      const availableYears = [
+        ...primaryYears.map(String),
+        ...(backendData.overall ? ["overall"] : [])
+      ];
+
+      console.log("PRIMARY YEARS:", primaryYears);
+      console.log("AVAILABLE YEARS:", availableYears);
+      console.log("PASS DATA:", backendData);
+
+      setYears(availableYears);
+      setFetchData(backendData);
+
+      // Default to overall
+      if (backendData?.overall) {
+        setSelectedYear("overall");
+      } else if (availableYears.length > 0) {
+        setSelectedYear(availableYears[0]);
       }
-    };
 
-    fetchPassMeasures();
-  }, []);
+    } catch (err) {
+      console.error("Error Fetching data", err);
+
+      Swal.fire({
+        title: "Network Error",
+        text: "Failed to fetch pass analytics data. Please refresh.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
+    }
+  };
+
+  fetchPassMeasures();
+}, []);
 
   const passMeasure = fetchData?.[selectedYear] || {};
 
@@ -216,7 +236,7 @@ const Dashboard = () => {
     const namesList = card.names?.names || (Array.isArray(card.names) ? card.names : []);
 
     if (!namesList || namesList.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: `No student records found for ${card.title}.`,
         icon: "info",
@@ -245,7 +265,7 @@ const Dashboard = () => {
 
   const handlePieClick = async (data) => {
     if (!data || !data.value) {
-      fireSwal({
+      Swal.fire({
         title: "No Records Found",
         text: "Zero student passes filed in this category.",
         icon: "info",
@@ -257,7 +277,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
 
-    fireSwal({
+    Swal.fire({
       title: "Fetching Category Data",
       text: "Loading pass analysis records...",
       allowOutsideClick: false,
@@ -302,7 +322,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Error fetching pass analysis data:", err);
-      fireSwal({
+      Swal.fire({
         title: "Query Failed",
         text: err.response?.data?.message || "Could not retrieve breakdown.",
         icon: "error",
@@ -321,7 +341,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
 
-    fireSwal({
+    Swal.fire({
       title: "Filtering by Date",
       text: `Syncing records for ${formattedDate}...`,
       allowOutsideClick: false,
@@ -363,7 +383,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Error:", err);
-      fireSwal({
+      Swal.fire({
         title: "Filter Failed",
         text: err.response?.data?.message || "Failed to fetch data for this date.",
         icon: "error",
@@ -382,7 +402,7 @@ const Dashboard = () => {
   const handleTotalClick = () => {
     const names = fetchedPassAnalysis?.activePasses?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
@@ -397,7 +417,7 @@ const Dashboard = () => {
   const handleReturningClick = () => {
     const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
@@ -412,7 +432,7 @@ const Dashboard = () => {
   const handleOvertimeClick = () => {
     const names = fetchedPassAnalysis?.overduePasses?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",

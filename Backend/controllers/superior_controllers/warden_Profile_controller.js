@@ -62,7 +62,7 @@ async function wardenDoInactive(req, res) {
 
     await wardenCollection.updateOne(
       { warden_name: warden_name },
-      { $addToSet: { primary_batch: batch } },
+      { $addToSet: { primary_year: batch } },
     );
 
     const log_entry = {
@@ -112,7 +112,7 @@ async function wardenDoActive(req, res) {
       return res.status(404).json({ message: "Warden not found" });
     }
 
-    const primary_batchs = warden_details.primary_batch || [];
+    const primary_years = warden_details.primary_year || [];
 
     const active_logs = await logsCollection
       .find({ inactive_warden_id: warden_id, log_status: "active" })
@@ -126,7 +126,7 @@ async function wardenDoActive(req, res) {
 
     await wardenCollection.updateMany(
       { unique_id: { $ne: warden_id }, gender: warden_details.gender },
-      { $pull: { primary_batch: { $in: primary_batchs } } },
+      { $pull: { primary_year: { $in: primary_years } } },
     );
 
     const updateResult = await wardenCollection.updateOne(
@@ -165,7 +165,7 @@ async function wardenDoActive(req, res) {
 
 async function addWarden(req, res) {
   try {
-    const { name, primary_batch, phone_number, password, gender, joined_date } =
+    const { name, primary_year, phone_number, password, gender, joined_date } =
       req.body;
 
     const { user } = req.session;
@@ -178,7 +178,7 @@ async function addWarden(req, res) {
 
     if (
       !name ||
-      !primary_batch ||
+      !primary_year ||
       !phone_number ||
       !password ||
       !gender ||
@@ -189,7 +189,7 @@ async function addWarden(req, res) {
 
     const db = getDb();
     const wardenCollection = db.collection("warden_database");
-    const primary_batch1 = JSON.parse(primary_batch);
+    const primary_year1 = JSON.parse(primary_year);
 
     const existingWarden = await wardenCollection.findOne({ phone_number });
     if (existingWarden) {
@@ -211,7 +211,7 @@ async function addWarden(req, res) {
     const newWarden = {
       unique_id,
       warden_name: name,
-      primary_batch: primary_batch1,
+      primary_year: primary_year1,
       phone_number,
       password: hashedPassword,
       gender,
@@ -248,11 +248,11 @@ async function updatewarden(req, res) {
     }
 
     if (typeof updateFields.secondary_batch === "string") {
-      updateFields.primary_batch = JSON.parse(updateFields.secondary_batch);
+      updateFields.primary_year = JSON.parse(updateFields.secondary_batch);
     }
 
-    if (typeof updateFields.primary_batch === "string") {
-      updateFields.primary_batch = JSON.parse(updateFields.primary_batch);
+    if (typeof updateFields.primary_year === "string") {
+      updateFields.primary_year = JSON.parse(updateFields.primary_year);
     }
 
     const existingWarden = await wardenCollection.findOne({ unique_id });
@@ -328,7 +328,7 @@ async function fetchDetailsForReallocation(req, res) {
     if (!target_warden_data) {
       return res.status(404).json({ error: "Target warden not found" });
     }
-    const primary_batchs = target_warden_data.primary_batch;
+    const primary_years = target_warden_data.primary_year;
     const target_warden_gender = target_warden_data.gender;
     const warden_details = await wardenCollection
       .find({
@@ -351,7 +351,7 @@ async function fetchDetailsForReallocation(req, res) {
     const warden_names = warden_details.map((warden) => warden.warden_name);
     warden_names.push(superior_warden_name);
 
-    return res.status(200).json({ warden_names, primary_batchs });
+    return res.status(200).json({ warden_names, primary_years });
   } catch (error) {
     console.error("Error fetching warden details:", error);
     return res.status(500).json({ error: "Internal Server Error" });
