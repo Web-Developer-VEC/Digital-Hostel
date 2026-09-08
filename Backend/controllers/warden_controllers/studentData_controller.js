@@ -4,6 +4,7 @@ async function getStudentData(req, res) {
   try {
     const { user } = req.session;
 
+    // Check warden session
     if (!user || !user.registration_number) {
       return res
         .status(401)
@@ -11,35 +12,51 @@ async function getStudentData(req, res) {
     }
 
     const warden_unique_id = user.registration_number;
+
     const db = getDb();
+
     const wardenCollection = db.collection("warden_database");
     const studentCollection = db.collection("student_database");
     const passCollection = db.collection("pass_details");
 
+    // Find the logged-in warden
     const warden = await wardenCollection.findOne({
       unique_id: warden_unique_id,
     });
 
     if (!warden) {
-      return res.status(404).json({ error: "Warden not found" });
+      return res.status(404).json({
+        error: "Warden not found",
+      });
     }
-    if (!warden.primary_year) {
-      return res.status(400).json({ error: "Warden primary year not found" });
-    }
-    console.log(JSON.stringify(warden, null, 1));
 
+    console.log("Warden data:");
+    console.log(JSON.stringify(warden, null, 2));
+
+    // Your database uses primary_batch, not primary_year
+    if (!warden.primary_batch || warden.primary_batch.length === 0) {
+      return res.status(400).json({
+        error: "Warden primary batch not found",
+      });
+    }
+
+    // Find students belonging to the warden's batch/year
     const student_data = await studentCollection
       .find({
-        year: { $in: warden.primary_year },
+        year: { $in: warden.primary_batch },
         gender: warden.gender,
       })
       .toArray();
 
+    console.log("Students found:", student_data.length);
+
     if (student_data.length === 0) {
-      console.log("qwert");
-      return res.status(404).json({ message: "No students found" });
+      return res.status(404).json({
+        message: "No students found",
+      });
     }
 
+    // Add pass information to each student
     const students_with_pass_data = await Promise.all(
       student_data.map(async (student) => {
         let pass_info = {
@@ -48,6 +65,7 @@ async function getStudentData(req, res) {
           passtype: null,
         };
 
+        // Check whether student is currently in transit
         if (student.transit_status === true) {
           const pass_data = await passCollection.findOne({
             registration_number: student.registration_number,
@@ -70,10 +88,15 @@ async function getStudentData(req, res) {
       }),
     );
 
-    return res.status(200).json({ students: students_with_pass_data });
+    return res.status(200).json({
+      students: students_with_pass_data,
+    });
   } catch (err) {
     console.error("❌ Error fetching student details:", err);
-    return res.status(500).json({ error: "Internal Server error" });
+
+    return res.status(500).json({
+      error: "Internal Server error",
+    });
   }
 }
 
@@ -91,25 +114,39 @@ async function markStudentVacate(req, res) {
     const studentCollection = db.collection("student_database");
 
     const { student_id } = req.body;
+
     if (!student_id) {
-      return res.status(400).json({ error: "Missing student_id" });
+      return res.status(400).json({
+        error: "Missing student_id",
+      });
     }
 
     const updateResult = await studentCollection.updateOne(
-      { registration_number: student_id },
-      { $set: { vacate_status: true } },
+      {
+        registration_number: student_id,
+      },
+      {
+        $set: {
+          vacate_status: true,
+        },
+      },
     );
 
     if (updateResult.matchedCount === 0) {
-      return res.status(404).json({ error: "Student not found" });
+      return res.status(404).json({
+        error: "Student not found",
+      });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Student marked for vacating successfully" });
+    return res.status(200).json({
+      message: "Student marked for vacating successfully",
+    });
   } catch (err) {
     console.error("❌ Error:", err);
-    return res.status(500).json({ error: "Internal Server error" });
+
+    return res.status(500).json({
+      error: "Internal Server error",
+    });
   }
 }
 
@@ -126,20 +163,37 @@ async function foodChangeDirect(req, res) {
     const { registration_number } = req.body;
 
     if (!registration_number) {
-      return res.status(400).json({ error: "Registration number is required" });
+      return res.status(400).json({
+        error: "Registration number is required",
+      });
     }
+
     const db = getDb();
     const studentCollection = db.collection("student_database");
 
-    const student = await studentCollection.findOne({ registration_number });
+    const student = await studentCollection.findOne({
+      registration_number,
+    });
 
     if (!student) {
-      return res.status(404).json({ error: "Student not found" });
+      return res.status(404).json({
+        error: "Student not found",
+      });
     }
-    const newFoodType = student.foodtype === "Veg" ? "Non-Veg" : "Veg";
+
+    // Toggle food type
+    const newFoodType =
+      student.foodtype === "Veg" ? "Non-Veg" : "Veg";
+
     await studentCollection.updateOne(
-      { registration_number },
-      { $set: { foodtype: newFoodType } },
+      {
+        registration_number,
+      },
+      {
+        $set: {
+          foodtype: newFoodType,
+        },
+      },
     );
 
     return res.status(200).json({
@@ -148,7 +202,10 @@ async function foodChangeDirect(req, res) {
     });
   } catch (err) {
     console.error("❌ Error:", err);
-    return res.status(500).json({ error: "Internal Server error" });
+
+    return res.status(500).json({
+      error: "Internal Server error",
+    });
   }
 }
 
@@ -165,28 +222,40 @@ async function roomnoChangeDirect(req, res) {
     const { student_id, new_room_number } = req.body;
 
     if (!student_id || !new_room_number) {
-      return res
-        .status(400)
-        .json({ error: "Missing student_id or new_room_number" });
+      return res.status(400).json({
+        error: "Missing student_id or new_room_number",
+      });
     }
 
     const db = getDb();
     const studentCollection = db.collection("student_database");
 
     const updateResult = await studentCollection.updateOne(
-      { registration_number: student_id },
-      { $set: { room_number: new_room_number } },
+      {
+        registration_number: student_id,
+      },
+      {
+        $set: {
+          room_number: new_room_number,
+        },
+      },
     );
 
     if (updateResult.matchedCount === 0) {
-      return res.status(404).json({ error: "Student not found" });
+      return res.status(404).json({
+        error: "Student not found",
+      });
     }
-    return res
-      .status(200)
-      .json({ message: "Room number updated successfully" });
+
+    return res.status(200).json({
+      message: "Room number updated successfully",
+    });
   } catch (error) {
     console.error("Error Editing Room Number:", error);
-    return res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 }
 
