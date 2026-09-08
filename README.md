@@ -30,6 +30,7 @@ An enterprise-grade, role-based hostel management platform designed to automate 
 ## 🗺️ Workflows & Architecture
 
 ### 1. Student Outpass Lifecycle
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -48,6 +49,7 @@ sequenceDiagram
 ```
 
 ### 2. Hostel Vacating & No-Due Flow
+
 ```mermaid
 graph TD
     A[Student Profile] -->|Request Vacate| B(Warden Permission Check)
@@ -59,12 +61,13 @@ graph TD
 ```
 
 ### 3. Warden Deactivation & Batch Reallocation
-```mermaid
+
+```mermaidprimary_year
 graph LR
     A[Warden Account Deactivated] --> B{Check assigned batches}
-    B -->|Has primary_batch| C[Prompt batch reallocation]
+    B -->|Has primary_year| C[Prompt batch reallocation]
     C -->|Select Active Warden| D[Transfer batch to active warden]
-    D -->|Update Database| E[active_warden.primary_batch += batch]
+    D -->|Update Database| E[active_warden.primary_year += batch]
     E -->|Write Log Entry| F[Warden logs: track status, batch & date]
 ```
 
@@ -73,21 +76,25 @@ graph LR
 ## ✨ Features Breakdown
 
 ### 📱 Student Portal
+
 - **Smart Outpass Form:** Dynamic date/time range validators enforcing IST timezone synchronization and checking checkout policies.
 - **Unified Vacate Request:** Integrated workflow checks if the Warden has granted vacate permission, handles superior warden approvals, and allows printing a bordered No Due Form receipt with zero browser headers/footers.
 - **Dynamic Food Preference:** Toggles food preferences between **Veg** and **Non-Veg**, updating mess projections instantly.
 
 ### 📋 Warden Portal
+
 - **Live Approval Dashboard:** Process pending leave and food preference requests for assigned batches.
 - **Mess Monitoring:** Consolidated counts of active diners categorized by year and gender.
 - **Student Tracker:** View active student directory details and mark students as vacated.
 
 ### 👑 Superior Warden Portal
+
 - **Warden Management:** Perform CRUD operations on wardens, upload optimized profile photos (Sharp conversion to WebP), and toggle active statuses.
 - **Batch Reallocations:** Safely transfer students to active wardens on deactivation to prevent orphaned batches.
 - **Real-Time Analytics:** Interactive Recharts charts detailing pass distributions, average return delays, and student attendance logs.
 
 ### 🛡️ Security Desk
+
 - **Campus Gate System:** Quick barcode reader interface to log check-in and check-out events directly.
 
 ---
@@ -95,10 +102,12 @@ graph LR
 ## ⚙️ Configuration & Environment Setup
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MongoDB Community Server
 
 ### Backend Configuration (`Backend/.env`)
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017
@@ -118,6 +127,7 @@ SESSION_SECRET=your_long_session_secret_hash
 ```
 
 ### Frontend Configuration (`Frontend/.env`)
+
 ```env
 REACT_APP_QR_URL=https://your_aws_bucket_name.s3.ap-south-1.amazonaws.com
 REACT_APP_BASE_URL=http://localhost:5000
@@ -128,19 +138,23 @@ REACT_APP_BASE_URL=http://localhost:5000
 ## 🛠️ Installation & Quickstart
 
 ### 1. Start the API Backend
+
 ```bash
 cd Backend
 npm install
 npm start
 ```
+
 Server runs at `http://localhost:5000`.
 
 ### 2. Start the Frontend Client
+
 ```bash
 cd Frontend
 npm install
 npm start
 ```
+
 Client runs at `http://localhost:3000`.
 
 ---
@@ -148,21 +162,25 @@ Client runs at `http://localhost:3000`.
 ## 🔗 Key API Routes
 
 ### Authentication
+
 - `POST /api/login` - Authenticate user session
 - `POST /api/logout` - Clear user session
 
 ### Student Operations
+
 - `POST /api/verify_student` - Verify student existence via mobile number
 - `POST /api/submit_vacate_form` - Submit vacate request
 - `POST /api/get_student_pass_by_passid` - Fetch pass details
 
 ### Warden Operations
+
 - `GET /api/sidebar_warden` - Fetch session details for active warden
 - `GET /api/fetch_passes_` - Retrieve student outpasses by date/year
 - `POST /api/warden_decision` - Approve or reject outpass requests
 - `POST /api/approve_food_change` - Handle food preference change approvals
 
 ### Superior Warden Operations
+
 - `GET /api/fetch_warden_details` - Fetch list of wardens
 - `POST /api/add_warden` - Create a new assistant warden profile
 - `POST /api/update_warden_by_superior` - Edit warden details

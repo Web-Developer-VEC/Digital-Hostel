@@ -9,7 +9,7 @@
         "gender": "Male",
         "category": "assistant",
         "joined_date": "22/12/2020",
-        "primary_batch": [
+        "primary_year": [
             "2023-2027"
         ]
     },
@@ -28,6 +28,6 @@
             "2024-2028"
         ],
         "vacated_students": 2,
-        "primary_batch": []
+        "primary_year": []
     }
 ]

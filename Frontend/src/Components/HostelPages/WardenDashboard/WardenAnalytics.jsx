@@ -14,8 +14,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { getRequest } from "../../../api/axios";
 
-// Custom palette corresponding to your login brand colors:
-// Terracotta, Rust, Tangerine, Muted Amber
+
 const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 
 const DashboardCard = ({ title, number, tag, isInteractive, isDanger, onClick }) => {
@@ -62,7 +61,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log("Fetched Data",fetchData);
+  console.log("Fetched Data", fetchData);
 
   const ReasonTypeMapping = {
     od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
@@ -72,7 +71,7 @@ const Dashboard = () => {
   };
 
   const yearToAlphabet = {
-    '1': 'First Year', 
+    '1': 'First Year',
     '2': 'Second Year',
     '3': 'Third Year',
     '4': 'Fourth Year',
@@ -94,33 +93,82 @@ const Dashboard = () => {
     setSelectedYear(event.target.value);
   };
 
+  const fireSwal = (config) => {
+    return Swal.fire({
+      background: "#fefbf4",
+      color: "#7c2d12",
+      confirmButtonColor: "#a73d1a",
+      ...config
+    });
+  };
+
   // pass measure fetching
-  useEffect(()=>{
-    const fetchData = async ()=>{
+useEffect(() => {
+  const fetchPassMeasures = async () => {
+    try {
+      const response = await getRequest("/api/pass_measures_warden");
 
-      try{
-        const response = await getRequest('/api/pass_measures_warden');
-        const fetchedData = response.data;
-        
-        const years = Object.keys(fetchedData?.data)
-        
-        setYears(years);
+      console.log("RAW API RESPONSE:", response);
+      console.log("API DATA:", response.data);
 
-        setFetchData(fetchedData?.data);
-      } catch (err) {
-        console.error("Error Fetching data", err);
-        fireSwal({
-          title: "Network Error",
-          text: "Failed to fetch pass analytics data. Please refresh.",
-          icon: "error",
-          confirmButtonText: "OK"
-        });
+      /*
+        Backend response:
+
+        {
+          primary_years: [3, 4],
+          data: {
+            "3": {...},
+            "4": {...},
+            overall: {...}
+          }
+        }
+      */
+
+      const backendResponse = response.data;
+
+      // IMPORTANT:
+      // Actual dashboard data is inside `data`
+      const backendData = backendResponse?.data || {};
+
+      // Use primary_years from backend
+      const primaryYears = backendResponse?.primary_years || [];
+
+      // Convert years to strings because <select> values are strings
+      const availableYears = [
+        ...primaryYears.map(String),
+        ...(backendData.overall ? ["overall"] : [])
+      ];
+
+      console.log("PRIMARY YEARS:", primaryYears);
+      console.log("AVAILABLE YEARS:", availableYears);
+      console.log("PASS DATA:", backendData);
+
+      setYears(availableYears);
+      setFetchData(backendData);
+
+      // Default to overall
+      if (backendData?.overall) {
+        setSelectedYear("overall");
+      } else if (availableYears.length > 0) {
+        setSelectedYear(availableYears[0]);
       }
-    };
-    fetchMeasures();
-  }, []);
 
-  const passMeasure = fetchData ? fetchData[selectedYear] : {};
+    } catch (err) {
+      console.error("Error Fetching data", err);
+
+      Swal.fire({
+        title: "Network Error",
+        text: "Failed to fetch pass analytics data. Please refresh.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
+    }
+  };
+
+  fetchPassMeasures();
+}, []);
+
+  const passMeasure = fetchData?.[selectedYear] || {};
 
   const cardData = [
     {
@@ -158,11 +206,23 @@ const Dashboard = () => {
   ];
 
   const chartData = [
-    { name: "OD", value: passMeasure?.passTypeCounts?.od?.count || 0 },
-    { name: "Leave", value: passMeasure?.passTypeCounts?.leave?.count || 0 },
-    { name: "Stay Pass", value: passMeasure?.passTypeCounts?.staypass?.count || 0 },
-    { name: "Out Pass", value: passMeasure?.passTypeCounts?.outpass?.count || 0 }
-  ];
+  {
+    name: "OD",
+    value: passMeasure?.passTypeCounts?.od?.count ?? 0
+  },
+  {
+    name: "Leave",
+    value: passMeasure?.passTypeCounts?.leave?.count ?? 0
+  },
+  {
+    name: "Stay Pass",
+    value: passMeasure?.passTypeCounts?.staypass?.count ?? 0
+  },
+  {
+    name: "Out Pass",
+    value: passMeasure?.passTypeCounts?.outpass?.count ?? 0
+  }
+];
 
   const totalPassCount = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
@@ -176,7 +236,7 @@ const Dashboard = () => {
     const namesList = card.names?.names || (Array.isArray(card.names) ? card.names : []);
 
     if (!namesList || namesList.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: `No student records found for ${card.title}.`,
         icon: "info",
@@ -205,7 +265,7 @@ const Dashboard = () => {
 
   const handlePieClick = async (data) => {
     if (!data || !data.value) {
-      fireSwal({
+      Swal.fire({
         title: "No Records Found",
         text: "Zero student passes filed in this category.",
         icon: "info",
@@ -217,7 +277,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
 
-    fireSwal({
+    Swal.fire({
       title: "Fetching Category Data",
       text: "Loading pass analysis records...",
       allowOutsideClick: false,
@@ -262,7 +322,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Error fetching pass analysis data:", err);
-      fireSwal({
+      Swal.fire({
         title: "Query Failed",
         text: err.response?.data?.message || "Could not retrieve breakdown.",
         icon: "error",
@@ -281,7 +341,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
 
-    fireSwal({
+    Swal.fire({
       title: "Filtering by Date",
       text: `Syncing records for ${formattedDate}...`,
       allowOutsideClick: false,
@@ -323,7 +383,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Error:", err);
-      fireSwal({
+      Swal.fire({
         title: "Filter Failed",
         text: err.response?.data?.message || "Failed to fetch data for this date.",
         icon: "error",
@@ -342,7 +402,7 @@ const Dashboard = () => {
   const handleTotalClick = () => {
     const names = fetchedPassAnalysis?.activePasses?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
@@ -357,7 +417,7 @@ const Dashboard = () => {
   const handleReturningClick = () => {
     const names = fetchedPassAnalysis?.toFieldMatch?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
@@ -372,7 +432,7 @@ const Dashboard = () => {
   const handleOvertimeClick = () => {
     const names = fetchedPassAnalysis?.overduePasses?.names || [];
     if (names.length === 0) {
-      fireSwal({
+      Swal.fire({
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
@@ -389,7 +449,7 @@ const Dashboard = () => {
       {/* Top Header */}
       <header className="hl-warden-header">
         <div>
-          
+
           <h1 className="hl-title">Pass Measures & Analytics</h1>
           <p className="hl-subtitle">
             Hostel warden administrative overview and pass clearance audits

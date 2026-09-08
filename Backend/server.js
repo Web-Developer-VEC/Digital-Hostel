@@ -26,8 +26,7 @@ app.use(session);
 connectToDatabase();
 
 app.use((req, res, next) => {
-    console.log("Hits:", req.originalUrl);
-    
+    console.log("Hits:", req.method, req.originalUrl);    
     next();
 });
 

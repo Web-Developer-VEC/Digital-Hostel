@@ -72,21 +72,18 @@ const StudentHistory = () => {
         // 2. Parent approved / Warden approved
         // 3. Fully approved passes
         // Exclude rejected and completed (re-entered) passes
+        const isRejected = (pass) =>
+          pass.parent_approval === false ||
+          pass.wardern_approval === false ||
+          pass.superior_wardern_approval === false;
+
         const currentPasses = passes.filter((pass) => {
           const isNotCompleted = pass.re_entry_time === null;
-
-          const isNotRejected =
-            pass.parent_approval !== false &&
-            pass.wardern_approval !== false &&
-            pass.superior_wardern_approval !== false;
-
-          return isNotCompleted && isNotRejected;
+          return isNotCompleted && !isRejected(pass);
         });
 
-        // HISTORY GROUPING
-        // Keep ALL non-current/completed passes grouped by month
         const completedPasses = passes.filter(
-          (pass) => pass.re_entry_time !== null,
+          (pass) => pass.re_entry_time !== null || isRejected(pass),
         );
 
         const groupedHistory = {};
@@ -159,12 +156,10 @@ const StudentHistory = () => {
     fetchStudentPasses();
   }, []);
 
-  const handleCardClick = (data, year) => {
-    if (year === "Current") {
-      setSelectedData(data);
-      setIsModalOpen(true);
-      document.body.classList.add("blur-background");
-    }
+    const handleCardClick = (data) => {
+    setSelectedData(data);
+    setIsModalOpen(true);
+    document.body.classList.add("blur-background");
   };
 
   const closeModal = () => {
@@ -331,7 +326,7 @@ const StudentHistory = () => {
                   <div
                     key={index}
                     className="student-history-card"
-                    onClick={() => handleCardClick(info, val.year)}
+                    onClick={() => handleCardClick(info)}
                   >
                     {/* DATE BLOCK */}
                     <div className="pass-date-block">
@@ -429,14 +424,14 @@ const StudentHistory = () => {
                           className="view-details-button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleCardClick(info, val.year);
+                            handleCardClick(info);
                           }}
                         >
                           View Details
                         </button>
 
-                        {!info.wardern_approval &&
-                          !info.superior_wardern_approval && (
+                         {info.wardern_approval === null &&
+                          info.superior_wardern_approval === null && (
                             <button
                               className="stu-edit-button"
                               onClick={(e) => handleEditClick(info.pass_id, e)}

@@ -26,10 +26,10 @@ async function getFoodRequestChange(req, res) {
       return res.status(404).json({ error: "Warden not found" });
     }
 
-    const primary_batchs = warden.primary_batch;
+    const primary_years = warden.primary_year;
     const warder_handling_gender = warden.gender;
     const requests = await requestsCollection
-      .find({ batch: { $in: primary_batchs }, gender: warder_handling_gender })
+      .find({ batch: { $in: primary_years }, gender: warder_handling_gender })
       .toArray();
 
     return res.status(200).json({ requests });

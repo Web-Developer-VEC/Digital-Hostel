@@ -1210,11 +1210,304 @@ textarea::placeholder {
 
   box-shadow: none;
 }
+/* ================================
+   MOBILE RESPONSIVENESS (CSS-only)
+================================ */
 
+@media (max-width: 768px) {
+  .AR-main {
+    padding: 0.75rem;
+  }
+
+  .AR-page-title {
+    font-size: 1.25rem;
+  }
+
+  /* --- Navigate buttons wrap instead of overflowing --- */
+  .navigate-button {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* --- Table -> stacked cards (column order: Name, Year, Room,
+     Reg data, Pass Type, from Date, Late Count, Parent Approval) --- */
+  .AR-table-container {
+    border: none;
+    background-color: transparent;
+    overflow-x: visible;
+    white-space: normal;
+  }
+
+  .AR-table,
+  .AR-table tbody,
+  .AR-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .AR-table thead {
+    display: none;
+  }
+
+  .AR-table tr:not(.AR-details-row) {
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background-color: white;
+    padding: 4px 14px;
+  }
+
+  /* preserve late-count/status tint on the whole card */
+  .AR-table tr.AR-row-green:not(.AR-details-row) {
+    background-color: #f0fdf4 !important;
+  }
+  .AR-table tr.AR-row-orange:not(.AR-details-row) {
+    background-color: #fff7ed !important;
+  }
+  .AR-table tr.AR-row-red:not(.AR-details-row) {
+    background-color: #fef3f3 !important;
+  }
+
+  .AR-table tr:not(.AR-details-row) td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .AR-table tr:not(.AR-details-row) td:last-child {
+    border-bottom: none;
+  }
+
+  .AR-table tr:not(.AR-details-row) td::before {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(1)::before { content: "Name"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(2)::before { content: "Year"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(3)::before { content: "Room"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(4)::before { content: "Reg Date"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(5)::before { content: "Pass Type"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(6)::before { content: "From Date"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(7)::before { content: "Late Count"; }
+  .AR-table tr:not(.AR-details-row) td:nth-of-type(8)::before { content: "Parent Approval"; }
+
+  .AR-details-row td {
+    display: block;
+    padding: 0 !important;
+    border-bottom: none;
+  }
+
+  /* --- Expanded detail panel --- */
+  .AR-inline-details {
+    padding: 18px 16px;
+  }
+
+  .AR-inline-details-header h2 {
+    font-size: 17px;
+  }
+
+  .AR-inline-details-grid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 14px;
+  }
+
+  .AR-inline-details-grid > div {
+    grid-template-columns: 120px 1fr;
+  }
+
+  .AR-parent-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .AR-send-otp-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .AR-inline-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .AR-decline-button,
+  .AR-accept-button {
+    width: 100%;
+  }
+
+  .AR-document-button {
+    margin-top: 14px;
+  }
+
+  /* --- OTP popup --- */
+  .AR-otp-popup {
+    padding: 28px 18px 22px;
+  }
+
+  .AR-otp-boxes {
+    gap: 6px;
+  }
+
+  .AR-otp-input {
+    width: 40px;
+    height: 48px;
+    font-size: 19px;
+  }
+
+  /* --- Document preview modal --- */
+  .AR-document-container {
+    width: 94%;
+    height: 82vh;
+  }
+
+  .AR-document-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .AR-document-title {
+    font-size: 1rem;
+  }
+
+  /* --- Dead-code modal styles (harmless if ever used) --- */
+  .AR-modal-container {
+    width: 92%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navigate-button {
+    flex-direction: column;
+  }
+
+  .Food-Request-button {
+    width: 100% !important;
+    margin: 4px 0 !important;
+    text-align: center !important;
+  }
+
+  .AR-inline-details-grid > div {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+  }
+
+  .AR-otp-popup {
+    width: 100%;
+    padding: 24px 14px 18px;
+  }
+
+  .AR-otp-input {
+    width: 36px;
+    height: 44px;
+    font-size: 17px;
+  }
+
+  .AR-otp-actions {
+    flex-direction: column;
+  }
+}
+/* ================================
+   PASS LOG HISTORY PAGE - MOBILE
+================================ */
+
+@media (max-width: 768px) {
+  /* --- Header row: icon-only round back button --- */
+  .AR-main:has(.back-btn) > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .back-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    gap: 0 !important;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    color: #111827;
+    font-size: 0; /* collapses the "Back" text node; icon is unaffected */
+  }
+
+  .back-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .back-btn:active {
+    background-color: #f3f4f6;
+  }
+
+  .AR-main:has(.back-btn) .AR-page-title {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  /* --- Correct card labels for this table's column order
+     (Name, Year, Room, Req data, Pass Type, from Date,
+      Warden Approval, Parent Approval) --- */
+  .AR-main:has(.back-btn) .AR-table tr:not(.AR-details-row) td:nth-of-type(4)::before {
+    content: "Requested On";
+  }
+
+  .AR-main:has(.back-btn) .AR-table tr:not(.AR-details-row) td:nth-of-type(7)::before {
+    content: "Warden Approval";
+  }
+
+  /* --- Detail modal: bottom-sheet style, easier to read --- */
+  .AR-modal-overlay {
+    align-items: flex-end;
+  }
+
+  .AR-modal-container {
+    width: 100%;
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .AR-modal-content {
+    max-height: 88vh;
+  }
+
+  .AR-modal-body {
+    max-height: calc(88vh - 140px);
+  }
+
+  .AR-paired-info {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    column-gap: 0;
+  }
+
+  .AR-title {
+    font-size: 1.05rem;
+  }
+}
 
 /* Mobile */
 
-@media (max-width: 500px) {
+/* @media (max-width: 500px) {
 
   .AR-otp-popup {
     padding: 32px 20px 25px;
@@ -1231,4 +1524,4 @@ textarea::placeholder {
     font-size: 20px;
   }
 
-}
+} */

@@ -71,18 +71,24 @@
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   font-size: 0.9rem;
 }
 
 .gender-btn:hover {
-  color: #111827;
+  background-color: #800000;
+  color: #ffffff;
 }
 
 .gender-btn.active {
   background-color: #fdcc03;
   color: #111827;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gender-btn.active:hover {
+  background-color: #800000;
+  color: #ffffff;
 }
 
 /* Actions */
@@ -97,12 +103,60 @@
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
   height: 40px; /* Aligns with toggle */
 }
 
 .action-btn:hover {
-  opacity: 0.9;
+  background-color: #800000;
+  color: #ffffff;
+}
+
+/* The Download button renders a child <DownloadPdf/> component whose
+   internal markup we don't control — force it to inherit this button's
+   color instead of any styling of its own, so it never looks washed out
+   or falls out of sync with the hover state above. */
+.action-btn a,
+.action-btn button,
+.action-btn span {
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Increment Student Year select — left exactly as-is, untouched */
+.year-select {
+  background-color: #800000;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  height: 40px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.year-select:hover {
+  background-color: #fdcc03;
+  color: #111827;
+}
+
+/* The dropdown popup itself (and each option row) — plain and readable,
+   independent of whatever color the closed select currently shows. */
+.year-select option {
+  background-color: #ffffff;
+  color: #111827;
+  font-weight: 500;
 }
 
 /* =========================================
@@ -141,6 +195,76 @@
   padding: 8px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
+}
+
+/* =========================================
+   Increment Year — Confirmation Modal
+   ========================================= */
+.AR-confirmation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.AR-confirmation-modal {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.75rem 2rem;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.AR-confirmation-modal h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  color: #111827;
+  font-weight: 700;
+}
+
+.AR-confirmation-modal p {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.AR-confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.AR-button {
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.AR-button:hover {
+  opacity: 0.9;
+}
+
+.AR-button-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.AR-button-primary {
+  background-color: #fdcc03;
+  color: #111827;
 }
 
 /* =========================================
@@ -218,176 +342,242 @@
   cursor: pointer;
   width: 100%;
   margin-top: auto;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.view-more-btn:hover {
+  background-color: #800000;
+  color: #ffffff;
 }
 
 /* =========================================
-   Modal Overlay & Content 
+   Modal Overlay & Content
+   Mirrors Hostelstudents.jsx's modal 1:1 — same padding
+   architecture (each region owns its own inset so the name,
+   HOSTEL, and CONTACT all sit flush to the same left edge),
+   same sizes, same colors.
    ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(17, 17, 20, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1.5rem;
   z-index: 1000;
-  backdrop-filter: blur(2px);
+  animation: modalBackdropFadeIn 0.18s ease-out;
+}
+
+@keyframes modalBackdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 650px; 
-  padding: 2.5rem 3rem; 
   position: relative;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  text-align: left !important; 
+  background: #ffffff;
+  border-radius: 0.85rem;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  animation: modalContentSlideUp 0.2s ease-out;
 }
 
-/* Clean Icon Close Button (No Framework Overlap) */
+@keyframes modalContentSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Clean Icon Close Button — color comes from here (JSX passes no
+   hardcoded color prop to the X icon, so this controls it via
+   currentColor, exactly like Hostelstudents.jsx). */
 .close-modal-btn {
   position: absolute;
-  top: 1.25rem;
+  top: 1.1rem;
   right: 1.25rem;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #ef4444;
+  color: #b66441;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.close-modal-btn:hover {
+  color: #111827;
 }
 
 /* =========================================
-   Modal Header Alignment Fix
+   Modal Header
    ========================================= */
 .modal-header {
-  display: flex !important;
-  flex-direction: row !important; 
-  align-items: center !important; 
-  justify-content: flex-start !important; 
-  gap: 1.5rem !important;
-  margin-bottom: 1.5rem;
-  text-align: left !important; 
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  padding: 2rem 2.5rem 1.5rem;
+  text-align: left;
   width: 100%;
 }
 
 .modal-avatar {
-  width: 70px;
-  height: 70px;
+  width: 76px;
+  height: 76px;
   background-color: #fdcc03;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #111827;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .modal-header-text {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  text-align: left !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
+  margin-left: 20px;
+  padding: top 20px;
 }
 
-.modal-header-text h2 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.4rem;
-  color: #111827 !important; 
-  font-weight: 700;
-  text-align: left !important;
+
+.modal-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
+  margin-left: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .modal-meta {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #6b7280;
-  margin: 0 0 0.25rem 0;
-  text-align: left !important;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.3;
+  text-align: left;
 }
 
 .modal-subtext {
-  font-size: 0.8rem;
-  color: #9ca3af;
+  font-size: 0.92rem;
+  color: #6b7280;
   margin: 0;
-  text-align: left !important;
+  line-height: 1.3;
+  text-align: left;
 }
 
 .modal-divider {
   border: 0;
   height: 1px;
   background: #e5e7eb;
-  margin: 1.5rem 0;
-  width: 100%;
+  margin: 0 2.5rem;
 }
 
 /* =========================================
-   Modal Body Alignment Fix
+   Modal Body
    ========================================= */
-.section-title {
-  font-size: 0.85rem;
-  color: #111827;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  letter-spacing: 0.5px;
-  text-align: left !important;
-  width: 100%;
+.modal-body {
+  padding: 1.5rem 1.5rem 2rem;
+  text-align: left;
 }
+
+.section-title {
+   font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #111827;
+  margin-bottom: 1.1rem;
+  text-align: 30%;
+  padding-top:30px ;
+}
+
+/* .section-title {
+  padding-top:100x;
+  margin-left: -230px;
+
+}  */
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-  text-align: left !important;
+  gap: 1rem 1.75rem;
+  margin-bottom: 0;
+  text-align: left;
 }
 
 .info-item {
   display: flex;
   flex-direction: column;
-  align-items: flex-start !important; 
-  text-align: left !important;
-  gap: 0.3rem;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.4rem;
+  min-width: 0;
 }
 
 .info-label {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: #6b7280;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .info-value {
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: #111827;
-  font-weight: 500;
+  font-weight: 600;
+  word-break: break-word;
 }
 
 .edit-link {
-  font-size: 0.75rem;
-  color: #eab308;
+  font-size: 0.9rem;
+  color: #f4c430;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 2px;
+  margin-top: 0.2rem;
+}
+
+.edit-link:hover {
+  color: #b58600;
+  text-decoration: underline;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
-  justify-content: flex-start !important; 
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 .status-dot.transit { background-color: #10b981; }
-.status-dot.hostel { background-color: #3b82f6; }
+.status-dot.hostel { background-color: #9ca3af; }
 
 /* =========================================
    Inline Edit Group (Food Type Dropdown)
@@ -396,14 +586,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 2px;
+  margin-top: 0.2rem;
 }
 
 .inline-select {
-  padding: 0.3rem 0.5rem;
-  font-size: 0.85rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.35rem;
   background-color: white;
   color: #111827;
   outline: none;
@@ -412,6 +602,22 @@
 }
 
 .inline-select:focus {
+  border-color: #fdcc03;
+}
+
+.inline-input {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.35rem;
+  background-color: white;
+  color: #111827;
+  outline: none;
+  width: auto;
+  max-width: 110px;
+}
+
+.inline-input:focus {
   border-color: #fdcc03;
 }
 
@@ -448,34 +654,50 @@
 .modal-actions {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
+  padding: 1.35rem 2.5rem 2rem;
+  margin-top: 0.35rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .btn-vaccate {
-  background-color: #7f1d1d; 
-  color: white;
-  padding: 0.6rem 2rem;
-  border-radius: 6px;
+  background-color: #800000;
+  color: #ffffff;
+  padding: 0.75rem 1.6rem;
+  border-radius: 0.45rem;
   border: none;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-/* Close Button Overrides */
+.btn-vaccate:hover {
+  background-color: #6b0000;
+}
+
+/* Close Button — matches Hostelstudents.jsx's current close button exactly */
 .btn-close {
-  background-color: #fee2e2 !important; 
+  background-color: #fee2e2 !important;
   background-image: none !important;
-  color: #991b1b !important; 
-  padding: 0.6rem 2rem !important;
-  border-radius: 6px !important;
-  border: none !important;
+  color: #991b1b !important;
+  padding: 0.75rem 1.9rem !important;
+  border-radius: 0.45rem !important;
+  border: 1px solid #fecaca !important;
   font-weight: 600 !important;
+  font-size: 0.95rem !important;
   cursor: pointer !important;
   position: relative !important;
   opacity: 1 !important;
   width: auto !important;
   height: auto !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.btn-close:hover {
+  background-color: #fecaca !important;
+  color: #7f1d1d !important;
 }
 
 .btn-close svg {
@@ -506,12 +728,29 @@
     flex-wrap: wrap;
     justify-content: space-between;
   }
-  
-  .info-grid {
-    grid-template-columns: repeat(2, 1fr);
+
+  .year-select {
+    flex: 1 1 auto;
+    min-width: 160px;
   }
   
-  .modal-content {
-    padding: 1.5rem; 
+  /* .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  } */
+
+  .modal-header {
+    padding: 1.5rem 1.5rem 1.25rem;
+  }
+
+  .modal-divider {
+    margin: 0 1.5rem;
+  }
+
+  /* .modal-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+  } */
+
+  .modal-actions {
+    padding: 1.1rem 1.5rem 1.5rem;
   }
 }
