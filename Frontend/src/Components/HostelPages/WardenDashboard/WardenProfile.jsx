@@ -32,61 +32,124 @@ function WardenProfile() {
   });
 
   // ============================================
+  // IMAGE URL HELPER
+  // ============================================
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return "";
+    }
+
+    // If image_path is already a complete URL,
+    // don't add BASE_URL.
+    if (
+      imagePath.startsWith("http://") ||
+      imagePath.startsWith("https://")
+    ) {
+      return imagePath;
+    }
+
+    // Otherwise, image_path is assumed to be
+    // an S3 file path.
+    return `${BASE_URL}${imagePath}`;
+  };
+
+  // ============================================
   // GET WARDEN PROFILE
   // ============================================
 
   useEffect(() => {
     const getWardenProfile = async () => {
       try {
-        const response = await axiosInstance.get("api/warden_profile");
+        const response = await axiosInstance.get(
+          "api/warden_profile"
+        );
 
-        console.log("Warden Profile Response:", response.data);
+        console.log(
+          "Warden Profile Response:",
+          response.data
+        );
 
-        // Your backend sends profile inside "data"
-        const wardenData = response.data?.data || {};
+        // Backend sends profile inside "data"
+        const wardenData =
+          response.data?.data || {};
 
         const formattedWarden = {
-          unique_id: wardenData.warden_id || "",
+          unique_id:
+            wardenData.warden_id || "",
 
-          warden_name: wardenData.name || "",
+          warden_name:
+            wardenData.name || "",
 
-          phone_number: wardenData.mobile_number || "",
+          phone_number:
+            wardenData.mobile_number || "",
 
-          image_path: BASE_URL + wardenData.image_path || "",
+          // FIXED IMAGE URL
+          image_path: getImageUrl(
+            wardenData.image_path
+          ),
 
-          gender: wardenData.gender || "",
+          gender:
+            wardenData.gender || "",
 
-          category: wardenData.category || "",
+          category:
+            wardenData.category || "",
 
-          joined_date: wardenData.joined_date || "",
+          joined_date:
+            wardenData.joined_date || "",
 
-          handling_years: Array.isArray(wardenData.handling_year)
-            ? wardenData.handling_year
-            : [],
+          handling_years:
+            Array.isArray(
+              wardenData.handling_year
+            )
+              ? wardenData.handling_year
+              : [],
 
-          incharge_of: wardenData.incharge_of || "",
+          incharge_of:
+            wardenData.incharge_of || "",
 
-          email: wardenData.email || "",
+          email:
+            wardenData.email || "",
         };
 
-        console.log("Formatted Warden Data:", formattedWarden);
+        console.log(
+          "Formatted Warden Data:",
+          formattedWarden
+        );
 
         setWarden(formattedWarden);
 
         setFormData({
-          warden_name: formattedWarden.warden_name,
-          phone_number: formattedWarden.phone_number,
+          warden_name:
+            formattedWarden.warden_name,
+
+          phone_number:
+            formattedWarden.phone_number,
         });
       } catch (error) {
-        console.error("❌ Failed to fetch warden profile");
+        console.error(
+          "❌ Failed to fetch warden profile"
+        );
 
-        console.error("Full Error:", error);
+        console.error(
+          "Full Error:",
+          error
+        );
 
-        console.error("Backend Response:", error.response);
+        console.error(
+          "Backend Response:",
+          error.response
+        );
 
-        console.error("Backend Data:", error.response?.data);
+        console.error(
+          "Backend Data:",
+          error.response?.data
+        );
 
-        console.error("Status:", error.response?.status);
+        console.error(
+          "Status:",
+          error.response?.status
+        );
       }
     };
 
@@ -101,28 +164,57 @@ function WardenProfile() {
     <div className="student-container">
       <div className="student-main">
         <div className="student-form-container">
-          {/* TITLE */}
-
-          <h2 className="student-title">Profile Details</h2>
 
           {/* ============================================
-          PROFILE SECTION
-      ============================================ */}
+              TITLE
+          ============================================ */}
+
+          <h2 className="student-title">
+            Profile Details
+          </h2>
+
+          {/* ============================================
+              PROFILE SECTION
+          ============================================ */}
 
           <div className="student-profile-section">
-            {/* PROFILE PHOTO */}
+
+            {/* ============================================
+                PROFILE PHOTO
+            ============================================ */}
 
             <div className="student-photo-section">
-              <img
-                src={warden.image_path || "https://via.placeholder.com/150"}
-                alt={warden.warden_name || "Warden"}
-                className="student-profile-photo"
-              />
+              {warden.image_path ? (
+                <img
+                  src={warden.image_path}
+                  alt={
+                    warden.warden_name ||
+                    "Warden"
+                  }
+                  className="student-profile-photo"
+                  onError={(e) => {
+                    console.error(
+                      "❌ Failed to load profile image:",
+                      warden.image_path
+                    );
+
+                    e.currentTarget.style.display =
+                      "none";
+                  }}
+                />
+              ) : (
+                <div className="student-profile-photo">
+                  No Image
+                </div>
+              )}
             </div>
 
-            {/* PRIMARY DETAILS */}
+            {/* ============================================
+                PRIMARY DETAILS
+            ============================================ */}
 
             <div className="student-primary-details">
+
               {/* NAME */}
 
               <div className="student-form-group">
@@ -132,7 +224,9 @@ function WardenProfile() {
                   type="text"
                   name="warden_name"
                   disabled
-                  value={formData.warden_name}
+                  value={
+                    formData.warden_name
+                  }
                   className="student-input"
                 />
               </div>
@@ -144,7 +238,9 @@ function WardenProfile() {
 
                 <input
                   type="text"
-                  value={warden.unique_id}
+                  value={
+                    warden.unique_id
+                  }
                   disabled
                   className="student-input"
                 />
@@ -157,27 +253,35 @@ function WardenProfile() {
 
                 <input
                   type="text"
-                  value={warden.category}
+                  value={
+                    warden.category
+                  }
                   disabled
                   className="student-input"
                 />
               </div>
+
             </div>
           </div>
 
           {/* ============================================
-          SECONDARY DETAILS
-      ============================================ */}
+              SECONDARY DETAILS
+          ============================================ */}
 
           <div className="student-secondary-details">
+
             {/* JOINED DATE */}
 
             <div className="student-form-group">
-              <label>Joined Date</label>
+              <label>
+                Joined Date
+              </label>
 
               <input
                 type="text"
-                value={warden.joined_date}
+                value={
+                  warden.joined_date
+                }
                 disabled
                 className="student-input"
               />
@@ -186,13 +290,19 @@ function WardenProfile() {
             {/* HANDLING YEAR */}
 
             <div className="student-form-group">
-              <label>Handling Year</label>
+              <label>
+                Handling Year
+              </label>
 
               <input
                 type="text"
                 value={
-                  Array.isArray(warden.handling_years)
-                    ? warden.handling_years.join(", ")
+                  Array.isArray(
+                    warden.handling_years
+                  )
+                    ? warden.handling_years.join(
+                        ", "
+                      )
                     : ""
                 }
                 disabled
@@ -203,11 +313,15 @@ function WardenProfile() {
             {/* INCHARGE OF */}
 
             <div className="student-form-group">
-              <label>Incharge of</label>
+              <label>
+                Incharge of
+              </label>
 
               <input
                 type="text"
-                value={warden.gender}
+                value={
+                  warden.gender
+                }
                 disabled
                 className="student-input"
               />
@@ -216,16 +330,21 @@ function WardenProfile() {
             {/* MOBILE NUMBER */}
 
             <div className="student-form-group">
-              <label>Mobile Number</label>
+              <label>
+                Mobile Number
+              </label>
 
               <input
                 type="tel"
                 name="phone_number"
                 disabled
-                value={formData.phone_number}
+                value={
+                  formData.phone_number
+                }
                 className="student-input"
               />
             </div>
+
           </div>
         </div>
       </div>
