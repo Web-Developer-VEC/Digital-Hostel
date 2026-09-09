@@ -404,6 +404,10 @@ function HostelPass() {
   // ONLY for the custom date/time picker popup — which field is open
   const [activeDatePicker, setActiveDatePicker] = useState(null); // null | "from" | "to"
 
+  // Guards against double submission (double-click, slow network, etc.)
+  // for submit / update / parent-approval actions.
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -708,6 +712,8 @@ function HostelPass() {
   };
 
   const handleUpdatePass = async () => {
+    if (isSubmitting) return;
+
     if (!mobileNumber) {
       showSweetAlert(
         "Alert!",
@@ -717,6 +723,8 @@ function HostelPass() {
 
       return;
     }
+
+    setIsSubmitting(true);
 
     const formData = new FormData();
 
@@ -751,9 +759,12 @@ function HostelPass() {
             navigate("/hostel/student/previousrequest");
           },
         });
+      } else {
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error updating pass:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -794,6 +805,11 @@ function HostelPass() {
   };
 
   const submitPassRequest = async (mode) => {
+    // Hard stop against double-fire: double-click, slow network, or a
+    // second button pressed before the first request's disabled state
+    // has visually applied.
+    if (isSubmitting) return;
+
     if (!mobileNumber) {
       showSweetAlert(
         "Alert!",
@@ -822,6 +838,9 @@ function HostelPass() {
 
       return;
     }
+
+    // Disable Warden / Chief Warden / Save buttons immediately.
+    setIsSubmitting(true);
 
     const formData = new FormData();
 
@@ -877,9 +896,13 @@ function HostelPass() {
             window.location.reload();
           },
         });
+      } else {
+        // Non-2xx that didn't throw — re-enable so the user can retry.
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error submitting pass:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -1355,16 +1378,18 @@ function HostelPass() {
                     <button
                       className="HS-button HS-button-update"
                       onClick={handleUpdatePass}
+                      disabled={isSubmitting}
                     >
-                      Update Pass
+                      {isSubmitting ? "Updating..." : "Update Pass"}
                     </button>
 
                     {parentApproval && (
                       <button
                         className="HS-button HS-button-parent"
                         onClick={() => submitPassRequest("parent")}
+                        disabled={isSubmitting}
                       >
-                        Parent Approval
+                        {isSubmitting ? "Submitting..." : "Parent Approval"}
                       </button>
                     )}
                   </>
@@ -1373,22 +1398,25 @@ function HostelPass() {
                     <button
                       className="HS-button HS-button-warden"
                       onClick={() => submitPassRequest("warden")}
+                      disabled={isSubmitting}
                     >
-                      Warden Approval
+                      {isSubmitting ? "Submitting..." : "Warden Approval"}
                     </button>
 
                     <button
                       className="HS-button HS-button-chief"
                       onClick={() => submitPassRequest("superior")}
+                      disabled={isSubmitting}
                     >
-                      Chief Warden Approval
+                      {isSubmitting ? "Submitting..." : "Chief Warden Approval"}
                     </button>
 
                     <button
                       className="HS-button HS-button-save"
                       onClick={() => submitPassRequest("draft")}
+                      disabled={isSubmitting}
                     >
-                      Save
+                      {isSubmitting ? "Saving..." : "Save"}
                     </button>
                   </>
                 )}
