@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, FileText } from 'lucide-react';
+import { Search, X, FileText, Send, CheckCircle } from 'lucide-react';
 import './SuperiorRequest.css';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../../api/axios';
 
 function SuperiorRequest() {
@@ -15,6 +16,12 @@ function SuperiorRequest() {
   const [activeGender, setActiveGender] = useState('');
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ year: '', department: '', passType: '', search: '' });
+
+  // Parent OTP flow state
+  const [otpError, setOtpError] = useState("");
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otpPassId, setOtpPassId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -39,6 +46,23 @@ function SuperiorRequest() {
     "outpass": "Out Pass",
     "staypass": "Stay Pass",
     "leave": "Leave"
+  };
+
+  // Normalizes parent_approval (which may be null, a boolean, or a
+  // string like "pending"/"approved"/"declined") into one of three
+  // known states, instead of relying on JS truthiness.
+  const getParentApprovalStatus = (value) => {
+    if (value === null || value === undefined) return "pending";
+    if (typeof value === "boolean") return value ? "approved" : "declined";
+
+    const normalized = String(value).toLowerCase();
+    if (["approved", "accepted", "true", "1"].includes(normalized)) {
+      return "approved";
+    }
+    if (["declined", "rejected", "false", "0"].includes(normalized)) {
+      return "declined";
+    }
+    return "pending"; // e.g. "pending", or any other unrecognized value
   };
 
   const handleGenderFilter = (gender) => {
@@ -137,6 +161,155 @@ function SuperiorRequest() {
     }
   };
 
+  // ----- Parent OTP flow (same backend endpoints as WardenRequest) -----
+
+  const handleSendParentOTP = async (pass_id) => {
+    try {
+      await axiosInstance.post('/api/send_parent_otp', { pass_id });
+
+      toast.success(
+        "OTP has been sent to the parent's registered mobile number.",
+        {
+          position: "bottom-right",
+        },
+      );
+
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to send parent OTP.");
+
+      return false;
+    }
+  };
+
+  // Sends the OTP and, if that succeeds, opens the verification popup.
+  const handleSendOtpAndOpenPopup = async (pass_id) => {
+    const success = await handleSendParentOTP(pass_id);
+    if (success) {
+      openOtpPopup(pass_id);
+    }
+  };
+
+  const handleOtpChange = (value, index) => {
+    // Only allow numbers
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+
+    setOtp(newOtp);
+    if (otpError) setOtpError("");
+
+    // Move to next box automatically
+    if (value && index < 5) {
+      document.getElementById(`otp-input-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    // Move to previous box when Backspace is pressed
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      document.getElementById(`otp-input-${index - 1}`)?.focus();
+    }
+
+    // Move using arrow keys
+    if (e.key === "ArrowLeft" && index > 0) {
+      document.getElementById(`otp-input-${index - 1}`)?.focus();
+    }
+
+    if (e.key === "ArrowRight" && index < 5) {
+      document.getElementById(`otp-input-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+
+    const pastedData = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    if (!pastedData) return;
+
+    const newOtp = ["", "", "", "", "", ""];
+
+    pastedData.split("").forEach((digit, index) => {
+      newOtp[index] = digit;
+    });
+
+    setOtp(newOtp);
+
+    // Focus last entered box
+    const lastIndex = Math.min(pastedData.length - 1, 5);
+
+    setTimeout(() => {
+      document.getElementById(`otp-input-${lastIndex}`)?.focus();
+    }, 50);
+  };
+
+  const handleValidateOTP = async () => {
+    const enteredOtp = otp.join("");
+
+    if (enteredOtp.length !== 6) {
+      setOtpError("Please enter the complete 6-digit OTP.");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post('/api/verify_parent_otp', {
+        pass_id: otpPassId,
+        otp: enteredOtp,
+      });
+
+      toast.success(response?.data?.message || "OTP verified successfully.", {
+        position: "bottom-right",
+      });
+
+      setRecords((prev) =>
+        prev.map((record) =>
+          record.pass_id === otpPassId
+            ? {
+                ...record,
+                parent_approval: "approved",
+              }
+            : record,
+        ),
+      );
+
+      // The modal is bound to `selectedRecord`, a separate snapshot from
+      // `records` — without this it keeps showing the stale (pending)
+      // status and the button never flips to "Verified".
+      setSelectedRecord((prev) =>
+        prev && prev.pass_id === otpPassId
+          ? { ...prev, parent_approval: "approved" }
+          : prev,
+      );
+
+      setShowOtpPopup(false);
+      setOtp(["", "", "", "", "", ""]);
+      setOtpPassId(null);
+      setOtpError("");
+    } catch (error) {
+      setOtpError(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Invalid OTP. Please try again.",
+      );
+    }
+  };
+
+  const openOtpPopup = (pass_id) => {
+    setOtp(["", "", "", "", "", ""]);
+    setOtpPassId(pass_id);
+    setOtpError("");
+    setShowOtpPopup(true);
+
+    // Automatically focus first box
+    setTimeout(() => {
+      document.getElementById("otp-input-0")?.focus();
+    }, 100);
+  };
 
   const filteredRecords = records.filter(record => {
     const searchQuery = filters.search.toLowerCase();
@@ -155,6 +328,13 @@ function SuperiorRequest() {
 
   return (
     <div className="SR-app">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+      />
       <div className="SR-main">
         <h1 className="SR-page-title">Requests</h1>
 
@@ -269,8 +449,10 @@ function SuperiorRequest() {
                     return "SR-row-red"; // Red row
                   };
                   const getStatusClass = (status) => {
-                    if (status === null) return "SR-status-orange"; // Pending (Orange)
-                    return status ? "SR-status-green" : "SR-status-red"; // Accepted (Green) | Declined (Red)
+                    const normalized = getParentApprovalStatus(status);
+                    if (normalized === "approved") return "SR-status-green";
+                    if (normalized === "declined") return "SR-status-red";
+                    return "SR-status-orange"; // Pending
                   };
 
                   return (
@@ -288,7 +470,11 @@ function SuperiorRequest() {
                       </td>
                       <td>
                         <span className={`SR-status-circle ${getStatusClass(record.parent_approval)}`}>
-                          {record.parent_approval === null ? "Pending" : record.parent_approval ? "Accepted" : "Declined"}
+                          {getParentApprovalStatus(record.parent_approval) === "approved"
+                            ? "Accepted"
+                            : getParentApprovalStatus(record.parent_approval) === "declined"
+                              ? "Declined"
+                              : "Pending"}
                         </span>
                       </td>
                     </tr>
@@ -305,9 +491,93 @@ function SuperiorRequest() {
             onClose={() => setSelectedRecord(null)}
             onAccept={handleAccept}
             onDecline={handleDecline}
+            onSendParentOTP={handleSendOtpAndOpenPopup}
             isMedical={isMedical} // ✅ Pass down medical state
             setIsMedical={setIsMedical} // ✅ Allow modal to update medical state
           />
+        )}
+
+        {showOtpPopup && (
+          <div
+            className="AR-otp-overlay"
+            onClick={() => setShowOtpPopup(false)}
+          >
+            <div className="AR-otp-popup" onClick={(e) => e.stopPropagation()}>
+              {/* Close Button */}
+              <button
+                className="AR-otp-close"
+                onClick={() => setShowOtpPopup(false)}
+              >
+                <X size={20} />
+              </button>
+
+              {/* Icon */}
+              <div className="AR-otp-icon">🔐</div>
+
+              {/* Title */}
+              <h2>Verify Parent OTP</h2>
+
+              <p className="AR-otp-description">
+                We've sent a 6-digit OTP to the parent's registered mobile
+                number.
+              </p>
+
+              {/* OTP Boxes */}
+              <div className="AR-otp-boxes">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`otp-input-${index}`}
+                    className={`AR-otp-input ${digit ? "AR-otp-filled" : ""} ${otpError ? "AR-otp-invalid" : ""}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    autoComplete="one-time-code"
+                    onChange={(e) => handleOtpChange(e.target.value, index)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                    onPaste={handleOtpPaste}
+                    onFocus={(e) => e.target.select()}
+                  />
+                ))}
+              </div>
+
+              {/* Inline error */}
+              {otpError && <p className="AR-otp-error">{otpError}</p>}
+
+              {/* Helper Text */}
+              <p className="AR-otp-helper">
+                Enter the OTP received on the parent's mobile
+              </p>
+
+              {/* Buttons */}
+              <div className="AR-otp-actions">
+                <button
+                  type="button"
+                  className="AR-otp-resend"
+                  onClick={async () => {
+                    const success = await handleSendParentOTP(otpPassId);
+                    if (success) {
+                      setOtp(["", "", "", "", "", ""]);
+                      setOtpError("");
+                      document.getElementById("otp-input-0")?.focus();
+                    }
+                  }}
+                >
+                  ↻ Resend OTP
+                </button>
+
+                <button
+                  type="button"
+                  className="AR-otp-verify"
+                  onClick={handleValidateOTP}
+                  disabled={otp.join("").length !== 6}
+                >
+                  ✓ Verify OTP
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -328,9 +598,25 @@ const PairedInfo = ({ left, right }) => (
   </div>
 );
 
-function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMedical }) {
+function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, isMedical, setIsMedical }) {
   const [showDocument, setShowDocument] = useState(false);
   const [comment, setComment] = useState("");
+
+  // Normalizes parent_approval the same way as the list view, so the
+  // OTP button and status text stay in sync after verification.
+  const getParentApprovalStatus = (value) => {
+    if (value === null || value === undefined) return "pending";
+    if (typeof value === "boolean") return value ? "approved" : "declined";
+
+    const normalized = String(value).toLowerCase();
+    if (["approved", "accepted", "true", "1"].includes(normalized)) {
+      return "approved";
+    }
+    if (["declined", "rejected", "false", "0"].includes(normalized)) {
+      return "declined";
+    }
+    return "pending";
+  };
 
   // Convert "from" and "to" timestamps into date & time formats
   const fromDateTime = new Date(record.from);
@@ -470,6 +756,29 @@ function DetailModal({ record, onClose, onAccept, onDecline, isMedical, setIsMed
                 )
               }}
             />
+
+            <div className="AR-parent-section">
+              <span>Parent Approval</span>
+
+              {getParentApprovalStatus(record.parent_approval) === "approved" ? (
+                <span className="AR-otp-verified-badge">
+                  <CheckCircle size={16} />
+                  Verified
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="AR-send-otp-button"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await onSendParentOTP(record.pass_id);
+                  }}
+                >
+                  <Send size={16} />
+                  <span>Send Parent OTP</span>
+                </button>
+              )}
+            </div>
 
             {(record.parent_approval === null || record.parent_approval === false) && (
               <div className="AR-warden-note">
