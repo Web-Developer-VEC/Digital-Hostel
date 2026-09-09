@@ -1236,3 +1236,8 @@
   }
 
 }
+@media (max-width: 768px) {
+    .tut-container {
+        padding-bottom: 90px;
+    }
+}

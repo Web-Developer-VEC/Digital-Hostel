@@ -1518,3 +1518,8 @@
   }
 
 }
+@media (max-width: 768px) {
+    .student-container {
+        margin-bottom: 70px;
+    }
+}
