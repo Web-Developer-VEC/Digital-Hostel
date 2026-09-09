@@ -1,1 +1,38 @@
-[{"_id":{"$oid":"6a8f15583bade0094c87eeab"},"unique_id":"001","warden_name":"Security","phone_number":1234567890,"image_path":"/static/images/security_profile_photos/001.jpeg","active":true,"password":"$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS","gender":"male"},{"_id":{"$oid":"686f3a6124bb9be99c6853e7"},"unique_id":"002","warden_name":"Marcus","phone_number":1234567890,"image_path":"/static/images/security_profile_photos/002.jpeg","active":true,"password":"$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS","gender":"male"},{"_id":{"$oid":"686f3a6124bb9be99c6853e8"},"unique_id":"003","warden_name":"Wayne","phone_number":1234567890,"image_path":"/static/images/security_profile_photos/003.jpeg","active":false,"password":"$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS","gender":"male"}]
+[
+    {
+        "_id": {
+            "$oid": "6a8f15583bade0094c87eeab"
+        },
+        "unique_id": "001",
+        "warden_name": "Security",
+        "phone_number": 1234567890,
+        "image_path": "/static/images/security_profile_photos/001.jpeg",
+        "active": true,
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "gender": "male"
+    },
+    {
+        "_id": {
+            "$oid": "686f3a6124bb9be99c6853e7"
+        },
+        "unique_id": "002",
+        "warden_name": "Marcus",
+        "phone_number": 1234567890,
+        "image_path": "/static/images/security_profile_photos/002.jpeg",
+        "active": true,
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "gender": "male"
+    },
+    {
+        "_id": {
+            "$oid": "686f3a6124bb9be99c6853e8"
+        },
+        "unique_id": "003",
+        "warden_name": "Wayne",
+        "phone_number": 1234567890,
+        "image_path": "/static/images/security_profile_photos/003.jpeg",
+        "active": false,
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "gender": "male"
+    }
+]

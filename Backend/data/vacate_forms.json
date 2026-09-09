@@ -1,1 +1,20 @@
-[{"_id":{"$oid":"6a9e5712c4cf6c93096e739a"},"name":"Priya Dharsan T","registration_number":"113224072071","dept":"AIDS","batch":"2023-2027","gender":"Male","room_no":"104","blockname":"NBH","Reason":"asddw","date_time":{"$date":"2026-09-07T06:17:54.537Z"},"Address":"ASDDQ","vacate_date":"2026-09-07T11:47"}]
+[
+    {
+        "_id": {
+            "$oid": "6a9e5712c4cf6c93096e739a"
+        },
+        "name": "Priya Dharsan T",
+        "registration_number": "113224072071",
+        "dept": "AIDS",
+        "batch": "2023-2027",
+        "gender": "Male",
+        "room_no": "104",
+        "blockname": "NBH",
+        "Reason": "asddw",
+        "date_time": {
+            "$date": "2026-09-07T06:17:54.537Z"
+        },
+        "Address": "ASDDQ",
+        "vacate_date": "2026-09-07T11:47"
+    }
+]

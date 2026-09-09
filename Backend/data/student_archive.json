@@ -1,1 +1,32 @@
-[{"_id":{"$oid":"686f4ae324bb9be99c685417"},"name":"Priyan T","registration_number":"113224072071","password":"$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS","admin_number":"24VEC586","room_number":"104","department":"AIDS","gender":"Male","phone_number_student":"9514077320","phone_number_parent":"8524847320","city":"Chennai","foodtype":"Non-Veg","year":4,"profile_photo_path":"https://adminvec.s3.ap-south-1.amazonaws.com/static/hostel/profile_photos/113224072071.webp","block_name":"NCBH","late_count":0,"QR_path":"/static/student_barcode/113222072000.png","edit_status":true,"transit_status":false,"vacate_status":false,"batch":"2023-2027","food_edit_status":null,"profile_edit_status":null,"superior_wardern_approval":false,"changes":[],"vacate_form":"submitted"}]
+[
+    {
+        "_id": {
+            "$oid": "686f4ae324bb9be99c685417"
+        },
+        "name": "Priyan T",
+        "registration_number": "113224072071",
+        "password": "$2b$10$JpZsEiEj7l3JwMSsCDCBbOmJ5.UNNouWOJE1BbmGyK.dIqcqAGNiS",
+        "admin_number": "24VEC586",
+        "room_number": "104",
+        "department": "AIDS",
+        "gender": "Male",
+        "phone_number_student": "9514077320",
+        "phone_number_parent": "8524847320",
+        "city": "Chennai",
+        "foodtype": "Non-Veg",
+        "year": 4,
+        "profile_photo_path": "https://adminvec.s3.ap-south-1.amazonaws.com/static/hostel/profile_photos/113224072071.webp",
+        "block_name": "NCBH",
+        "late_count": 0,
+        "QR_path": "/static/student_barcode/113222072000.png",
+        "edit_status": true,
+        "transit_status": false,
+        "vacate_status": false,
+        "batch": "2023-2027",
+        "food_edit_status": null,
+        "profile_edit_status": null,
+        "superior_wardern_approval": false,
+        "changes": [],
+        "vacate_form": "submitted"
+    }
+]
