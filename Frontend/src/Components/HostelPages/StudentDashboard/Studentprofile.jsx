@@ -1,7 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Info, Check } from 'lucide-react';
+import { Send, Info, Check, X } from 'lucide-react';
 import axiosInstance from '../../../api/axios';
 import './Studentprofile.css';
+
+// Inline SVG placeholder avatar (no network dependency)
+const DUMMY_IMAGE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(`
+    <svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'>
+      <rect width='100%' height='100%' fill='#e2e8f0'/>
+      <circle cx='75' cy='58' r='30' fill='#94a3b8'/>
+      <rect x='30' y='95' width='90' height='45' rx='22' fill='#94a3b8'/>
+    </svg>
+  `);
+
+// Fallback dummy profile used when the backend request fails
+const DUMMY_PROFILE = {
+  name: "John Doe",
+  room_number: "B-204",
+  department: "Computer Science",
+  year: "2nd Year",
+  admin_number: "ADM2024001",
+  city: "Chennai",
+  phone_number_student: "9876543210",
+  phone_number_parent: "9123456780",
+  foodtype: "Veg",
+  profile_photo_path: "",
+  changes: []
+};
 
 function Studentprofile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -12,10 +38,12 @@ function Studentprofile() {
   const [formData, setFormData] = useState(null);
   const [initialFormData, setInitialFormData] = useState(formData);
   const [changedFields, setChangedFields] = useState({});
+  const [imgError, setImgError] = useState(false);
 
   const BASE_URL = process.env.REACT_APP_QR_URL;
 
   const UrlParser = (path) => {
+    if (!path) return DUMMY_IMAGE;
     return path?.startsWith("http") ? path : `${BASE_URL}${path}`;
   };
 
@@ -31,7 +59,12 @@ function Studentprofile() {
       setIsWaitingApproval(hasPendingChanges);
       setPendingChanges(data.changes || []);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Error fetching profile, using dummy data:', error);
+      // Fallback to dummy data so the UI remains usable without a backend
+      setFormData(DUMMY_PROFILE);
+      setInitialFormData(DUMMY_PROFILE);
+      setIsWaitingApproval(false);
+      setPendingChanges([]);
     }
   };
 
@@ -43,6 +76,13 @@ function Studentprofile() {
   const handleEdit = () => {
     setIsEditing(true);
     setInitialFormData(formData);
+    setHasChanges(false);
+    setChangedFields({});
+  };
+
+  const handleCancel = () => {
+    setFormData(initialFormData);
+    setIsEditing(false);
     setHasChanges(false);
     setChangedFields({});
   };
@@ -108,8 +148,6 @@ function Studentprofile() {
     }
   };
 
-
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const newFormData = {
@@ -130,9 +168,10 @@ function Studentprofile() {
           <div className="student-profile-section">
             <div className="student-photo-section">
               <img
-                src={UrlParser(formData?.profile_photo_path)}
-                alt={formData?.name}
+                src={imgError ? DUMMY_IMAGE : UrlParser(formData?.profile_photo_path)}
+                alt={formData?.name || "Profile"}
                 className="student-profile-photo"
+                onError={() => setImgError(true)}
               />
             </div>
 
@@ -274,13 +313,21 @@ function Studentprofile() {
 
           <div className="student-actions">
             {isEditing ? (
-              <button
-                onClick={handleRequestChange}
-                disabled={!hasChanges}
-                className="student-button-group student-request-button"
-              >
-                Request Change <Send />
-              </button>
+              <>
+                <button
+                  onClick={handleRequestChange}
+                  disabled={!hasChanges}
+                  className="student-button-group student-request-button"
+                >
+                  Request Change <Send />
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="student-button-group student-cancel-button"
+                >
+                  Cancel <X />
+                </button>
+              </>
             ) : (
               <button
                 onClick={handleEdit}
