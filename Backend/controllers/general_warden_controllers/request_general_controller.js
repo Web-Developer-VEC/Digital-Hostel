@@ -10,323 +10,100 @@ const hashOTP = (otp) => {
   return crypto.createHash("sha256").update(String(otp)).digest("hex");
 };
 
-
-// ============================================================
-// FETCH PENDING PASSES FOR WARDEN / SUPERIOR WARDEN
-// ============================================================
 async function fetchPassWarden(req, res) {
   try {
     const db = getDb();
-
     const wardenCollection = db.collection("warden_database");
     const passCollection = db.collection("pass_details");
     const studentCollection = db.collection("student_database");
 
-    // ========================================================
-    // SESSION CHECK
-    // ========================================================
     const { user } = req.session;
 
     if (!user || !user.registration_number) {
-      return res.status(401).json({
-        success: false,
-        message: "Session expired. Please login again.",
-      });
+      return res
+        .status(401)
+        .json({ message: "Session expired. Please login again." });
     }
 
     const user_id = user.registration_number;
     const usertype = user.type;
-
-    console.log("==============================================");
-    console.log("FETCH PASSES - USER");
-    console.log("Registration Number:", user_id);
-    console.log("User Type:", usertype);
-    console.log("==============================================");
-
-    // ========================================================
-    // FIND WARDEN
-    // ========================================================
-    const warden_data = await wardenCollection.findOne({
-      unique_id: user_id,
-    });
-
+    const date = req.body?.date || req.query?.date;
+    const warden_id = req.body?.warden_id || req.query?.warden_id;
+    const warden_data = await wardenCollection.findOne({ unique_id: user_id });
     if (!warden_data) {
-      console.log("WARDEN NOT FOUND:", user_id);
-
-      return res.status(404).json({
-        success: false,
-        message: "Warden details not found.",
-      });
+      return res.status(404).json({ error: "Warden not found" });
     }
 
-    console.log("WARDEN DATA:");
-    console.log(warden_data);
-
-    // ========================================================
-    // OPTIONAL DATE FILTER
-    // ========================================================
-    const date = req.body?.date || req.query?.date;
-
-    // ========================================================
-    // OPTIONAL WARDEN ID
-    // ========================================================
-    const warden_id = req.body?.warden_id || req.query?.warden_id;
-
-    // ========================================================
-    // DATE QUERY
-    // ========================================================
-    let dateQuery = {};
+    let query = {};
 
     if (date) {
-      const selectedDate = new Date(date);
+      const targetDate = date ? new Date(date) : new Date();
 
-      if (isNaN(selectedDate.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid date format.",
-        });
-      }
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      dateQuery = {
-        createdAt: {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        },
-      };
-    }
-
-    // ========================================================
-    // GENDER
-    // ========================================================
-    let target_genders = [];
-
-    if (usertype === "superior") {
-      // Superior warden can see both genders
-      target_genders = ["Male", "Female"];
-    } else {
-      // Normal warden only sees their assigned gender
-      if (warden_data.gender) {
-        target_genders = [warden_data.gender];
-      }
-    }
-
-    // ========================================================
-    // BASE QUERY
-    // ========================================================
-    let query = {
-      request_completed: false,
-      expiry_status: false,
-
-      gender: {
-        $in: target_genders,
-      },
-
-      qrcode_status: false,
-
-      wardern_approval: null,
-
-      superior_wardern_approval: null,
-
-      notify_superior: usertype === "superior",
-
-      parent_approval: {
-        $ne: false,
-      },
-
-      ...dateQuery,
-    };
-
-    // ========================================================
-    // NORMAL WARDEN
-    // ========================================================
-    if (usertype !== "superior") {
-      /*
-       * YOUR DATABASE USES:
-       *
-       * primary_batch: [4]
-       *
-       * NOT:
-       *
-       * primary_year
-       */
-
-      let target_batches = [];
-
-      // ------------------------------------------------------
-      // primary_batch is already an array
-      // ------------------------------------------------------
-      if (Array.isArray(warden_data.primary_batch)) {
-        target_batches = warden_data.primary_batch;
-      }
-
-      // ------------------------------------------------------
-      // primary_batch is a single value
-      // ------------------------------------------------------
-      else if (
-        warden_data.primary_batch !== undefined &&
-        warden_data.primary_batch !== null
-      ) {
-        target_batches = [warden_data.primary_batch];
-      }
-
-      // ------------------------------------------------------
-      // Convert numeric strings to numbers
-      // Example:
-      // ["4"] -> [4]
-      // ------------------------------------------------------
-      target_batches = target_batches.map((value) => {
-        const numberValue = Number(value);
-
-        return Number.isNaN(numberValue)
-          ? value
-          : numberValue;
-      });
-
-      console.log("----------------------------------------------");
-      console.log("WARDEN PRIMARY BATCH:");
-      console.log(target_batches);
-      console.log("----------------------------------------------");
-
-      // ------------------------------------------------------
-      // No batch assigned
-      // ------------------------------------------------------
-      if (target_batches.length === 0) {
-        console.log(
-          "WARNING: No primary_batch assigned to this warden."
-        );
-
-        return res.status(200).json({
-          success: true,
-          message: "No primary batch assigned to this warden.",
-          data: [],
-        });
-      }
-
-      // ------------------------------------------------------
-      // Filter passes according to assigned batch/year
-      // ------------------------------------------------------
-      query.year = {
-        $in: target_batches,
-      };
-    }
-
-    // ========================================================
-    // SUPERIOR WARDEN
-    // ========================================================
-    else {
-      /*
-       * Superior warden should receive requests that were
-       * notified to the superior warden.
-       *
-       * We don't restrict the superior warden by primary_batch.
-       */
-
-      query.notify_superior = true;
-
-      // Get all available student years.
-      const target_years =
-        await studentCollection.distinct("year");
-
-      console.log("----------------------------------------------");
-      console.log("SUPERIOR WARDEN YEARS:");
-      console.log(target_years);
-      console.log("----------------------------------------------");
-
-      if (target_years.length > 0) {
+      query.request_time = { $gte: startOfDay, $lte: endOfDay };
+      query.request_completed = true;
+      if (usertype === "superior") {
+        if (warden_id && warden_id !== "overall") {
+          query.authorised_warden_id = warden_id;
+        } else {
+          query.year = { $in: await studentCollection.distinct("year") };
+        }
+      } else {
+        query.gender = warden_data.gender;
         query.year = {
-          $in: target_years,
+          $in: warden_data.primary_year || warden_data.primary_year || [],
         };
       }
+      console.log("nian", query);
+      const oldPasses = await passCollection.find(query).toArray();
+      return res
+        .status(200)
+        .json({ message: "Old passes fetched successfully", data: oldPasses });
     }
 
-    // ========================================================
-    // LOG FINAL QUERY
-    // ========================================================
-    console.log("==============================================");
-    console.log("FINAL MONGO QUERY");
-    console.log("==============================================");
+    const target_genders =
+      usertype === "superior" ? ["Male", "Female"] : [warden_data.gender];
 
-    console.log(
-      JSON.stringify(query, null, 2)
-    );
+    query = {
+      request_completed: false,
+      expiry_status: false,
+      gender: { $in: target_genders },
+      qrcode_status: false,
+      wardern_approval: null,
+      superior_wardern_approval: null,
+      notify_superior: usertype === "superior",
+      parent_approval: { $ne: false },
+    };
 
-    console.log("==============================================");
+    if (usertype === "superior") {
+      const target_years = await studentCollection.distinct("year");
+      query.year = { $in: target_years };
+    } else {
+      const target_batches =
+        warden_data.primary_year || warden_data.primary_year || [];
+      query.year = { $in: target_batches };
+    }
 
-    // ========================================================
-    // FETCH PASSES
-    // ========================================================
-    const pendingPasses = await passCollection
-      .find(query)
-      .sort({
-        createdAt: -1,
-      })
-      .toArray();
+    console.log(query);
+    const pendingPasses = await passCollection.find(query).toArray();
+    if (pendingPasses.length === 0) {
+      return res.status(200).json({
+        message: "No pending passes found",
+        data: [],
+      });
+    }
 
-    // ========================================================
-    // LOG RESULT
-    // ========================================================
-    console.log("==============================================");
-    console.log(
-      "PENDING PASSES FOUND:",
-      pendingPasses.length
-    );
-    console.log("==============================================");
-
-    // ========================================================
-    // DEBUG EACH PASS
-    // ========================================================
-    pendingPasses.forEach((pass, index) => {
-      console.log(
-        `PASS ${index + 1}:`,
-        {
-          pass_id: pass.pass_id,
-          name: pass.name,
-          gender: pass.gender,
-          year: pass.year,
-          parent_approval: pass.parent_approval,
-          wardern_approval: pass.wardern_approval,
-          superior_wardern_approval:
-            pass.superior_wardern_approval,
-          notify_superior: pass.notify_superior,
-          request_completed: pass.request_completed,
-        }
-      );
-    });
-
-    // ========================================================
-    // RESPONSE
-    // ========================================================
     return res.status(200).json({
-      success: true,
-      message: "Pending passes fetched successfully.",
-      count: pendingPasses.length,
+      message: "Pending passes fetched successfully",
       data: pendingPasses,
     });
   } catch (error) {
-    console.error(
-      "ERROR IN fetchPassWarden:",
-      error
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch pending passes.",
-      error: error.message,
-    });
+    console.error("❌ Error fetching old passes:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
-
-
-
-
-
-
 
 async function WardenDecision(req, res) {
   try {
@@ -341,13 +118,11 @@ async function WardenDecision(req, res) {
     const warden_unique_id = user.registration_number;
     const isSuperior = user?.type === "superior";
     const { pass_id, action, medical_status, comment } = req.body;
-
     if (!pass_id || !["approve", "reject"].includes(action)) {
       return res.status(400).json({
         error: "pass_id and valid action (approve/reject) are required",
       });
     }
-
     const db = getDb();
     const passCollection = db.collection("pass_details");
     const wardenCollection = db.collection("warden_database");
@@ -367,37 +142,16 @@ async function WardenDecision(req, res) {
       return res.status(404).json({ error: "Pass not found" });
     }
 
-    // ========================================================
-    // BULLETPROOF YEAR/BATCH CHECKING
-    // ========================================================
-    // Ensure we always have an array, even if the DB stores it as a single integer (e.g., 2) or string (e.g., "2")
-    const getArray = (val) => (Array.isArray(val) ? val : val ? [val] : []);
-
-    // Updated to match your database field name: primary_batch
-    const assignedYears = [
-      ...getArray(warden_data.primary_batch),
-      ...getArray(warden_data.secondary_batch),
-      ...getArray(warden_data.primary_year),
-    ];
-
-    console.log("-----------------------------------------");
-    console.log("Warden Allowed Years:", assignedYears);
-    console.log("Student Pass Year:", passData.year);
-    console.log("-----------------------------------------");
-
     const isIncluded = isSuperior
       ? (await studentCollection.distinct("year")).some(
-          (y) => String(y).trim() === String(passData.year).trim()
+          (y) => y?.toString() === passData.year?.toString(),
         )
-      : assignedYears.some(
-          (b) => String(b).trim() === String(passData.year).trim()
+      : (warden_data.primary_year || warden_data.primary_year || []).some(
+          (b) => b?.toString() === passData.year?.toString(),
         );
-
     if (!isIncluded) {
       return res.status(400).json({
-        error: `Warden is accessing a pass outside assigned ${
-          isSuperior ? "year" : "batch"
-        }`,
+        error: `Warden is accessing a pass outside assigned ${isSuperior ? "year" : "batch"}`,
       });
     }
 
@@ -405,8 +159,7 @@ async function WardenDecision(req, res) {
       ? "superior_wardern_approval"
       : "wardern_approval";
 
-    // Prevent double-clicking issues
-    if (passData[approvalField] === true || passData[approvalField] === false) {
+    if (passData[approvalField] !== null) {
       return res.status(400).json({
         message: `You have already ${
           passData[approvalField] ? "approved" : "rejected"
@@ -424,29 +177,21 @@ async function WardenDecision(req, res) {
     }
 
     if (action === "approve") {
-      // Robust parent approval check (case-insensitive, handles true/false strings)
-      const parentApprovalStatus = String(passData.parent_approval || "")
-        .trim()
-        .toLowerCase();
-
-      if (!["approved", "true", "1"].includes(parentApprovalStatus)) {
+      // if (passData.parent_approval != "approved") {
+      //   return res.status(400).json({ message: "Parents Approval Needed!" });
+      // }
+      if (passData.parent_approval != "Approved") {
         return res.status(400).json({ message: "Parents Approval Needed!" });
       }
-
       const qrPath = await generateQR(pass_id, passData.registration_number);
 
       updateData.qrcode_path = qrPath;
       updateData.qrcode_status = true;
 
-      // Ensure boolean comparison is strict
-      if (
-        medical_status === true ||
-        String(medical_status).toLowerCase() === "true"
-      ) {
+      if (medical_status === true) {
         updateData.reason_type = "medical";
       }
-
-      updateData.request_completed = true;
+      updateData.request_completed=true;
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
@@ -459,7 +204,7 @@ async function WardenDecision(req, res) {
     if (action === "reject") {
       updateData.qrcode_path = null;
       updateData.qrcode_status = false;
-      updateData.request_completed = true;
+      updateData.request_completed=true;
     }
 
     await passCollection.updateOne({ pass_id }, { $set: updateData });

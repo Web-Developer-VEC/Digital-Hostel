@@ -1,22 +1,788 @@
 [
     {
-        "pass_id": "43b7c61e-405d-459d-bc52-cb7934ad798b",
-        "name": "Arun",
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d449264d"
+        },
+        "pass_id": "test-001",
+        "name": "Student0001",
         "mobile_number": "9876543201",
-        "dept": "EEE",
+        "dept": "CSE",
         "batch": "2023-2027",
-        "year": 3,
-        "room_no": "201",
-        "registration_number": "113222072000",
-        "profile_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Mangekyou_Sharingan_Sasuke_%28Eternal%29.svg/1200px-Mangekyou_Sharingan_Sasuke_%28Eternal%29.svg.png",
+        "year": 4,
+        "room_no": "101",
+        "registration_number": "113222070001",
+        "profile_image": "/static/hostel/profile_photos/student1.jpg",
         "gender": "Male",
         "late_count": 0,
         "blockname": "NCBH",
         "passtype": "outpass",
-        "from": "2026-06-18T14:30:00.000Z",
-        "to": "2026-06-18T15:30:00.000Z",
-        "place_to_visit": "Ambattur",
-        "reason_type": "Shopping",
+        "from": {
+            "$date": "2026-09-07T03:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T18:00:00Z"
+        },
+        "place_to_visit": "Erode",
+        "reason_type": "shopping",
+        "reason_for_visit": "shopping",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T03:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T10:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T10:00:00Z"
+        },
+        "authorised_Security_id": "SEC001",
+        "authorised_warden_id": "WARDEN001",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d449264e"
+        },
+        "pass_id": "test-002",
+        "name": "Student0002",
+        "mobile_number": "9876543202",
+        "dept": "EEE",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "102",
+        "registration_number": "113222070002",
+        "profile_image": "/static/hostel/profile_photos/student2.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "od",
+        "from": {
+            "$date": "2026-09-07T02:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T12:00:00Z"
+        },
+        "place_to_visit": "College",
+        "reason_type": "internship",
+        "reason_for_visit": "internship",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T02:10:00Z"
+        },
+        "re_entry_time": {
+            "$date": "2026-09-07T10:00:00Z"
+        },
+        "delay_status": false,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "authorised_Security_id": "SEC002",
+        "authorised_warden_id": "WARDEN002",
+        "notify_superior": false,
+        "comment": "Returned"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d449264f"
+        },
+        "pass_id": "test-003",
+        "name": "Student0003",
+        "mobile_number": "9876543203",
+        "dept": "ECE",
+        "batch": "2024-2028",
+        "year": 3,
+        "room_no": "103",
+        "registration_number": "113222070003",
+        "profile_image": "/static/hostel/profile_photos/student3.jpg",
+        "gender": "Male",
+        "late_count": 1,
+        "blockname": "NCBH",
+        "passtype": "leave",
+        "from": {
+            "$date": "2026-09-07T01:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T08:00:00Z"
+        },
+        "place_to_visit": "Home",
+        "reason_type": "function",
+        "reason_for_visit": "function",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T01:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": true,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "authorised_Security_id": "SEC003",
+        "authorised_warden_id": "WARDEN003",
+        "notify_superior": true,
+        "comment": "Overdue"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492650"
+        },
+        "pass_id": "test-004",
+        "name": "Student0004",
+        "mobile_number": "9876543204",
+        "dept": "MECH",
+        "batch": "2025-2029",
+        "year": 2,
+        "room_no": "104",
+        "registration_number": "113222070004",
+        "profile_image": "/static/hostel/profile_photos/student4.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "staypass",
+        "from": {
+            "$date": "2026-09-07T04:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-08T12:00:00Z"
+        },
+        "place_to_visit": "Hostel",
+        "reason_type": "weekend holiday",
+        "reason_for_visit": "weekend holiday",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T04:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "authorised_Security_id": "SEC004",
+        "authorised_warden_id": "WARDEN004",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492651"
+        },
+        "pass_id": "test-005",
+        "name": "Student0005",
+        "mobile_number": "9876543205",
+        "dept": "IT",
+        "batch": "2024-2028",
+        "year": 3,
+        "room_no": "105",
+        "registration_number": "113222070005",
+        "profile_image": "/static/hostel/profile_photos/student5.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-07T05:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T20:00:00Z"
+        },
+        "place_to_visit": "Shopping Mall",
+        "reason_type": "shopping",
+        "reason_for_visit": "shopping",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T05:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T12:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T12:00:00Z"
+        },
+        "authorised_Security_id": "SEC005",
+        "authorised_warden_id": "WARDEN005",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492652"
+        },
+        "pass_id": "test-006",
+        "name": "Student0006",
+        "mobile_number": "9876543206",
+        "dept": "CIVIL",
+        "batch": "2026-2030",
+        "year": 1,
+        "room_no": "106",
+        "registration_number": "113222070006",
+        "profile_image": "/static/hostel/profile_photos/student6.jpg",
+        "gender": "Male",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "od",
+        "from": {
+            "$date": "2026-09-07T03:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T19:00:00Z"
+        },
+        "place_to_visit": "College",
+        "reason_type": "sports",
+        "reason_for_visit": "sports",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T03:20:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "authorised_Security_id": "SEC006",
+        "authorised_warden_id": "WARDEN006",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492653"
+        },
+        "pass_id": "test-007",
+        "name": "Student0007",
+        "mobile_number": "9876543207",
+        "dept": "CSE",
+        "batch": "2026-2030",
+        "year": 1,
+        "room_no": "107",
+        "registration_number": "113222070007",
+        "profile_image": "/static/hostel/profile_photos/student7.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "leave",
+        "from": {
+            "$date": "2026-09-07T02:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T09:00:00Z"
+        },
+        "place_to_visit": "Hospital",
+        "reason_type": "medical",
+        "reason_for_visit": "medical",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T02:15:00Z"
+        },
+        "re_entry_time": {
+            "$date": "2026-09-07T08:30:00Z"
+        },
+        "delay_status": false,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-06T07:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T07:00:00Z"
+        },
+        "authorised_Security_id": "SEC007",
+        "authorised_warden_id": "WARDEN007",
+        "notify_superior": false,
+        "comment": "Returned"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492654"
+        },
+        "pass_id": "test-008",
+        "name": "Student0008",
+        "mobile_number": "9876543208",
+        "dept": "EEE",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "108",
+        "registration_number": "113222070008",
+        "profile_image": "/static/hostel/profile_photos/student8.jpg",
+        "gender": "Female",
+        "late_count": 1,
+        "blockname": "NCBH",
+        "passtype": "staypass",
+        "from": {
+            "$date": "2026-09-07T01:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T07:00:00Z"
+        },
+        "place_to_visit": "Hostel",
+        "reason_type": "holiday",
+        "reason_for_visit": "holiday",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T01:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": true,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T06:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T06:00:00Z"
+        },
+        "authorised_Security_id": "SEC008",
+        "authorised_warden_id": "WARDEN008",
+        "notify_superior": true,
+        "comment": "Overdue"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492655"
+        },
+        "pass_id": "test-009",
+        "name": "Student0009",
+        "mobile_number": "9876543209",
+        "dept": "ECE",
+        "batch": "2025-2029",
+        "year": 2,
+        "room_no": "109",
+        "registration_number": "113222070009",
+        "profile_image": "/static/hostel/profile_photos/student9.jpg",
+        "gender": "Male",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-07T01:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T15:00:00Z"
+        },
+        "place_to_visit": "Erode",
+        "reason_type": "classes",
+        "reason_for_visit": "classes",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T01:20:00Z"
+        },
+        "re_entry_time": {
+            "$date": "2026-09-07T14:00:00Z"
+        },
+        "delay_status": false,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T09:00:00Z"
+        },
+        "authorised_Security_id": "SEC009",
+        "authorised_warden_id": "WARDEN009",
+        "notify_superior": false,
+        "comment": "Returned"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492656"
+        },
+        "pass_id": "test-010",
+        "name": "Student0010",
+        "mobile_number": "9876543210",
+        "dept": "MECH",
+        "batch": "2024-2028",
+        "year": 3,
+        "room_no": "110",
+        "registration_number": "113222070010",
+        "profile_image": "/static/hostel/profile_photos/student10.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "od",
+        "from": {
+            "$date": "2026-09-07T03:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T22:00:00Z"
+        },
+        "place_to_visit": "Coimbatore",
+        "reason_type": "hackathon",
+        "reason_for_visit": "hackathon",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T03:10:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T08:00:00Z"
+        },
+        "authorised_Security_id": "SEC010",
+        "authorised_warden_id": "WARDEN010",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492657"
+        },
+        "pass_id": "test-011",
+        "name": "Student0011",
+        "mobile_number": "9876543211",
+        "dept": "IT",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "111",
+        "registration_number": "113222070011",
+        "profile_image": "/static/hostel/profile_photos/student11.jpg",
+        "gender": "Male",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "leave",
+        "from": {
+            "$date": "2026-09-07T00:30:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T06:00:00Z"
+        },
+        "place_to_visit": "Home",
+        "reason_type": "exams",
+        "reason_for_visit": "exams",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T00:40:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": true,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T05:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T05:00:00Z"
+        },
+        "authorised_Security_id": "SEC011",
+        "authorised_warden_id": "WARDEN011",
+        "notify_superior": true,
+        "comment": "Overdue"
+    },
+    {
+        "_id": {
+            "$oid": "6a9e83f01d4e9f79d4492658"
+        },
+        "pass_id": "test-012",
+        "name": "Student0012",
+        "mobile_number": "9876543212",
+        "dept": "CIVIL",
+        "batch": "2025-2029",
+        "year": 2,
+        "room_no": "112",
+        "registration_number": "113222070012",
+        "profile_image": "/static/hostel/profile_photos/student12.jpg",
+        "gender": "Female",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "staypass",
+        "from": {
+            "$date": "2026-09-07T02:00:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T23:00:00Z"
+        },
+        "place_to_visit": "Hostel",
+        "reason_type": "festival holiday",
+        "reason_for_visit": "festival holiday",
+        "file_path": null,
+        "qrcode_path": null,
+        "parent_approval": true,
+        "wardern_approval": true,
+        "superior_wardern_approval": true,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T02:20:00Z"
+        },
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": false,
+        "request_time": {
+            "$date": "2026-09-06T10:00:00Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-06T10:00:00Z"
+        },
+        "authorised_Security_id": "SEC012",
+        "authorised_warden_id": "WARDEN012",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6a9e85978401500ac9185332"
+        },
+        "pass_id": "0d4470cc-2749-477d-b1c6-295b11a19e16",
+        "name": "Priya Dharsan T",
+        "mobile_number": "9514077320",
+        "phone_number_parent": "8524847320",
+        "dept": "AIDS",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "104",
+        "registration_number": "113224072071",
+        "profile_image": "/static/hostel/profile_photos/113224072071.webp",
+        "gender": "Male",
+        "late_count": 0,
+        "blockname": "NBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-07T09:40:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T09:50:00Z"
+        },
+        "place_to_visit": "summa",
+        "reason_type": "Medical",
+        "reason_for_visit": "",
+        "file_path": null,
+        "qrcode_path": "/static/digihostel/qrcodes/113224072071.webp",
+        "parent_approval": "Approved",
+        "wardern_approval": true,
+        "superior_wardern_approval": null,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T09:40:36.489Z"
+        },
+        "re_entry_time": {
+            "$date": "2026-09-07T11:02:21.666Z"
+        },
+        "delay_status": true,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-07T09:36:23.733Z"
+        },
+        "expiry_status": true,
+        "request_date_time": {
+            "$date": "2026-09-07T09:36:23.733Z"
+        },
+        "authorised_Security_id": "001",
+        "authorised_warden_id": "002",
+        "notify_superior": false,
+        "comment": null,
+        "parent_otp_attempts": 0,
+        "parent_otp_created_at": {
+            "$date": "2026-09-07T09:36:30.907Z"
+        },
+        "parent_otp_expires_at": {
+            "$date": "2026-09-07T09:41:30.907Z"
+        },
+        "parent_otp_hash": "f8d20d27773f70e7fc745b9af05845f931118ec592ec93597c7a5de3f62f7243",
+        "parent_otp_used": true,
+        "parent_sms_sent_at": {
+            "$date": "2026-09-07T09:36:31.788Z"
+        },
+        "parent_otp_verified": true,
+        "parent_otp_verified_at": {
+            "$date": "2026-09-07T09:36:39.55Z"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6a9e87628401500ac9185333"
+        },
+        "pass_id": "d9d04c2b-1b4e-459c-aeab-d36ef4d7cdb9",
+        "name": "Vignesh",
+        "mobile_number": "9876543209",
+        "phone_number_parent": "9123456709",
+        "dept": "CSE",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "209",
+        "registration_number": "113222072008",
+        "profile_image": "/static/hostel/profile_photos/student9.jpg",
+        "gender": "Male",
+        "late_count": 0,
+        "blockname": "NCBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-07T09:45:00Z"
+        },
+        "to": {
+            "$date": "2026-09-07T10:00:00Z"
+        },
+        "place_to_visit": "asd",
+        "reason_type": "Internship",
+        "reason_for_visit": "",
+        "file_path": null,
+        "qrcode_path": "/static/digihostel/qrcodes/113222072008.webp",
+        "parent_approval": "Approved",
+        "wardern_approval": true,
+        "superior_wardern_approval": null,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": {
+            "$date": "2026-09-07T09:46:15.759Z"
+        },
+        "re_entry_time": {
+            "$date": "2026-09-07T09:47:58.396Z"
+        },
+        "delay_status": false,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-07T09:44:02.087Z"
+        },
+        "expiry_status": true,
+        "request_date_time": {
+            "$date": "2026-09-07T09:44:02.087Z"
+        },
+        "authorised_Security_id": "001",
+        "authorised_warden_id": "002",
+        "notify_superior": false,
+        "comment": null,
+        "parent_otp_attempts": 0,
+        "parent_otp_created_at": {
+            "$date": "2026-09-07T09:44:14.575Z"
+        },
+        "parent_otp_expires_at": {
+            "$date": "2026-09-07T09:49:14.575Z"
+        },
+        "parent_otp_hash": "5cd8c1da23cb7c2d556b9d59e09484f9131e1ee65815ed8aaee8d981bc22e3c4",
+        "parent_otp_used": true,
+        "parent_sms_sent_at": {
+            "$date": "2026-09-07T09:44:15.118Z"
+        },
+        "parent_otp_verified": true,
+        "parent_otp_verified_at": {
+            "$date": "2026-09-07T09:44:36.527Z"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6aa0f7fd9ce08b3c3b6b8b5c"
+        },
+        "pass_id": "5f596d4c-8424-403b-bea1-948c70739fcb",
+        "name": "Priya Dharsan T",
+        "mobile_number": "9514077320",
+        "phone_number_parent": "8524847320",
+        "dept": "AIDS",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "104",
+        "registration_number": "113224072071",
+        "profile_image": "/static/hostel/profile_photos/113224072071.webp",
+        "gender": "Male",
+        "late_count": 1,
+        "blockname": "NBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-10T06:08:00Z"
+        },
+        "to": {
+            "$date": "2026-09-10T08:08:00Z"
+        },
+        "place_to_visit": "asdc",
+        "reason_type": "Internship",
         "reason_for_visit": "",
         "file_path": null,
         "qrcode_path": null,
@@ -29,16 +795,82 @@
         "re_entry_time": null,
         "delay_status": false,
         "request_completed": true,
-        "request_time": "2026-06-18T14:25:07.408Z",
+        "request_time": {
+            "$date": "2026-09-09T06:09:01.64Z"
+        },
         "expiry_status": false,
-        "request_date_time": "2026-06-18T14:25:07.409Z",
+        "request_date_time": {
+            "$date": "2026-09-09T06:09:01.64Z"
+        },
         "authorised_Security_id": null,
-        "authorised_warden_id": null,
+        "authorised_warden_id": "002",
+        "notify_superior": false,
+        "comment": null
+    },
+    {
+        "_id": {
+            "$oid": "6aa0f8469ce08b3c3b6b8b5d"
+        },
+        "pass_id": "be0c703e-68cc-4fa7-a7dd-6ce19ba85fa1",
+        "name": "Priya Dharsan T",
+        "mobile_number": "9514077320",
+        "phone_number_parent": "8524847320",
+        "dept": "AIDS",
+        "batch": "2023-2027",
+        "year": 4,
+        "room_no": "104",
+        "registration_number": "113224072071",
+        "profile_image": "/static/hostel/profile_photos/113224072071.webp",
+        "gender": "Male",
+        "late_count": 1,
+        "blockname": "NBH",
+        "passtype": "outpass",
+        "from": {
+            "$date": "2026-09-10T07:09:00Z"
+        },
+        "to": {
+            "$date": "2026-09-10T09:09:00Z"
+        },
+        "place_to_visit": "qwedf",
+        "reason_type": "Shopping",
+        "reason_for_visit": "",
+        "file_path": null,
+        "qrcode_path": "/static/digihostel/qrcodes/113224072071.webp",
+        "parent_approval": "Approved",
+        "wardern_approval": true,
+        "superior_wardern_approval": null,
+        "parent_sms_sent_status": true,
+        "qrcode_status": true,
+        "exit_time": null,
+        "re_entry_time": null,
+        "delay_status": false,
+        "request_completed": true,
+        "request_time": {
+            "$date": "2026-09-09T06:10:14.611Z"
+        },
+        "expiry_status": false,
+        "request_date_time": {
+            "$date": "2026-09-09T06:10:14.611Z"
+        },
+        "authorised_Security_id": null,
+        "authorised_warden_id": "002",
         "notify_superior": false,
         "comment": null,
-        "approval_time": "2026-06-18T15:17:12.783Z",
-        "status": "rejected",
-        "updated_by": "001",
-        "warden_comment": "Rejected by warden undefined"
+        "parent_otp_attempts": 0,
+        "parent_otp_created_at": {
+            "$date": "2026-09-09T06:21:30.369Z"
+        },
+        "parent_otp_expires_at": {
+            "$date": "2026-09-09T06:26:30.369Z"
+        },
+        "parent_otp_hash": "31e6fc6bd4cff41be177184c8c0f15926bd207fba6578120d169df31548caf60",
+        "parent_otp_used": true,
+        "parent_sms_sent_at": {
+            "$date": "2026-09-09T06:21:30.975Z"
+        },
+        "parent_otp_verified": true,
+        "parent_otp_verified_at": {
+            "$date": "2026-09-09T06:21:52.269Z"
+        }
     }
 ]

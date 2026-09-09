@@ -20,7 +20,7 @@ function SuperiorRequest() {
     try {
       const response = await axiosInstance.get('/api/sidebar_warden');
       const data = response.data;
-      // const years = data["primary batch"] || data["primary year"];
+      // const years = data["primary year"] || data["primary year"];
       const years = [1, 2, 3, 4];
       if (years) {
         setWardenYears([...years]);

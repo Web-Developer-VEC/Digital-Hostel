@@ -38,8 +38,8 @@ async function getWardenDetail(req, res) {
 
     return res.status(200).json({
       name: warden_data.warden_name || warden_data.name,
-      "primary batch": warden_data.primary_year || [],
-      "Secondary batch": warden_data.secondary_batch || [],
+      "primary year": warden_data.primary_year || [],
+      "Secondary year": warden_data.secondary_year || [],
       "Phone number": warden_data.phone_number,
       image_path: warden_data.image_path || warden_data.profile_photo_path,
       "Active Status": warden_data.active,
