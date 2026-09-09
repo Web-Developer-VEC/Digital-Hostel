@@ -255,8 +255,9 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                     <button
                       type="button"
                       key={day}
-                      className={`HS-calendar-day ${isSelected ? "HS-calendar-selected" : ""
-                        } ${isToday && !isSelected ? "HS-calendar-today" : ""}`}
+                      className={`HS-calendar-day ${
+                        isSelected ? "HS-calendar-selected" : ""
+                      } ${isToday && !isSelected ? "HS-calendar-today" : ""}`}
                       onClick={() => selectDate(day)}
                     >
                       {day}
@@ -320,8 +321,9 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                       <button
                         type="button"
                         key={number}
-                        className={`HS-clock-number ${hour === number ? "HS-clock-selected" : ""
-                          }`}
+                        className={`HS-clock-number ${
+                          hour === number ? "HS-clock-selected" : ""
+                        }`}
                         style={getClockStyle(number, 12)}
                         onClick={() => selectHour(number)}
                       >
@@ -338,8 +340,9 @@ function CustomDateTimePicker({ value, onChange, onClose }) {
                       <button
                         type="button"
                         key={number}
-                        className={`HS-clock-number ${minute === number ? "HS-clock-selected" : ""
-                          }`}
+                        className={`HS-clock-number ${
+                          minute === number ? "HS-clock-selected" : ""
+                        }`}
                         style={getClockStyle(i, 12)}
                         onClick={() => selectMinute(number)}
                       >
@@ -397,10 +400,13 @@ function HostelPass() {
   const [existingFilePath, setExistingFilePath] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [parentApproval, setParentApproval] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ONLY for the custom date/time picker popup — which field is open
   const [activeDatePicker, setActiveDatePicker] = useState(null); // null | "from" | "to"
+
+  // Guards against double submission (double-click, slow network, etc.)
+  // for submit / update / parent-approval actions.
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -706,6 +712,8 @@ function HostelPass() {
   };
 
   const handleUpdatePass = async () => {
+    if (isSubmitting) return;
+
     if (!mobileNumber) {
       showSweetAlert(
         "Alert!",
@@ -715,6 +723,8 @@ function HostelPass() {
 
       return;
     }
+
+    setIsSubmitting(true);
 
     const formData = new FormData();
 
@@ -749,9 +759,12 @@ function HostelPass() {
             navigate("/hostel/student/previousrequest");
           },
         });
+      } else {
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error updating pass:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -792,19 +805,20 @@ function HostelPass() {
   };
 
   const submitPassRequest = async (mode) => {
+    // Hard stop against double-fire: double-click, slow network, or a
+    // second button pressed before the first request's disabled state
+    // has visually applied.
     if (isSubmitting) return;
 
     if (!mobileNumber) {
       showSweetAlert(
         "Alert!",
         "Please verify your mobile number first.",
-        "warning"
+        "warning",
       );
 
       return;
     }
-
-    // your document validation is here...
 
     // ==========================================
     // MANDATORY DOCUMENT FOR OD AND LEAVE
@@ -824,7 +838,10 @@ function HostelPass() {
 
       return;
     }
+
+    // Disable Warden / Chief Warden / Save buttons immediately.
     setIsSubmitting(true);
+
     const formData = new FormData();
 
     formData.append("mobile_number", mobileNumber);
@@ -879,6 +896,9 @@ function HostelPass() {
             window.location.reload();
           },
         });
+      } else {
+        // Non-2xx that didn't throw — re-enable so the user can retry.
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error submitting pass:", error);
@@ -916,14 +936,14 @@ function HostelPass() {
 
         setFrom(
           firstDraft.from.split("T")[0] +
-          "T" +
-          firstDraft.from.split("T")[1].slice(0, 5),
+            "T" +
+            firstDraft.from.split("T")[1].slice(0, 5),
         );
 
         setTo(
           firstDraft.to.split("T")[0] +
-          "T" +
-          firstDraft.to.split("T")[1].slice(0, 5),
+            "T" +
+            firstDraft.to.split("T")[1].slice(0, 5),
         );
 
         setPlace(firstDraft.place_to_visit || "");
@@ -1091,8 +1111,9 @@ function HostelPass() {
                 {["outpass", "staypass", "od", "leave"].map((type) => (
                   <label
                     key={type}
-                    className={`HS-pass-type ${passType === type ? "HS-pass-type-active" : ""
-                      }`}
+                    className={`HS-pass-type ${
+                      passType === type ? "HS-pass-type-active" : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -1279,8 +1300,9 @@ function HostelPass() {
                     <label className="HS-label">To Date & Time</label>
 
                     <div
-                      className={`HS-datetime-display ${!from ? "HS-datetime-disabled" : ""
-                        }`}
+                      className={`HS-datetime-display ${
+                        !from ? "HS-datetime-disabled" : ""
+                      }`}
                       onClick={() => {
                         if (!from) return;
                         setActiveDatePicker("to");
@@ -1356,16 +1378,18 @@ function HostelPass() {
                     <button
                       className="HS-button HS-button-update"
                       onClick={handleUpdatePass}
+                      disabled={isSubmitting}
                     >
-                      Update Pass
+                      {isSubmitting ? "Updating..." : "Update Pass"}
                     </button>
 
                     {parentApproval && (
                       <button
                         className="HS-button HS-button-parent"
                         onClick={() => submitPassRequest("parent")}
+                        disabled={isSubmitting}
                       >
-                        Parent Approval
+                        {isSubmitting ? "Submitting..." : "Parent Approval"}
                       </button>
                     )}
                   </>
@@ -1377,19 +1401,22 @@ function HostelPass() {
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Warden Approval"}
-                    </button><button
-                      className="HS-button HS-button-save"
-                      onClick={() => submitPassRequest("draft")}
+                    </button>
+
+                    <button
+                      className="HS-button HS-button-chief"
+                      onClick={() => submitPassRequest("superior")}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Saving..." : "Save"}
+                      {isSubmitting ? "Submitting..." : "Chief Warden Approval"}
                     </button>
 
                     <button
                       className="HS-button HS-button-save"
                       onClick={() => submitPassRequest("draft")}
+                      disabled={isSubmitting}
                     >
-                      Save
+                      {isSubmitting ? "Saving..." : "Save"}
                     </button>
                   </>
                 )}
