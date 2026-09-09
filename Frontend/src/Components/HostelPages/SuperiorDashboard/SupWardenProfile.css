@@ -498,7 +498,8 @@ input[type="date"].AR-filter-select {
 }
 
 .AR-button-primary:hover {
-  background-color: #1d4ed8;
+  color:white;
+  background-color: #800000;
 }
 
 .AR-button-secondary {
