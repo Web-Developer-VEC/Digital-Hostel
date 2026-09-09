@@ -286,8 +286,8 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     return romanMap[num] || num;
   };
 
-  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary batch"])
-    ? wardenSlidebar["primary batch"]
+  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary year"])
+    ? wardenSlidebar["primary year"]
     : Array.isArray(wardenSlidebar?.["primary year"])
       ? wardenSlidebar["primary year"]
       : [];

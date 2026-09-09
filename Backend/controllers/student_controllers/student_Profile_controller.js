@@ -51,14 +51,14 @@ async function changeFoodType(req, res) {
     const newFoodType = student.foodtype === "Veg" ? "Non-Veg" : "Veg";
 
     let warden = await wardensCollection.findOne({
-      primary_year: { $in: [student.batch] },
+      primary_year: { $in: [student.year] },
       gender: student.gender,
       active: true,
     });
 
     if (!warden) {
       warden = await wardensCollection.findOne({
-        secondary_batch: { $in: [student.batch] },
+        secondary_year: { $in: [student.year] },
         gender: student.gender,
         active: true,
       });
@@ -66,7 +66,7 @@ async function changeFoodType(req, res) {
     if (!warden) {
       return res
         // .status(403)
-        .json({ message: "No active warden found for this student batch" });
+        .json({ message: "No active warden found for this student year" });
     }
 
     await requestsCollection.insertOne({
