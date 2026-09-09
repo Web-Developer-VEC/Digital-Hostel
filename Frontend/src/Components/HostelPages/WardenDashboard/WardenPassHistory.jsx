@@ -196,7 +196,7 @@ function WardenPassHistory() {
             />
 
             <select className="AR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}>
-              <option value="">All Statuses</option>
+              <option value="">All Status</option>
               <option value="accepted">Accepted</option>
               <option value="declined">Declined</option>
             </select>
