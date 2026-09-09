@@ -79,7 +79,7 @@ function SuperiorRequest() {
   const fetchWardenDetails = async () => {
     try {
       const response = await axiosInstance.get('/api/sidebar_warden');
-      // We don't overwrite wardenYears with batch years because we handle academic years (1, 2, 3, 4) in this dashboard.
+      // We don't overwrite wardenYears with year years because we handle academic years (1, 2, 3, 4) in this dashboard.
     } catch (error) {
       console.error("Error fetching warden details:", error);
     }

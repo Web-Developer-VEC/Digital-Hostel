@@ -29,7 +29,7 @@ async function getFoodRequestChange(req, res) {
     const primary_years = warden.primary_year;
     const warder_handling_gender = warden.gender;
     const requests = await requestsCollection
-      .find({ batch: { $in: primary_years }, gender: warder_handling_gender })
+      .find({ year: { $in: primary_years }, gender: warder_handling_gender })
       .toArray();
 
     return res.status(200).json({ requests });

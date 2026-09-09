@@ -1,4 +1,4 @@
-const { getDb } = require("../../config/db");
+ const { getDb } = require("../../config/db");
 const s3 = require("../../config/aws");
 const bcrypt = require("bcrypt");
 const uploadToS3 = require("../../middleware/uploadTos3Middleware");
@@ -28,7 +28,7 @@ async function wardenDoInactive(req, res) {
     const db = getDb();
     const wardenCollection = db.collection("warden_database");
     const logsCollection = db.collection("warden_logs");
-    const { warden_name, inactive_warden_id, batch } = req.body;
+    const { warden_name, inactive_warden_id, year } = req.body;
 
     const { user } = req.session;
 
@@ -38,7 +38,7 @@ async function wardenDoInactive(req, res) {
         .json({ message: "Session expired. Please login again." });
     }
 
-    if (!warden_name || !inactive_warden_id || !batch) {
+    if (!warden_name || !inactive_warden_id || !year) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -62,7 +62,7 @@ async function wardenDoInactive(req, res) {
 
     await wardenCollection.updateOne(
       { warden_name: warden_name },
-      { $addToSet: { primary_year: batch } },
+      { $addToSet: { primary_year: year } },
     );
 
     const log_entry = {
@@ -71,7 +71,7 @@ async function wardenDoInactive(req, res) {
       deactivated_date: new Date(),
       new_warden_id: new_warden.unique_id,
       new_warden_name: warden_name,
-      transferred_batch: batch,
+      transferred_year: year,
       log_status: "active",
     };
 
@@ -79,7 +79,7 @@ async function wardenDoInactive(req, res) {
 
     return res.json({
       message:
-        "Warden status updated, batch transferred, and log recorded successfully",
+        "Warden status updated, year transferred, and log recorded successfully",
     });
   } catch (error) {
     console.error("❌ Error handling warden status:", error);
@@ -147,7 +147,7 @@ async function wardenDoActive(req, res) {
           $set: {
             log_status: "resolved",
             activated_date: new Date(),
-            returned_batchs: log.transferred_batch,
+            returned_years: log.transferred_year,
           },
         },
       );
@@ -155,7 +155,7 @@ async function wardenDoActive(req, res) {
 
     return res.json({
       message:
-        "Warden activated, batchs updated, and logs resolved successfully",
+        "Warden activated, years updated, and logs resolved successfully",
     });
   } catch (error) {
     console.error("❌ Error handling warden status:", error);
@@ -247,8 +247,8 @@ async function updatewarden(req, res) {
         .json({ message: "Session expired. Please login again." });
     }
 
-    if (typeof updateFields.secondary_batch === "string") {
-      updateFields.primary_year = JSON.parse(updateFields.secondary_batch);
+    if (typeof updateFields.secondary_year === "string") {
+      updateFields.primary_year = JSON.parse(updateFields.secondary_year);
     }
 
     if (typeof updateFields.primary_year === "string") {
