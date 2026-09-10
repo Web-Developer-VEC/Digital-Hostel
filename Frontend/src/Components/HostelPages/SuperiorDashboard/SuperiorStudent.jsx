@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Download, Filter, Footprints, Home, Search, X } from 'lucide-react';
+import { Download, Filter, Footprints, Home, Search, X, Phone } from 'lucide-react';
 import './SuperiorStudent.css';
 import axiosInstance from '../../../api/axios';
 import DownloadPdf from '../pdf';
@@ -20,13 +20,13 @@ function SuperiorStudent() {
   const [students, setStudents] = useState({ male: [], female: [] });
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
-  
+
   // States
   const [selectedGender, setSelectedGender] = useState('Male'); // Default to Boys
   const [selectedStudent, setSelectedStudent] = useState(null); // Modal state
-  
+
   // State for Inline Editing Food Type
-  const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' }); 
+  const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' });
 
   // Increment Student Year states
   const [isModalOpen, setIsModalOpen] = useState(false); // Control confirmation modal visibility
@@ -107,7 +107,7 @@ function SuperiorStudent() {
     const matchesYear = filters.year === "All" || student.year === yearToAlphabet[filters.year];
     const matchesDepartment = filters.department === "All" || student.department === filters.department;
     const matchesFoodType = filters.foodType === "All" || student.foodType === filters.foodType;
-    
+
     const matchesTransitStatus =
       filters.transitStatus === "All" ||
       (filters.transitStatus === "true" && student.transitStatus) ||
@@ -216,7 +216,7 @@ function SuperiorStudent() {
 
   const handleSaveStudentField = async (field, newValue, successMessage = "Updated successfully!") => {
     if (!selectedStudent) return;
-    
+
     const updateFields = {
       [field]: newValue
     };
@@ -229,9 +229,9 @@ function SuperiorStudent() {
 
       if (response.status === 200) {
         const formattedFood = newValue === 'Veg' ? 'Vegetarian' : (newValue === 'Non-Veg' ? 'Non-Vegetarian' : newValue);
-        
+
         setSelectedStudent(prev => ({ ...prev, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood }));
-        
+
         setStudents(prev => ({
           male: prev.male.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s),
           female: prev.female.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s)
@@ -326,7 +326,7 @@ function SuperiorStudent() {
   return (
     <div className="superior-container">
       <div className="superior-content">
-        
+
         {/* Top Header Row */}
         <div className="warden-header-controls">
           <div className="search-wrapper">
@@ -369,12 +369,12 @@ function SuperiorStudent() {
               <Download size={18} />
               <DownloadPdf studentData={filteredStudents} />
             </button>
-            
+
             <div className="filter-wrapper" ref={filterRef}>
               <button className="action-btn" onClick={() => setShowFilters(!showFilters)}>
                 <Filter size={18} /> Filters
               </button>
-              
+
               {showFilters && (
                 <div className="filter-popup">
                   <div className="filter-section">
@@ -422,7 +422,7 @@ function SuperiorStudent() {
                   <Home size={18} color="#3b82f6" />
                 )}
               </div>
-              
+
               <div className="card-info-row">
                 <div className="avatar-circle">
                   {getInitials(student.name)}
@@ -434,7 +434,7 @@ function SuperiorStudent() {
                   <p>{student.department}</p>
                 </div>
               </div>
-              
+
               <button className="view-more-btn" onClick={() => setSelectedStudent(student)}>
                 View More
               </button>
@@ -442,109 +442,402 @@ function SuperiorStudent() {
           ))}
         </div>
 
-        {/* Details Modal */}
+        {/* =========================================
+    STUDENT DETAILS MODAL
+========================================= */}
+
         {selectedStudent && (
-          <div className="modal-overlay" onClick={closeModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="close-modal-btn" onClick={closeModal}>
-                <X size={20} />
-              </button>
+          <div
+            className="student-modal-overlay"
+            onClick={closeModal}
+          >
+            <div
+              className="student-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
 
-              <div className="modal-header">
-                <div className="avatar-circle modal-avatar">
-                  {getInitials(selectedStudent.name)}
-                </div>
-                <div className="modal-header-text">
-                  <h2>{selectedStudent.name}</h2>
-                  <p className="modal-meta">{selectedStudent.year} • {selectedStudent.department}</p>
-                  <p className="modal-subtext">Admission No. {selectedStudent.admissionNumber}</p>
-                </div>
-              </div>
+              {/* =====================================
+          MODAL TOP / HEADER
+      ===================================== */}
 
-              <hr className="modal-divider" />
+              <div className="student-modal-header">
 
-              <div className="modal-body">
-                <h4 className="section-title">HOSTEL</h4>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">ROOM</span>
-                    {editingRoom ? (
-                      <div className="inline-edit-group">
-                        <input
-                          type="text"
-                          className="inline-input"
-                          value={tempRoom}
-                          onChange={(e) => setTempRoom(e.target.value)}
-                        />
-                        <button className="inline-btn inline-confirm" onClick={confirmEditRoom} title="Save">✓</button>
-                        <button className="inline-btn inline-cancel" onClick={cancelEditRoom} title="Cancel">✕</button>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="info-value">{selectedStudent.roomNumber || 'N/A'}</span>
-                        <span className="edit-link" onClick={startEditRoom}>Edit</span>
-                      </>
-                    )}
-                  </div>
-                  
-                  {/* Inline Food Type Editor with Tick and Cross buttons */}
-                  <div className="info-item">
-                    <span className="info-label">FOOD</span>
-                    {inlineEdit.field === 'foodType' ? (
-                      <div className="inline-edit-group">
-                        <select
-                          className="inline-select"
-                          value={inlineEdit.value}
-                          onChange={(e) => setInlineEdit({ ...inlineEdit, value: e.target.value })}
-                        >
-                          <option value="Veg">Vegetarian</option>
-                          <option value="Non-Veg">Non-Vegetarian</option>
-                        </select>
-                        <button className="inline-btn inline-confirm" onClick={confirmEditFood} title="Save">✓</button>
-                        <button className="inline-btn inline-cancel" onClick={cancelInlineEdit} title="Cancel">✕</button>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="info-value">{selectedStudent.foodType}</span>
-                        <span className="edit-link" onClick={startEditFood}>Edit</span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="info-item">
-                    <span className="info-label">STATUS</span>
-                    <span className="info-value status-indicator">
-                      <span className={`status-dot ${selectedStudent.transitStatus ? 'transit' : 'hostel'}`}></span>
-                      {selectedStudent.transitStatus ? 'In Transit' : 'In Hostel'}
-                    </span>
-                  </div>
-                </div>
-
-                <h4 className="section-title">CONTACT</h4>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">STUDENT</span>
-                    <span className="info-value">{selectedStudent.studentMobile || 'N/A'}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">PARENT</span>
-                    <span className="info-value">{selectedStudent.parentMobile || 'N/A'}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">AREA</span>
-                    <span className="info-value">{selectedStudent.area || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button className="btn-vaccate" onClick={() => handleDelete(selectedStudent.registrationNumber, selectedStudent.name)}>
-                  Mark Vaccate
+                {/* Close */}
+                <button
+                  type="button"
+                  className="student-modal-close"
+                  onClick={closeModal}
+                  aria-label="Close"
+                >
+                  <X size={21} />
                 </button>
-                <button className="btn-close" onClick={closeModal}>
-                  Close
+
+
+                {/* Student Information */}
+                <div className="student-modal-profile">
+
+                  <div className="student-modal-avatar">
+                    {getInitials(selectedStudent.name)}
+                  </div>
+
+                  <div className="student-modal-identity">
+
+                    <div className="student-modal-name-row">
+                      <h2>
+                        {selectedStudent.name}
+                      </h2>
+
+                      <span className="student-modal-active-badge">
+                        {selectedStudent.transitStatus
+                          ? "In Transit"
+                          : "In Hostel"}
+                      </span>
+                    </div>
+
+                    <p className="student-modal-academic">
+                      {selectedStudent.year}
+                      <span>•</span>
+                      {selectedStudent.department}
+                    </p>
+
+                    <p className="student-modal-admission">
+                      Admission No.
+                      <strong>
+                        {selectedStudent.admissionNumber}
+                      </strong>
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                {/* Mark Vacate */}
+                <button
+                  type="button"
+                  className="student-modal-vacate"
+                  onClick={() =>
+                    handleDelete(
+                      selectedStudent.registrationNumber,
+                      selectedStudent.name
+                    )
+                  }
+                >
+                  Mark Vacate
                 </button>
+
               </div>
+
+
+              {/* =====================================
+          HEADER ACCENT
+      ===================================== */}
+
+              <div className="student-modal-accent"></div>
+
+
+              {/* =====================================
+          MODAL BODY
+      ===================================== */}
+
+              <div className="student-modal-body">
+
+
+                {/* ===================================
+            HOSTEL SECTION
+        =================================== */}
+
+                <section className="student-modal-section">
+
+                  <div className="student-modal-section-heading">
+
+                    <div className="student-modal-section-icon">
+                      <Home size={17} />
+                    </div>
+
+                    <div>
+                      <h3>Hostel Information</h3>
+                      <p>Current accommodation details</p>
+                    </div>
+
+                  </div>
+
+
+                  <div className="student-modal-info-grid">
+
+
+                    {/* ROOM */}
+                    <div className="student-modal-info-card">
+
+                      <span className="student-modal-info-label">
+                        ROOM
+                      </span>
+
+                      {editingRoom ? (
+
+                        <div className="student-modal-edit-wrapper">
+
+                          <input
+                            type="text"
+                            className="student-modal-input"
+                            value={tempRoom}
+                            onChange={(e) =>
+                              setTempRoom(e.target.value)
+                            }
+                            autoFocus
+                          />
+
+                          <div className="student-modal-edit-buttons">
+
+                            <button
+                              type="button"
+                              className="student-modal-save"
+                              onClick={confirmEditRoom}
+                              title="Save"
+                            >
+                              ✓
+                            </button>
+
+                            <button
+                              type="button"
+                              className="student-modal-edit-cancel"
+                              onClick={cancelEditRoom}
+                              title="Cancel"
+                            >
+                              ×
+                            </button>
+
+                          </div>
+
+                        </div>
+
+                      ) : (
+
+                        <>
+
+                          <div className="student-modal-value">
+                            {selectedStudent.roomNumber || "N/A"}
+                          </div>
+
+                          <button
+                            type="button"
+                            className="student-modal-edit-link"
+                            onClick={startEditRoom}
+                          >
+                            Edit
+                          </button>
+
+                        </>
+
+                      )}
+
+                    </div>
+
+
+                    {/* FOOD */}
+                    <div className="student-modal-info-card">
+
+                      <span className="student-modal-info-label">
+                        FOOD
+                      </span>
+
+                      {inlineEdit.field === "foodType" ? (
+
+                        <div className="student-modal-edit-wrapper">
+
+                          <select
+                            className="student-modal-input"
+                            value={inlineEdit.value}
+                            onChange={(e) =>
+                              setInlineEdit({
+                                ...inlineEdit,
+                                value: e.target.value
+                              })
+                            }
+                            autoFocus
+                          >
+                            <option value="Veg">
+                              Vegetarian
+                            </option>
+
+                            <option value="Non-Veg">
+                              Non-Vegetarian
+                            </option>
+                          </select>
+
+                          <div className="student-modal-edit-buttons">
+
+                            <button
+                              type="button"
+                              className="student-modal-save"
+                              onClick={confirmEditFood}
+                              title="Save"
+                            >
+                              ✓
+                            </button>
+
+                            <button
+                              type="button"
+                              className="student-modal-edit-cancel"
+                              onClick={cancelInlineEdit}
+                              title="Cancel"
+                            >
+                              ×
+                            </button>
+
+                          </div>
+
+                        </div>
+
+                      ) : (
+
+                        <>
+
+                          <div className="student-modal-value">
+                            {selectedStudent.foodType || "N/A"}
+                          </div>
+
+                          <button
+                            type="button"
+                            className="student-modal-edit-link"
+                            onClick={startEditFood}
+                          >
+                            Edit
+                          </button>
+
+                        </>
+
+                      )}
+
+                    </div>
+
+
+                    {/* STATUS */}
+                    <div className="student-modal-info-card">
+
+                      <span className="student-modal-info-label">
+                        STATUS
+                      </span>
+
+                      <div className="student-modal-status">
+
+                        <span
+                          className={`student-modal-status-dot ${selectedStudent.transitStatus
+                              ? "transit"
+                              : "hostel"
+                            }`}
+                        ></span>
+
+                        <span>
+                          {selectedStudent.transitStatus
+                            ? "In Transit"
+                            : "In Hostel"}
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </section>
+
+
+                {/* ===================================
+            CONTACT SECTION
+        =================================== */}
+
+                <section className="student-modal-section student-modal-contact-section">
+
+                  <div className="student-modal-section-heading">
+
+                    <div className="student-modal-section-icon">
+                      <Phone size={17} />
+                    </div>
+
+                    <div>
+                      <h3>Contact Information</h3>
+                      <p>Student and parent contact details</p>
+                    </div>
+
+                  </div>
+
+
+                  <div className="student-modal-contact-grid">
+
+
+                    {/* STUDENT */}
+                    <div className="student-modal-contact-card">
+
+                      <span className="student-modal-info-label">
+                        STUDENT
+                      </span>
+
+                      <a
+                        href={
+                          selectedStudent.studentMobile
+                            ? `tel:${selectedStudent.studentMobile}`
+                            : "#"
+                        }
+                        className="student-modal-contact-value"
+                        onClick={(e) => {
+                          if (!selectedStudent.studentMobile) {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        {selectedStudent.studentMobile || "N/A"}
+                      </a>
+
+                    </div>
+
+
+                    {/* PARENT */}
+                    <div className="student-modal-contact-card">
+
+                      <span className="student-modal-info-label">
+                        PARENT
+                      </span>
+
+                      <a
+                        href={
+                          selectedStudent.parentMobile
+                            ? `tel:${selectedStudent.parentMobile}`
+                            : "#"
+                        }
+                        className="student-modal-contact-value"
+                        onClick={(e) => {
+                          if (!selectedStudent.parentMobile) {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        {selectedStudent.parentMobile || "N/A"}
+                      </a>
+
+                    </div>
+
+
+                    {/* AREA */}
+                    <div className="student-modal-contact-card">
+
+                      <span className="student-modal-info-label">
+                        AREA
+                      </span>
+
+                      <span className="student-modal-contact-value">
+                        {selectedStudent.area || "N/A"}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </section>
+
+
+              </div>
+
             </div>
           </div>
         )}

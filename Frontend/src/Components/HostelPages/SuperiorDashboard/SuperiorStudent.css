@@ -1,289 +1,329 @@
-/* =========================================
-   Container & Layout Styles
-   ========================================= */
+/* =========================================================
+   SUPERIOR STUDENT PAGE
+   Clean + responsive stylesheet
+   ========================================================= */
+
+:root {
+  --maroon: #800000;
+  --maroon-dark: #650000;
+  --yellow: #fdcc03;
+  --yellow-soft: #fff8d8;
+  --yellow-border: #ead27a;
+
+  --text: #111827;
+  --text-soft: #5f6b7a;
+  --muted: #8a929d;
+
+  --page-bg: #f5f6f8;
+  --white: #fff;
+  --border: #e7e9ed;
+
+  --green: #10b981;
+  --gray-dot: #9ca3af;
+  --danger: #dc2626;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --shadow-sm: 0 2px 8px rgba(17, 24, 39, .06);
+  --shadow-md: 0 8px 24px rgba(17, 24, 39, .09);
+  --shadow-lg: 0 24px 60px rgba(17, 24, 39, .22);
+
+  --ease: 180ms ease;
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.superior-container,
+.superior-container * {
+  box-sizing: border-box;
+}
+
 .superior-container {
   min-height: 100vh;
-  background-color: #f3f4f6;
   margin-left: 16rem;
-  padding: 1.5rem;
   margin-top: -20px;
+  padding: 1.5rem;
+  background: var(--page-bg);
+  color: var(--text);
 }
 
 .superior-content {
+  width: 100%;
+  max-width: 1500px;
   margin: 0 auto;
 }
 
-/* =========================================
-   Header & Controls
-   ========================================= */
+
+/* =========================================================
+   TOP CONTROLS
+   ========================================================= */
+
 .warden-header-controls {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .search-wrapper {
   position: relative;
-  width: 350px;
+  width: min(360px, 100%);
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 13px;
   top: 50%;
-  transform: translateY(-50%);
   color: #9ca3af;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 10px 10px 40px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  height: 42px;
+  padding: .65rem .85rem .65rem 2.5rem;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   outline: none;
-  font-size: 0.95rem;
+
+  background: var(--white);
+  color: var(--text);
+
+  font: inherit;
+  font-size: .9rem;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color var(--ease),
+    box-shadow var(--ease);
+}
+
+.search-input::placeholder {
+  color: #a1a7b0;
+}
+
+.search-input:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(253, 204, 3, .14);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: .65rem;
+  flex-wrap: wrap;
 }
 
-/* =========================================
-   Gender Toggle Switch
-   ========================================= */
+
+/* =========================================================
+   GENDER
+   ========================================================= */
+
 .gender-toggle {
-  display: flex;
-  background-color: #f3f4f6;
-  border-radius: 8px;
+  display: inline-flex;
+  gap: 3px;
   padding: 4px;
-  border: 1px solid #e5e7eb;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: #eef0f3;
 }
 
 .gender-btn {
-  padding: 8px 20px;
-  border: none;
-  background: transparent;
+  min-height: 34px;
+  padding: .45rem 1rem;
+
+  border: 0;
   border-radius: 6px;
-  font-weight: 600;
+
+  background: transparent;
   color: #6b7280;
+
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 650;
+
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  font-size: 0.9rem;
+  transition:
+    background var(--ease),
+    color var(--ease);
 }
 
 .gender-btn:hover {
-  background-color: #800000;
-  color: #ffffff;
+  background: #fff;
+  color: var(--maroon);
 }
 
 .gender-btn.active {
-  background-color: #fdcc03;
-  color: #111827;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--yellow);
+  color: var(--text);
 }
 
-.gender-btn.active:hover {
-  background-color: #800000;
-  color: #ffffff;
-}
 
-/* Actions */
-.action-btn {
-  background-color: #fdcc03;
-  color: #111827;
-  padding: 8px 16px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  border: none;
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.action-btn,
+.year-select {
+  height: 40px;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 650;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  height: 40px; /* Aligns with toggle */
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 0 1rem;
+  border: 0;
+
+  background: var(--yellow);
+  color: var(--text);
+
+  transition:
+    background var(--ease),
+    color var(--ease),
+    transform var(--ease),
+    box-shadow var(--ease);
 }
 
 .action-btn:hover {
-  background-color: #800000;
-  color: #ffffff;
+  background: var(--maroon);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(128, 0, 0, .16);
 }
 
-/* The Download button renders a child <DownloadPdf/> component whose
-   internal markup we don't control — force it to inherit this button's
-   color instead of any styling of its own, so it never looks washed out
-   or falls out of sync with the hover state above. */
-.action-btn a,
-.action-btn button,
-.action-btn span {
-  color: inherit;
-  font: inherit;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-}
-
-/* Increment Student Year select — left exactly as-is, untouched */
 .year-select {
-  background-color: #800000;
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  height: 40px;
+  min-width: 145px;
+  padding: 0 .9rem;
+
+  border: 0;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+
+  background: var(--maroon);
+  color: #fff;
 }
 
 .year-select:hover {
-  background-color: #fdcc03;
-  color: #111827;
+  background: var(--yellow);
+  color: var(--text);
 }
 
-/* The dropdown popup itself (and each option row) — plain and readable,
-   independent of whatever color the closed select currently shows. */
-.year-select option {
-  background-color: #ffffff;
-  color: #111827;
-  font-weight: 500;
-}
 
-/* =========================================
-   Filter Popup
-   ========================================= */
-.filter-wrapper { 
-  position: relative; 
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.filter-wrapper {
+  position: relative;
 }
 
 .filter-popup {
   position: absolute;
-  top: 110%;
+  top: calc(100% + 8px);
   right: 0;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  z-index: 100;
+
   width: 250px;
-  z-index: 10;
-  border: 1px solid #e5e7eb;
+  padding: 1rem;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: #fff;
+  box-shadow: var(--shadow-md);
 }
 
 .filter-section {
   display: flex;
   flex-direction: column;
+  gap: 6px;
   margin-bottom: 1rem;
 }
 
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
 .filter-section label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-}
-
-.filter-section select {
-  padding: 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-}
-
-/* =========================================
-   Increment Year — Confirmation Modal
-   ========================================= */
-.AR-confirmation-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1100;
-}
-
-.AR-confirmation-modal {
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 1.75rem 2rem;
-  width: 90%;
-  max-width: 380px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-  text-align: center;
-}
-
-.AR-confirmation-modal h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.1rem;
-  color: #111827;
+  color: var(--text);
+  font-size: .78rem;
   font-weight: 700;
 }
 
-.AR-confirmation-modal p {
-  margin: 0 0 1.5rem 0;
-  font-size: 0.9rem;
-  color: #6b7280;
+.filter-section select {
+  width: 100%;
+  padding: .55rem .65rem;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  outline: none;
+  background: #fff;
+  color: var(--text);
 }
 
-.AR-confirmation-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
+.filter-section select:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(253, 204, 3, .12);
 }
 
-.AR-button {
-  padding: 0.6rem 1.4rem;
-  border-radius: 6px;
-  border: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
 
-.AR-button:hover {
-  opacity: 0.9;
-}
+/* =========================================================
+   STUDENT GRID
+   ========================================================= */
 
-.AR-button-secondary {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-}
-
-.AR-button-primary {
-  background-color: #fdcc03;
-  color: #111827;
-}
-
-/* =========================================
-   Grid & Student Cards
-   ========================================= */
 .students-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
+  gap: 1.15rem;
 }
 
 .student-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.25rem;
+  position: relative;
+
+  min-width: 0;
+  min-height: 235px;
+
   display: flex;
   flex-direction: column;
-  position: relative;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+  padding: 1.15rem;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    transform var(--ease),
+    box-shadow var(--ease),
+    border-color var(--ease);
+}
+
+.student-card:hover {
+  transform: translateY(-3px);
+  border-color: #dddfe4;
+  box-shadow: var(--shadow-md);
 }
 
 .status-icon-top {
@@ -295,462 +335,1101 @@
 .card-info-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: .8rem;
+  min-width: 0;
+  margin-bottom: 1.15rem;
 }
 
 .avatar-circle {
   width: 56px;
   height: 56px;
-  background-color: #fdcc03;
-  border-radius: 50%;
+  flex: 0 0 56px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
-  flex-shrink: 0;
+
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--text);
+
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
 .card-details {
+  min-width: 0;
   overflow: hidden;
 }
 
 .card-details h3 {
-  margin: 0 0 4px 0;
-  font-size: 1.05rem;
-  color: #111827;
-  white-space: nowrap;
+  margin: 0 0 4px;
+
   overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 1rem;
+  font-weight: 750;
+
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .card-details p {
-  margin: 2px 0;
-  font-size: 0.75rem;
+  margin: 3px 0;
+
+  overflow: hidden;
+
   color: #6b7280;
+
+  font-size: .74rem;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
+
+/* =========================================================
+   VIEW MORE
+   ========================================================= */
+
 .view-more-btn {
-  background-color: #fdcc03;
-  color: #111827;
-  border: none;
-  padding: 0.6rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
   width: 100%;
   margin-top: auto;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  padding: .65rem .8rem;
+
+  border: 1px solid var(--yellow-border);
+  border-radius: var(--radius-sm);
+
+  background: var(--yellow-soft);
+  color: var(--maroon);
+
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    background var(--ease),
+    color var(--ease),
+    border-color var(--ease),
+    transform var(--ease),
+    box-shadow var(--ease);
 }
 
 .view-more-btn:hover {
-  background-color: #800000;
-  color: #ffffff;
+  border-color: var(--maroon);
+  background: var(--maroon);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(128, 0, 0, .16);
 }
 
-/* =========================================
-   Modal Overlay & Content
-   Mirrors Hostelstudents.jsx's modal 1:1 — same padding
-   architecture (each region owns its own inset so the name,
-   HOSTEL, and CONTACT all sit flush to the same left edge),
-   same sizes, same colors.
-   ========================================= */
-.modal-overlay {
+.view-more-btn:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   YEAR CONFIRMATION MODAL
+   ========================================================= */
+
+.AR-confirmation-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(17, 17, 20, 0.55);
+  inset: 0;
+  z-index: 1100;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  z-index: 1000;
-  animation: modalBackdropFadeIn 0.18s ease-out;
+
+  padding: 1rem;
+
+  background: rgba(0, 0, 0, .48);
+  backdrop-filter: blur(3px);
 }
 
-@keyframes modalBackdropFadeIn {
+.AR-confirmation-modal {
+  width: min(380px, 100%);
+  padding: 1.7rem 1.8rem;
+
+  border-radius: var(--radius-md);
+  background: #fff;
+
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.AR-confirmation-modal h3 {
+  margin: 0 0 .65rem;
+  color: var(--text);
+  font-size: 1.08rem;
+}
+
+.AR-confirmation-modal p {
+  margin: 0 0 1.35rem;
+  color: #6b7280;
+  font-size: .88rem;
+  line-height: 1.55;
+}
+
+.AR-confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: .7rem;
+}
+
+.AR-button {
+  min-height: 38px;
+  padding: .55rem 1.25rem;
+
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.AR-button-secondary {
+  border: 1px solid var(--border);
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.AR-button-primary {
+  border: 1px solid var(--yellow);
+  background: var(--yellow);
+  color: var(--text);
+}
+
+
+/* =========================================================
+   STUDENT MODAL
+   IMPORTANT: These names match the CURRENT JSX:
+   student-modal-overlay / student-modal / etc.
+   ========================================================= */
+
+.student-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 15, 18, .62);
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  animation: studentOverlayIn 180ms ease-out;
+}
+
+@keyframes studentOverlayIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.modal-content {
+.student-modal {
   position: relative;
-  background: #ffffff;
-  border-radius: 0.85rem;
-  width: 100%;
-  max-width: 860px;
+
+  width: min(900px, 100%);
   max-height: 90vh;
+
   overflow-y: auto;
-  padding: 0;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  animation: modalContentSlideUp 0.2s ease-out;
+
+  border: 1px solid rgba(0, 0, 0, .05);
+  border-radius: 22px;
+
+  background: #fff;
+
+  box-shadow: var(--shadow-lg);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--yellow) transparent;
+
+  animation: studentModalIn 220ms ease-out;
 }
 
-@keyframes modalContentSlideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes studentModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* Clean Icon Close Button — color comes from here (JSX passes no
-   hardcoded color prop to the X icon, so this controls it via
-   currentColor, exactly like Hostelstudents.jsx). */
-.close-modal-btn {
+
+/* =========================================================
+   MODAL CLOSE
+   ========================================================= */
+
+.student-modal-close {
   position: absolute;
-  top: 1.1rem;
-  right: 1.25rem;
-  z-index: 2;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #b66441;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+
+  width: 36px;
+  height: 36px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #b45c3b;
+
+  cursor: pointer;
+
+  transition:
+    background var(--ease),
+    color var(--ease),
+    transform var(--ease);
 }
 
-.close-modal-btn:hover {
-  color: #111827;
+.student-modal-close:hover {
+  background: var(--yellow-soft);
+  color: var(--maroon);
+  transform: rotate(7deg);
 }
 
-/* =========================================
-   Modal Header
-   ========================================= */
-.modal-header {
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+.student-modal-header {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  gap: 1.25rem;
-  padding: 2rem 2.5rem 1.5rem;
-  text-align: left;
+  justify-content: space-between;
+  gap: 25px;
+
+  padding: 32px 70px 28px 38px;
+
+  background:
+    linear-gradient(135deg, #fffdf7 0%, #fff 75%);
+
+  border-top: 4px solid var(--yellow);
+}
+
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+.student-modal-profile {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  min-width: 0;
+  flex: 1;
+}
+
+.student-modal-avatar {
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 4px solid #fff0a0;
+  border-radius: 50%;
+
+  background: var(--yellow);
+  color: var(--text);
+
+  font-size: 1.35rem;
+  font-weight: 800;
+
+  box-shadow: 0 8px 22px rgba(253, 204, 3, .22);
+}
+
+.student-modal-identity {
+  min-width: 0;
+}
+
+.student-modal-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+
+  margin-bottom: 6px;
+}
+
+.student-modal-name-row h2 {
+  margin: 0;
+
+  color: var(--maroon);
+
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.student-modal-active-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 9px;
+
+  border: 1px solid #c7e7cf;
+  border-radius: 20px;
+
+  background: #edf9f1;
+  color: #27733b;
+
+  font-size: .65rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.student-modal-academic {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin: 0 0 5px;
+
+  color: var(--text-soft);
+
+  font-size: .93rem;
+}
+
+.student-modal-academic span {
+  color: #d0a900;
+  font-weight: 800;
+}
+
+.student-modal-admission {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: .8rem;
+}
+
+.student-modal-admission strong {
+  margin-left: 5px;
+  color: #5d6672;
+  font-weight: 650;
+}
+
+
+/* =========================================================
+   MARK VACATE
+   ========================================================= */
+
+.student-modal-vacate {
+  flex: 0 0 auto;
+
+  min-width: 140px;
+
+  padding: 12px 19px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: var(--maroon);
+  color: #fff;
+
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  box-shadow: 0 7px 18px rgba(128, 0, 0, .18);
+
+  transition:
+    background var(--ease),
+    transform var(--ease),
+    box-shadow var(--ease);
+}
+
+.student-modal-vacate:hover {
+  background: var(--maroon-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 23px rgba(128, 0, 0, .25);
+}
+
+.student-modal-vacate:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   ACCENT + BODY
+   ========================================================= */
+
+.student-modal-accent {
+  height: 4px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--maroon),
+      #d89c00 55%,
+      var(--yellow)
+    );
+}
+
+.student-modal-body {
+  padding: 28px 38px 36px;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.student-modal-section {
   width: 100%;
 }
 
-.modal-avatar {
-  width: 76px;
-  height: 76px;
-  background-color: #fdcc03;
-  border-radius: 50%;
+.student-modal-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.student-modal-section-icon {
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #111827;
-  flex-shrink: 0;
-  line-height: 1;
+
+  border-radius: 9px;
+
+  background: var(--yellow-soft);
+  color: #9b7600;
 }
 
-.modal-header-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-width: 0;
-  margin-left: 20px;
-  padding: top 20px;
-}
-
-
-.modal-header-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-width: 0;
-  margin-left: 20px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-.modal-meta {
-  font-size: 1rem;
-  color: #6b7280;
-  margin: 0 0 0.2rem 0;
-  line-height: 1.3;
-  text-align: left;
-}
-
-.modal-subtext {
-  font-size: 0.92rem;
-  color: #6b7280;
+.student-modal-section-heading h3 {
   margin: 0;
-  line-height: 1.3;
-  text-align: left;
-}
 
-.modal-divider {
-  border: 0;
-  height: 1px;
-  background: #e5e7eb;
-  margin: 0 2.5rem;
-}
+  color: var(--text);
 
-/* =========================================
-   Modal Body
-   ========================================= */
-.modal-body {
-  padding: 1.5rem 1.5rem 2rem;
-  text-align: left;
-}
+  font-size: .84rem;
+  font-weight: 800;
 
-.section-title {
-   font-size: 0.85rem;
-  font-weight: 700;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #111827;
-  margin-bottom: 1.1rem;
-  text-align: 30%;
-  padding-top:30px ;
 }
 
-/* .section-title {
-  padding-top:100x;
-  margin-left: -230px;
+.student-modal-section-heading p {
+  margin: 3px 0 0;
 
-}  */
+  color: #9aa1aa;
 
-.info-grid {
+  font-size: .73rem;
+}
+
+
+/* =========================================================
+   HOSTEL CARDS
+   ========================================================= */
+
+.student-modal-info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem 1.75rem;
-  margin-bottom: 0;
-  text-align: left;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
 }
 
-.info-item {
+.student-modal-info-card {
+  min-width: 0;
+  min-height: 115px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
-  gap: 0.4rem;
-  min-width: 0;
+  justify-content: center;
+
+  padding: 17px;
+
+  border: 1px solid var(--border);
+  border-radius: 13px;
+
+  background: #fafafa;
+
+  transition:
+    border-color var(--ease),
+    box-shadow var(--ease);
 }
 
-.info-label {
-  font-size: 0.8rem;
-  color: #6b7280;
-  font-weight: 600;
+.student-modal-info-card:hover {
+  border-color: var(--yellow-border);
+  box-shadow: 0 5px 15px rgba(17, 24, 39, .04);
+}
+
+.student-modal-info-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: var(--muted);
+
+  font-size: .67rem;
+  font-weight: 750;
+
+  letter-spacing: .08em;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
-.info-value {
-  font-size: 1.15rem;
-  color: #111827;
-  font-weight: 600;
+.student-modal-value {
+  color: var(--text);
+
+  font-size: 1.18rem;
+  font-weight: 750;
+
+  line-height: 1.3;
   word-break: break-word;
 }
 
-.edit-link {
-  font-size: 0.9rem;
-  color: #f4c430;
-  font-weight: 700;
+.student-modal-edit-link {
+  margin-top: 7px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+  color: #d49f00;
+
+  font: inherit;
+  font-size: .77rem;
+  font-weight: 750;
+
   cursor: pointer;
-  margin-top: 0.2rem;
 }
 
-.edit-link:hover {
-  color: #b58600;
+.student-modal-edit-link:hover {
+  color: #8f6c00;
   text-decoration: underline;
 }
 
-.status-indicator {
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.student-modal-status {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
+  gap: 8px;
+
+  color: var(--text);
+
+  font-size: 1rem;
+  font-weight: 700;
 }
 
-.status-dot {
+.student-modal-status-dot {
   width: 9px;
   height: 9px;
+  flex: 0 0 9px;
+
   border-radius: 50%;
-  flex-shrink: 0;
 }
-.status-dot.transit { background-color: #10b981; }
-.status-dot.hostel { background-color: #9ca3af; }
 
-/* =========================================
-   Inline Edit Group (Food Type Dropdown)
-   ========================================= */
-.inline-edit-group {
+.student-modal-status-dot.hostel {
+  background: var(--gray-dot);
+}
+
+.student-modal-status-dot.transit {
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, .10);
+}
+
+
+/* =========================================================
+   INLINE EDIT
+   ========================================================= */
+
+.student-modal-edit-wrapper {
+  width: 100%;
+
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.2rem;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.inline-select {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.95rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.35rem;
-  background-color: white;
-  color: #111827;
+.student-modal-input {
+  width: 100%;
+  min-width: 0;
+
+  padding: 8px 9px;
+
+  border: 1px solid #d8dce2;
+  border-radius: 7px;
+
   outline: none;
-  cursor: pointer;
-  min-width: 130px;
-}
 
-.inline-select:focus {
-  border-color: #fdcc03;
-}
+  background: #fff;
+  color: var(--text);
 
-.inline-input {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.95rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.35rem;
-  background-color: white;
-  color: #111827;
-  outline: none;
-  width: auto;
-  max-width: 110px;
-}
-
-.inline-input:focus {
-  border-color: #fdcc03;
-}
-
-.inline-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: opacity 0.2s;
-}
-
-.inline-btn:hover {
-  opacity: 0.85;
-}
-
-.inline-confirm {
-  background-color: #10b981; /* Emerald green */
-}
-
-.inline-cancel {
-  background-color: #ef4444; /* Red */
-}
-
-/* =========================================
-   Modal Footer Actions
-   ========================================= */
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.35rem 2.5rem 2rem;
-  margin-top: 0.35rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.btn-vaccate {
-  background-color: #800000;
-  color: #ffffff;
-  padding: 0.75rem 1.6rem;
-  border-radius: 0.45rem;
-  border: none;
+  font: inherit;
+  font-size: .83rem;
   font-weight: 600;
-  font-size: 0.95rem;
+}
+
+.student-modal-input:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(253, 204, 3, .12);
+}
+
+.student-modal-edit-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.student-modal-save,
+.student-modal-edit-cancel {
+  width: 28px;
+  height: 28px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  color: #fff;
+
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 800;
+
   cursor: pointer;
-  transition: background-color 0.15s ease;
 }
 
-.btn-vaccate:hover {
-  background-color: #6b0000;
+.student-modal-save {
+  background: var(--green);
 }
 
-/* Close Button — matches Hostelstudents.jsx's current close button exactly */
-.btn-close {
-  background-color: #fee2e2 !important;
-  background-image: none !important;
-  color: #991b1b !important;
-  padding: 0.75rem 1.9rem !important;
-  border-radius: 0.45rem !important;
-  border: 1px solid #fecaca !important;
-  font-weight: 600 !important;
-  font-size: 0.95rem !important;
-  cursor: pointer !important;
-  position: relative !important;
-  opacity: 1 !important;
-  width: auto !important;
-  height: auto !important;
-  transition: background-color 0.15s ease, color 0.15s ease !important;
+.student-modal-edit-cancel {
+  background: var(--danger);
 }
 
-.btn-close:hover {
-  background-color: #fecaca !important;
-  color: #7f1d1d !important;
+
+/* =========================================================
+   CONTACT
+   ========================================================= */
+
+.student-modal-contact-section {
+  margin-top: 30px;
+  padding-top: 27px;
+
+  border-top: 1px solid var(--border);
 }
 
-.btn-close svg {
-  display: none !important;
+.student-modal-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
 }
 
-/* =========================================
-   Mobile Responsiveness
-   ========================================= */
-@media (max-width: 768px) {
+.student-modal-contact-card {
+  min-width: 0;
+  min-height: 95px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 16px 17px;
+
+  border: 1px solid var(--border);
+  border-radius: 13px;
+
+  background: linear-gradient(135deg, #fffdf7, #fafafa);
+}
+
+.student-modal-contact-value {
+  color: var(--text);
+
+  font-size: 1rem;
+  font-weight: 700;
+
+  text-decoration: none;
+  word-break: break-word;
+}
+
+a.student-modal-contact-value:hover {
+  color: var(--maroon);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
   .superior-container {
     margin-left: 0;
-    padding-bottom: 5rem;
     margin-top: 58px;
   }
-  
+
+  .modal-content {
+    max-width: 94vw;
+  }
+}
+
+
+/* =========================================================
+   768px
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .superior-container {
+    min-height: auto;
+    padding: 1rem 1rem 6rem;
+  }
+
   .warden-header-controls {
-    flex-direction: column;
-    gap: 1rem;
     align-items: stretch;
   }
-  
+
+  .search-wrapper {
+    flex: 1;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
+  }
+
+  .students-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+  }
+
+  .student-card {
+    min-height: 220px;
+    padding: 1rem;
+  }
+
+  .avatar-circle {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+    font-size: 1rem;
+  }
+
+
+  /* ---------- Student modal ---------- */
+
+  .student-modal-overlay {
+    padding: 12px;
+  }
+
+  .student-modal {
+    max-height: 94vh;
+    border-radius: 18px;
+  }
+
+  .student-modal-header {
+    align-items: flex-start;
+    gap: 18px;
+
+    padding: 27px 58px 24px 24px;
+  }
+
+  .student-modal-profile {
+    gap: 14px;
+  }
+
+  .student-modal-avatar {
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+    font-size: 1.15rem;
+  }
+
+  .student-modal-name-row h2 {
+    font-size: 1.45rem;
+  }
+
+  .student-modal-academic {
+    font-size: .84rem;
+  }
+
+  .student-modal-admission {
+    font-size: .74rem;
+  }
+
+  .student-modal-vacate {
+    min-width: 120px;
+    padding: 10px 14px;
+    font-size: .8rem;
+  }
+
+  .student-modal-body {
+    padding: 24px;
+  }
+
+  .student-modal-info-grid,
+  .student-modal-contact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* =========================================================
+   600px MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .superior-container {
+    padding: .85rem .85rem 6rem;
+  }
+
+  .warden-header-controls {
+    flex-direction: column;
+    gap: .8rem;
+  }
+
   .search-wrapper {
     width: 100%;
   }
-  
+
   .header-actions {
-    flex-wrap: wrap;
-    justify-content: space-between;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .year-select {
-    flex: 1 1 auto;
-    min-width: 160px;
-  }
-  
-  /* .info-grid {
-    grid-template-columns: repeat(2, 1fr);
-  } */
-
-  .modal-header {
-    padding: 1.5rem 1.5rem 1.25rem;
+  .gender-toggle {
+    grid-column: 1 / -1;
   }
 
-  .modal-divider {
-    margin: 0 1.5rem;
+  .gender-btn,
+  .year-select,
+  .action-btn {
+    width: 100%;
   }
 
-  /* .modal-body {
-    padding: 1.25rem 1.5rem 1.5rem;
-  } */
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
 
-  .modal-actions {
-    padding: 1.1rem 1.5rem 1.5rem;
+
+  /* ---------- Student modal ---------- */
+
+  .student-modal-overlay {
+    align-items: flex-start;
+    padding: 8px;
+  }
+
+  .student-modal {
+    width: 100%;
+    max-height: 96vh;
+    border-radius: 16px;
+  }
+
+  .student-modal-close {
+    top: 11px;
+    right: 11px;
+
+    width: 34px;
+    height: 34px;
+  }
+
+  .student-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    padding: 23px 45px 19px 17px;
+  }
+
+  .student-modal-profile {
+    gap: 12px;
+  }
+
+  .student-modal-avatar {
+    width: 58px;
+    height: 58px;
+    flex-basis: 58px;
+
+    border-width: 3px;
+
+    font-size: 1rem;
+  }
+
+  .student-modal-name-row {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .student-modal-name-row h2 {
+    margin-bottom: 6px;
+    font-size: 1.25rem;
+  }
+
+  .student-modal-active-badge {
+    font-size: .58rem;
+  }
+
+  .student-modal-academic {
+    font-size: .78rem;
+  }
+
+  .student-modal-admission {
+    font-size: .68rem;
+  }
+
+  .student-modal-vacate {
+    width: 100%;
+    min-width: 0;
+
+    padding: 10px 14px;
+
+    font-size: .82rem;
+  }
+
+  .student-modal-body {
+    padding: 20px 16px 27px;
+  }
+
+  .student-modal-section-heading {
+    margin-bottom: 12px;
+  }
+
+  .student-modal-section-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .student-modal-section-heading h3 {
+    font-size: .75rem;
+  }
+
+  .student-modal-section-heading p {
+    font-size: .66rem;
+  }
+
+  .student-modal-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .student-modal-info-card {
+    min-height: 96px;
+    padding: 12px;
+  }
+
+  .student-modal-info-label {
+    font-size: .6rem;
+  }
+
+  .student-modal-value {
+    font-size: .96rem;
+  }
+
+  .student-modal-status {
+    font-size: .84rem;
+  }
+
+  .student-modal-contact-section {
+    margin-top: 25px;
+    padding-top: 22px;
+  }
+
+  .student-modal-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-modal-contact-card {
+    min-height: 78px;
+    padding: 13px;
+  }
+
+  .student-modal-contact-value {
+    font-size: .88rem;
+  }
+}
+
+
+/* =========================================================
+   380px
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .header-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .gender-toggle {
+    grid-column: auto;
+  }
+
+  .student-modal-header {
+    padding-left: 14px;
+    padding-right: 42px;
+  }
+
+  .student-modal-avatar {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+  }
+
+  .student-modal-name-row h2 {
+    font-size: 1.1rem;
+  }
+
+  .student-modal-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(253, 204, 3, .35);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }
