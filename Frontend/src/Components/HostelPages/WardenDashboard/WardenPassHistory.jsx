@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, FileText, Filter, ArrowLeft } from 'lucide-react';
+import "./WardenRequest.css";
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../api/axios';
 import { useNavigate } from 'react-router-dom';
@@ -196,7 +197,7 @@ function WardenPassHistory() {
             />
 
             <select className="AR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}>
-              <option value="">All Statuses</option>
+              <option value="">All Status</option>
               <option value="accepted">Accepted</option>
               <option value="declined">Declined</option>
             </select>
