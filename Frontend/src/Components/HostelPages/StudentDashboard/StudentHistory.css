@@ -1881,3 +1881,55 @@
     scroll-behavior: auto !important;
   }
 }
+/* =========================================================
+   MOBILE MODAL FIXES
+========================================================= */
+
+@media (max-width: 768px) {
+
+  /* Pass Details heading */
+  .modal-content h2 {
+    margin-left: 3% !important;
+  }
+
+  /* Close Details button */
+  .modal-close-button {
+    width: 82%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding: 0.7rem 1rem;
+    font-size: 0.72rem;
+  }
+}
+@media (max-width: 480px) {
+
+  .modal-content h2 {
+    margin-top: 0.4rem !important;
+    margin-left: 1rem !important;
+  }
+
+  .modal-close-button {
+    width: 78%;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.68rem;
+  }
+}
+/* =========================================================
+   MOBILE QR BACKGROUND EXTENSION
+========================================================= */
+
+@media (max-width: 768px) {
+  .qr-container {
+    min-height: 380px;
+    padding: 4.5rem 1rem 4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-container {
+    min-height: 350px;
+    padding: 4rem 0.75rem 3.5rem;
+  }
+}
