@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
   ClipboardCheck,
   Users,
@@ -16,12 +17,18 @@ import {
 import { CiLogout } from "react-icons/ci";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./HostelSidebar.css";
+
 import axios from "axios";
 import Swal from "sweetalert2";
 
-/* =========================================================
-   NAVIGATION ITEMS
-========================================================= */
+const yearToAlphabet = {
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Fourth Year",
+  9: "ME",
+  10: "MBA",
+};
 
 const navItems = {
   student: [
@@ -63,7 +70,6 @@ const navItems = {
       label: "Profile",
       mobileLabel: "Profile",
       icon: <User />,
-      showProfileCard: true,
     },
     {
       path: "/hostel/warden/analytics",
@@ -103,7 +109,6 @@ const navItems = {
       label: "Profile",
       mobileLabel: "Profile",
       icon: <User />,
-      showProfileCard: true,
     },
     {
       path: "/hostel/superior/wardens",
@@ -142,11 +147,42 @@ const navItems = {
       icon: <ScrollText />,
     },
   ],
+
+  security: [
+    {
+      path: "/hostel/security/profile",
+      label: "Profile",
+      mobileLabel: "Profile",
+      icon: <User />,
+    },
+    {
+      path: "/hostel/security/attendance",
+      label: "Attendance",
+      mobileLabel: "Attendance",
+      icon: <ClipboardCheck />,
+    },
+    {
+      path: "/hostel/security/request",
+      label: "Request",
+      mobileLabel: "Request",
+      icon: <FileText />,
+    },
+    {
+      path: "/hostel/security/student",
+      label: "Student",
+      mobileLabel: "Student",
+      icon: <Users />,
+    },
+    {
+      path: "/hostel/security/tutorial",
+      label: "Tutorial Page",
+      mobileLabel: "Tutorial",
+      icon: <BookOpenCheck />,
+    },
+  ],
 };
-const base_url = process.env.REACT_APP_QR_URL;
-/* =========================================================
-   COMPONENT
-========================================================= */
+
+const BASE_URL = process.env.REACT_APP_QR_URL;
 
 function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const items = navItems[role] || [];
@@ -154,98 +190,303 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(
+    window.innerWidth <= 768
+  );
 
   const [showProfile, setShowProfile] = useState(false);
-  const [wardenSlidebar, setWardenSlidebar] = useState(null);
 
-  /* =========================================================
-     FETCH WARDEN DATA
-  ========================================================= */
+  const [wardenSidebar, setWardenSidebar] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("/api/sidebar_warden");
-
-        setWardenSlidebar(response.data);
-      } catch (err) {
-        console.error("Failed to fetch warden data:", err);
-      }
-    };
-
-    if (role === "student") {
-      fetchData();
-    }
-  }, [role]);
-
-  /* WARDEN'S OWN PROFILE (for the Profile hover card) */
-  /* LOGGED-IN USER'S OWN PROFILE (for the Profile hover card — warden or superior) */
+  // Logged-in warden / superior profile
   const [selfProfile, setSelfProfile] = useState(null);
 
-  useEffect(() => {
-    const fetchSelfProfile = async () => {
-      try {
-        const endpoint =
-          role === "superior"
-            ? "/api/superior_self_profile" // 👈 replace with your actual superior endpoint
-            : "/api/warden_self_profile"; // 👈 replace with your actual warden endpoint
 
-        const response = await axios.get(endpoint);
-        setSelfProfile(response.data);
-      } catch (err) {
-        console.error("Failed to fetch self profile:", err);
+  const isStudent = role === "student";
+
+  const isWarden = role === "warden";
+
+  const isSuperior = role === "superior";
+
+  const isStaff =
+    role === "warden" ||
+    role === "superior" ||
+    role === "security";
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchProfile = async () => {
+      try {
+
+        if (role === "student") {
+          const response = await axios.get(
+            "/api/sidebar_warden"
+          );
+
+          console.log(
+            "Student Sidebar Warden:",
+            response.data
+          );
+
+          if (mounted) {
+            setWardenSidebar(
+              response.data?.data || response.data || null
+            );
+          }
+
+          return;
+        }
+
+
+        if (role === "warden" || role === "superior") {
+          const response = await axios.get(
+            "/api/warden_profile"
+          );
+
+          console.log(
+            `${role} Sidebar Profile:`,
+            response.data
+          );
+
+          if (mounted) {
+            setSelfProfile(
+              response.data?.data || {}
+            );
+          }
+
+          return;
+        }
+        console.warn(
+          "No profile endpoint configured for role:",
+          role
+        );
+      } catch (error) {
+        console.error(
+          "Failed to fetch sidebar profile:",
+          error
+        );
+
+        console.error(
+          "Backend response:",
+          error.response?.data
+        );
       }
     };
 
-    if (role === "warden" || role === "superior") {
-      fetchSelfProfile();
-    }
+    fetchProfile();
+
+    return () => {
+      mounted = false;
+    };
   }, [role]);
 
-  const wardenSelfName = selfProfile?.warden_name || "Profile";
-  const wardenSelfId = selfProfile?.unique_id || "N/A";
-  const wardenSelfImage = selfProfile?.image_path
-    ? base_url + selfProfile.image_path
-    : "https://via.placeholder.com/150";
+  const profileData = isStudent
+    ? wardenSidebar
+    : selfProfile;
 
-  /* =========================================================
-     RESPONSIVE CHECK
-  ========================================================= */
+
+  const profileName =
+    profileData?.warden_name ||
+    profileData?.name ||
+    profileData?.superior_warden_name ||
+    profileData?.security_name ||
+    profileData?.full_name ||
+    profileData?.username ||
+    "Profile";
+
+  const profileId =
+    profileData?.unique_id ||
+    profileData?.warden_id ||
+    profileData?.superior_id ||
+    profileData?.security_id ||
+    profileData?.employee_id ||
+    profileData?.id ||
+    "N/A";
+
+  const profileImagePath =
+    profileData?.image_path ||
+    profileData?.profile_image ||
+    profileData?.image ||
+    null;
+
+  const getProfileImage = () => {
+    if (!profileImagePath) {
+      return "https://via.placeholder.com/150";
+    }
+
+    // If backend already sends a complete URL
+    if (
+      profileImagePath.startsWith("http://") ||
+      profileImagePath.startsWith("https://")
+    ) {
+      return profileImagePath;
+    }
+
+    return `${BASE_URL || ""}${profileImagePath}`;
+  };
+
+  const profileImage = getProfileImage();
+
+
+  const profilePhone =
+    profileData?.mobile_number ||
+    profileData?.phone_number ||
+    profileData?.phone ||
+    profileData?.mobile ||
+    profileData?.["Phone number"] ||
+    "Not Available";
+
+
+  const profileActive =
+    profileData?.["Active Status"] ??
+    profileData?.active_status ??
+    profileData?.active ??
+    profileData?.is_active ??
+    false;
+
+
+  const profileGender =
+    profileData?.gender || "";
+
+  const profileCategory =
+    profileData?.category || "";
+
+
+  const profileJoinedDate =
+    profileData?.joined_date || "";
+
+
+  const handlingYears = Array.isArray(
+    profileData?.handling_year
+  )
+    ? profileData.handling_year
+    : Array.isArray(profileData?.handling_years)
+      ? profileData.handling_years
+      : Array.isArray(profileData?.["primary year"])
+        ? profileData["primary year"]
+        : [];
+
+  const handlingYearText = handlingYears
+    .map(
+      (year) =>
+        yearToAlphabet[year] || year
+    )
+    .join(", ");
+
+
+  const profileInchargeOf =
+    profileData?.incharge_of || "";
+
+
+  const profileTitle =
+    role === "student"
+      ? "YOUR WARDEN"
+      : "YOUR PROFILE";
+
+
+  let profileDescription = "";
+
+  if (isStudent) {
+    profileDescription = handlingYearText
+      ? `Handling ${handlingYearText}`
+      : "Your assigned warden";
+  }
+
+  if (isWarden) {
+    profileDescription = handlingYearText
+      ? `Handling ${handlingYearText}`
+      : "Hostel Warden";
+  }
+
+  if (isSuperior) {
+    profileDescription = handlingYearText
+      ? `Handling ${handlingYearText}`
+      : "Superior Warden";
+  }
+
+  if (role === "security") {
+    profileDescription = "Security";
+  }
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const mobile =
+        window.innerWidth <= 768;
 
-      if (window.innerWidth > 768) {
+      setIsMobile(mobile);
+
+      if (!mobile) {
         setShowProfile(false);
       }
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
     };
   }, []);
 
-  /* =========================================================
-     LOGOUT
-  ========================================================= */
+
+  const closeProfile = () => {
+    setShowProfile(false);
+  };
+
+
+  const handleProfileNavigation = (
+    event,
+    item
+  ) => {
+    
+
+    if (
+      isMobile &&
+      isStaff &&
+      item.label === "Profile"
+    ) {
+      event.preventDefault();
+
+      setShowProfile(
+        (previous) => !previous
+      );
+
+      return;
+    }
+
+    closeProfile();
+
+    if (setActiveNav) {
+      setActiveNav(item.path);
+    }
+  };
+
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/logout", {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        "/api/logout",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (response.ok) {
         Swal.fire({
           title: "Logged Out",
-          text: data.message || "You have been logged out successfully",
+          text:
+            data.message ||
+            "You have been logged out successfully",
           icon: "success",
           timer: 2000,
           showConfirmButton: false,
@@ -256,117 +497,99 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
       } else {
         Swal.fire({
           title: "Error",
-          text: data.error || data.message || "Logout failed",
+          text:
+            data.error ||
+            data.message ||
+            "Logout failed",
           icon: "error",
         });
       }
     } catch (error) {
-      console.error("Logout Error:", error);
+      console.error(
+        "Logout Error:",
+        error
+      );
 
       Swal.fire({
         title: "Error",
-        text: "Error connecting to the server",
+        text:
+          "Error connecting to the server",
         icon: "error",
       });
     }
   };
 
-  /* =========================================================
-     ROMAN YEAR CONVERTER
-  ========================================================= */
-
-  const toRoman = (num) => {
-    const romanMap = {
-      1: "I",
-      2: "II",
-      3: "III",
-      4: "IV",
-    };
-
-    return romanMap[num] || num;
-  };
-
-  const primaryYearArray = Array.isArray(wardenSlidebar?.["primary year"])
-    ? wardenSlidebar["primary year"]
-    : Array.isArray(wardenSlidebar?.["primary year"])
-      ? wardenSlidebar["primary year"]
-      : [];
-
-  const primaryYears = primaryYearArray.map(toRoman).join(", ") || "N/A";
-
-  const yearLabel = primaryYearArray.length === 1 ? "year" : "years";
-
-  /* =========================================================
-     IMAGE SOURCE
-     Change this if your project requires UrlParser
-  ========================================================= */
-
-  const wardenImage =
-    base_url + wardenSlidebar?.image_path || "https://via.placeholder.com/150";
-
-  /* =========================================================
-     RETURN
-  ========================================================= */
-
   return (
     <>
-      {/* =====================================================
-          MOBILE FLOATING BOTTOM DOCK
-      ===================================================== */}
-
       {isMobile ? (
         <>
           <nav className="Hostel-mobile-dock">
-            {/* NAVIGATION ITEMS */}
 
             {items.map((item) => {
               const isActive =
-                location.pathname === item.path ||
-                location.pathname.startsWith(`${item.path}/`);
+                location.pathname ===
+                item.path ||
+                location.pathname.startsWith(
+                  `${item.path}/`
+                );
 
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  className={`Hostel-mobile-dock-item ${
-                    isActive ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    setShowProfile(false);
-
-                    if (setActiveNav) {
-                      setActiveNav(item.path);
-                    }
-                  }}
+                  className={`Hostel-mobile-dock-item ${isActive
+                    ? "active"
+                    : ""
+                    } ${isStaff &&
+                      item.label === "Profile" &&
+                      showProfile
+                      ? "profile-open"
+                      : ""
+                    }`}
+                  onClick={(event) =>
+                    handleProfileNavigation(
+                      event,
+                      item
+                    )
+                  }
                 >
-                  <div className="Hostel-mobile-dock-icon">{item.icon}</div>
+                  <div className="Hostel-mobile-dock-icon">
+                    {item.icon}
+                  </div>
 
                   <span className="Hostel-mobile-dock-label">
-                    {item.mobileLabel || item.label}
+                    {item.mobileLabel ||
+                      item.label}
                   </span>
                 </NavLink>
               );
             })}
 
-            {/* STUDENT WARDEN BUTTON */}
 
             {role === "student" && (
               <button
                 type="button"
-                className={`Hostel-mobile-dock-item ${
-                  showProfile ? "warden-active" : ""
-                }`}
-                onClick={() => setShowProfile((prev) => !prev)}
+                className={`Hostel-mobile-dock-item ${showProfile
+                  ? "profile-open"
+                  : ""
+                  }`}
+                onClick={() =>
+                  setShowProfile(
+                    (previous) =>
+                      !previous
+                  )
+                }
               >
                 <div className="Hostel-mobile-dock-icon">
                   <User />
                 </div>
 
-                <span className="Hostel-mobile-dock-label">Warden</span>
+                <span className="Hostel-mobile-dock-label">
+                  Warden
+                </span>
               </button>
             )}
 
-            {/* LOGOUT */}
             <button
               type="button"
               className="Hostel-mobile-dock-item logout-mobile"
@@ -376,249 +599,341 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                 <CiLogout />
               </div>
 
-              <span className="Hostel-mobile-dock-label">Logout</span>
+              <span className="Hostel-mobile-dock-label">
+                Logout
+              </span>
             </button>
           </nav>
 
-          {/* =====================================================
-              MOBILE WARDEN PROFILE POPUP
-          ===================================================== */}
 
-          {showProfile && role === "student" && (
-            <>
-              <div
-                className="warden-popup-backdrop"
-                onClick={() => setShowProfile(false)}
-              />
+          {showProfile &&
+            (isStudent || isStaff) && (
+              <>
+                <div
+                  className="warden-popup-backdrop"
+                  onClick={closeProfile}
+                />
 
-              <div className="warden-profile-popup">
-                <div className="warden-popup-handle" />
+                <div className="warden-profile-popup">
 
-                {/* PROFILE HEADER */}
+                  <div className="warden-popup-handle" />
 
-                <div className="warden-profile-header">
-                  <div className="warden-popup-image-wrapper">
-                    <img
-                      src={wardenImage}
-                      alt={wardenSlidebar?.name || "Warden"}
-                      className="warden-popup-photo"
-                    />
+                  {/* PROFILE HEADER */}
 
-                    <span
-                      className={`warden-online-dot ${
-                        wardenSlidebar?.["Active Status"] ? "online" : "offline"
-                      }`}
-                    />
+                  <div className="warden-profile-header">
+
+                    <div className="warden-popup-image-wrapper">
+
+                      <img
+                        src={profileImage}
+                        alt={
+                          profileName
+                        }
+                        className="warden-popup-photo"
+                        onError={(
+                          event
+                        ) => {
+                          event.currentTarget.src =
+                            "https://via.placeholder.com/150";
+                        }}
+                      />
+
+                      <span
+                        className={`warden-online-dot ${profileActive
+                          ? "online"
+                          : "offline"
+                          }`}
+                      />
+
+                    </div>
+
+                    <div className="warden-popup-info">
+
+                      <span className="warden-popup-small-title">
+                        {profileTitle}
+                      </span>
+
+                      <h3>
+                        {profileName}
+                      </h3>
+
+                      <p>
+                        {profileDescription}
+                      </p>
+
+                    </div>
                   </div>
 
-                  <div className="warden-popup-info">
-                    <span className="warden-popup-small-title">
-                      YOUR WARDEN
+                  <div className="warden-popup-divider" />
+
+
+                  <a
+                    href={
+                      profilePhone !==
+                        "Not Available"
+                        ? `tel:${profilePhone}`
+                        : undefined
+                    }
+                    className="warden-contact-card"
+                  >
+
+                    <div className="warden-contact-icon">
+                      <Phone size={18} />
+                    </div>
+
+                    <div>
+                      <span>
+                        {isStudent
+                          ? "Contact Warden"
+                          : "Contact"}
+                      </span>
+
+                      <strong>
+                        {profilePhone}
+                      </strong>
+                    </div>
+
+                  </a>
+
+                  {isStudent && (
+                    <div className="warden-popup-status-row">
+                      <span>Current Status</span>
+
+                      <span
+                        className={`warden-popup-status ${profileActive ? "active" : "inactive"
+                          }`}
+                      >
+                        <span className="status-dot" />
+
+                        {profileActive
+                          ? "Available"
+                          : "Unavailable"}
+                      </span>
+                    </div>
+                  )}
+
+
+                  <div className="profile-popup-id-row">
+
+                    <span>
+                      ID
                     </span>
 
-                    <h3>{wardenSlidebar?.name || "Warden"}</h3>
-
-                    <p>
-                      Handling {primaryYears} {yearLabel}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="warden-popup-divider" />
-
-                {/* CONTACT */}
-
-                <a
-                  href={
-                    wardenSlidebar?.["Phone number"]
-                      ? `tel:${wardenSlidebar["Phone number"]}`
-                      : undefined
-                  }
-                  className="warden-contact-card"
-                >
-                  <div className="warden-contact-icon">
-                    <Phone size={18} />
-                  </div>
-
-                  <div>
-                    <span>Contact Warden</span>
-
                     <strong>
-                      {wardenSlidebar?.["Phone number"] || "Not Available"}
+                      {profileId}
                     </strong>
+
                   </div>
-                </a>
 
-                {/* STATUS */}
+                  {!isStudent && (
+                    <>
+                      {profileGender && (
+                        <div className="profile-popup-id-row">
+                          <span>
+                            Gender
+                          </span>
 
-                <div className="warden-popup-status-row">
-                  <span>Current Status</span>
+                          <strong>
+                            {profileGender}
+                          </strong>
+                        </div>
+                      )}
 
-                  <span
-                    className={`warden-popup-status ${
-                      wardenSlidebar?.["Active Status"] ? "active" : "inactive"
-                    }`}
+                      {profileCategory && (
+                        <div className="profile-popup-id-row">
+                          <span>
+                            Category
+                          </span>
+
+                          <strong>
+                            {profileCategory}
+                          </strong>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* CLOSE */}
+
+                  <button
+                    type="button"
+                    className="warden-popup-close"
+                    onClick={closeProfile}
                   >
-                    <span className="status-dot" />
+                    Close
+                  </button>
 
-                    {wardenSlidebar?.["Active Status"]
-                      ? "Available"
-                      : "Unavailable"}
-                  </span>
                 </div>
-
-                {/* CLOSE */}
-
-                <button
-                  type="button"
-                  className="warden-popup-close"
-                  onClick={() => setShowProfile(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </>
-          )}
+              </>
+            )}
         </>
       ) : (
-        /* =====================================================
-            DESKTOP SIDEBAR
-        ===================================================== */
 
         <aside className="Hostel-sidebar">
-          {/* =================================================
-              STUDENT WARDEN SECTION
-          ================================================= */}
 
-          {role === "student" && (
+          {(isStudent || isStaff) && (
             <>
+
               <div className="warden-sidebar-top">
+
                 <div className="warden-photo-container">
+
                   <img
-                    src={wardenImage}
-                    alt={wardenSlidebar?.name || "Warden"}
+                    src={profileImage}
+                    alt={profileName}
                     className="warden-photo"
+                    onError={(
+                      event
+                    ) => {
+                      event.currentTarget.src =
+                        "https://via.placeholder.com/150";
+                    }}
                   />
+
+                  {/* ONLINE STATUS */}
+
+                  <span
+                    className={`sidebar-profile-status ${profileActive
+                      ? "online"
+                      : "offline"
+                      }`}
+                  />
+
                 </div>
 
                 <div className="warden-sidebar-info">
-                  <span className="warden-title">YOUR WARDEN</span>
+
+                  <span className="warden-title">
+                    {profileTitle}
+                  </span>
 
                   <h3 className="sidebar-warden-name">
-                    {wardenSlidebar?.name || "Warden"}
+                    {profileName}
                   </h3>
 
                   <p className="warden-years">
-                    Handling{" "}
-                    <span>
-                      {primaryYears} {yearLabel}
-                    </span>
+                    {profileDescription}
                   </p>
+
                 </div>
+
               </div>
 
-              {/* CONTACT */}
-
               <div className="warden-contact">
+
                 <a
                   href={
-                    wardenSlidebar?.["Phone number"]
-                      ? `tel:${wardenSlidebar["Phone number"]}`
+                    profilePhone !==
+                      "Not Available"
+                      ? `tel:${profilePhone}`
                       : undefined
                   }
                   className="warden-mobile"
                 >
+
                   <Phone size={15} />
 
                   <span>
-                    {wardenSlidebar?.["Phone number"] || "Not Available"}
+                    {profilePhone}
                   </span>
+
                 </a>
 
-                {/* STATUS */}
+                {isStudent && (
+                  <div className="warden-status-row">
+                    <span>Status</span>
 
-                <div className="warden-status-row">
-                  <span>Status</span>
+                    <span
+                      className={`warden-status ${profileActive ? "active" : "inactive"
+                        }`}
+                    >
+                      <span className="warden-status-dot" />
 
-                  <span
-                    className={`warden-status ${
-                      wardenSlidebar?.["Active Status"] ? "active" : "inactive"
-                    }`}
-                  >
-                    <span className="warden-status-dot" />
+                      {profileActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                )}
 
-                    {wardenSlidebar?.["Active Status"] ? "Active" : "Inactive"}
-                  </span>
-                </div>
               </div>
+
             </>
           )}
 
-          {/* =================================================
-              DESKTOP NAVIGATION
-          ================================================= */}
-
           <div className="Hostel-sidebar-content">
+
             <div className="Hostel-sidebar-menu">
+
               <nav>
+
                 {items.map((item) => {
+
                   const isActive =
-                    location.pathname === item.path ||
-                    location.pathname.startsWith(`${item.path}/`);
+                    location.pathname ===
+                    item.path ||
+                    location.pathname.startsWith(
+                      `${item.path}/`
+                    );
 
                   return (
-                    <div key={item.path} className="Hostel-nav-item-wrapper">
+                    <div
+                      key={item.path}
+                      className="Hostel-nav-item-wrapper"
+                    >
+
                       <NavLink
                         to={item.path}
-                        className={`Hostel-nav-button ${
-                          isActive ? "Hostel-nav-active" : ""
-                        }`}
+                        className={`Hostel-nav-button ${isActive
+                          ? "Hostel-nav-active"
+                          : ""
+                          }`}
                         onClick={() => {
-                          if (setActiveNav) {
-                            setActiveNav(item.path);
+
+                          closeProfile();
+
+                          if (
+                            setActiveNav
+                          ) {
+                            setActiveNav(
+                              item.path
+                            );
                           }
+
                         }}
                       >
+
                         {item.icon}
 
-                        <span>{item.label}</span>
+                        <span>
+                          {item.label}
+                        </span>
+
                       </NavLink>
 
-                      {item.showProfileCard && (
-                        <div className="Hostel-nav-flyout-card">
-                          <img
-                            src={wardenSelfImage}
-                            alt={wardenSelfName}
-                            className="Hostel-nav-flyout-photo"
-                          />
-                          <div className="Hostel-nav-flyout-info">
-                            <p className="Hostel-nav-flyout-name">
-                              {wardenSelfName}
-                            </p>
-                            <p className="Hostel-nav-flyout-id">
-                              ID: {wardenSelfId}
-                            </p>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
-                })}
 
-                {/* LOGOUT */}
+                })}
 
                 <button
                   type="button"
                   className="Logout-container"
                   onClick={handleLogout}
                 >
+
                   <CiLogout className="Hostel-icon" />
 
-                  <span className="Logout-button">Logout</span>
+                  <span className="Logout-button">
+                    Logout
+                  </span>
+
                 </button>
+
               </nav>
+
             </div>
+
           </div>
+
         </aside>
       )}
     </>

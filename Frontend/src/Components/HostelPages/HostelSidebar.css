@@ -1,9 +1,3 @@
-/* =========================================================
-   HOSTEL SIDEBAR — ULTRA PREMIUM ANIMATED EXPERIENCE
-   SAME MAROON + GOLD THEME
-   DESKTOP: CINEMATIC INTERACTIONS
-   MOBILE: SAME STRUCTURE + EQUAL ICON DISTRIBUTION
-========================================================= */
 
 :root {
   --header-height: 125px;
@@ -24,9 +18,6 @@
   --text-muted: #a8a8ad;
 }
 
-/* =========================================================
-   DESKTOP SIDEBAR BASE
-========================================================= */
 
 .Hostel-sidebar {
   width: 16rem;
@@ -63,11 +54,6 @@
     both;
 }
 
-
-/* =========================================================
-   LAYER 1 — AMBIENT MOVING LIGHT
-========================================================= */
-
 .Hostel-sidebar::before {
   content: "";
 
@@ -100,9 +86,6 @@
 }
 
 
-/* =========================================================
-   LAYER 2 — FLOATING LIGHT ORB
-========================================================= */
 
 .Hostel-sidebar::after {
   content: "";
@@ -135,10 +118,6 @@
     floating-orb 11s ease-in-out infinite alternate;
 }
 
-
-/* =========================================================
-   SIDEBAR ENTRANCE
-========================================================= */
 
 @keyframes sidebar-cinematic-enter {
 
@@ -199,10 +178,6 @@
 }
 
 
-/* =========================================================
-   CONTENT LAYER
-========================================================= */
-
 .warden-sidebar-top,
 .warden-contact,
 .Hostel-sidebar-content {
@@ -210,10 +185,6 @@
   z-index: 2;
 }
 
-
-/* =========================================================
-   ANIMATED GOLD EDGE
-========================================================= */
 
 .Hostel-sidebar-content::before {
   content: "";
@@ -256,10 +227,6 @@
   }
 }
 
-
-/* =========================================================
-   WARDEN PROFILE TOP
-========================================================= */
 
 .warden-sidebar-top {
   position: relative;
@@ -344,10 +311,6 @@
 }
 
 
-/* =========================================================
-   PROFILE IMAGE
-========================================================= */
-
 .warden-photo {
   width: 56px;
   height: 56px;
@@ -384,10 +347,6 @@
     0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
-
-/* =========================================================
-   PROFILE TEXT
-========================================================= */
 
 .warden-sidebar-info {
   min-width: 0;
@@ -456,9 +415,6 @@
 }
 
 
-/* =========================================================
-   CONTACT SECTION
-========================================================= */
 
 .warden-contact {
   padding: 0.8rem 1rem;
@@ -530,9 +486,6 @@
 }
 
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 .warden-status-row {
   display: flex;
@@ -667,9 +620,6 @@
 }
 
 
-/* =========================================================
-   NAVIGATION BUTTON
-========================================================= */
 
 .Hostel-nav-button {
   position: relative;
@@ -744,10 +694,6 @@
 }
 
 
-/* =========================================================
-   LIQUID HOVER LAYER
-========================================================= */
-
 .Hostel-nav-button::before {
   content: "";
 
@@ -812,10 +758,6 @@
 }
 
 
-/* =========================================================
-   ICON
-========================================================= */
-
 .Hostel-nav-button svg {
   width: 19px;
   height: 19px;
@@ -827,11 +769,6 @@
     transform 0.45s
     cubic-bezier(0.16, 1.4, 0.3, 1);
 }
-
-
-/* =========================================================
-   HOVER EXPERIENCE
-========================================================= */
 
 .Hostel-nav-button:hover:not(.Hostel-nav-active) {
   color: white;
@@ -866,9 +803,6 @@
 }
 
 
-/* =========================================================
-   ACTIVE NAVIGATION — PREMIUM SPOTLIGHT
-========================================================= */
 
 .Hostel-nav-active {
   position: relative;
@@ -994,10 +928,6 @@
   }
 }
 
-
-/* =========================================================
-   LOGOUT
-========================================================= */
 
 .Logout-container {
   position: relative;
@@ -1146,19 +1076,10 @@
 }
 
 
-/* =========================================================
-   MOBILE — DO NOT CHANGE STRUCTURE
-========================================================= */
-
 .Hostel-mobile-dock {
   display: none;
 }
 
-
-/* =========================================================
-   MOBILE VIEW
-   ONLY IMPROVEMENT: EQUAL DISTRIBUTION
-========================================================= */
 
 @media (max-width: 768px) {
 
@@ -1267,10 +1188,6 @@
 }
 
 
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
 @media (max-width: 420px) {
 
   .Hostel-mobile-dock {
@@ -1286,10 +1203,6 @@
     font-size: 9px;
   }
 }
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
@@ -1352,9 +1265,6 @@
   margin: 0;
   color: #888;
 }
-/* =========================================================
-   MOBILE — WARDEN PROFILE POPUP
-========================================================= */
 
 .warden-popup-backdrop {
   position: fixed;
@@ -1622,4 +1532,258 @@
   justify-content: center;
   min-height: 60vh;
   width: 100%;
+}
+
+.warden-sidebar-top {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  padding: 1.15rem 1rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  overflow: hidden;
+
+  animation:
+    profile-drop 0.75s 0.15s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+
+.warden-sidebar-top::before {
+  content: "";
+
+  position: absolute;
+
+  top: -80%;
+  left: -60%;
+
+  width: 35%;
+  height: 260%;
+
+  transform: rotate(25deg);
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+
+  animation:
+    profile-shine 7s ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+@keyframes profile-shine {
+
+  0%,
+  70% {
+    left: -60%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+@keyframes profile-drop {
+
+  from {
+    opacity: 0;
+    transform: translateY(-35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.warden-photo-container {
+  position: relative;
+
+  width: 56px;
+  height: 56px;
+
+  flex-shrink: 0;
+
+  margin-right: 0.9rem;
+}
+
+.warden-photo {
+  width: 56px;
+  height: 56px;
+
+  display: block;
+
+  object-fit: cover;
+
+  border-radius: 18px;
+
+  border:
+    2px solid var(--hostel-gold);
+
+  background: #242428;
+
+  box-shadow:
+    0 0 0 4px rgba(253, 205, 3, 0.08),
+    0 10px 25px rgba(0, 0, 0, 0.28);
+
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s ease,
+    border-radius 0.5s ease;
+}
+
+.warden-sidebar-top:hover .warden-photo {
+  transform:
+    rotate(-4deg)
+    scale(1.08);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 7px rgba(253, 205, 3, 0.1),
+    0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-profile-status {
+  position: absolute;
+
+  right: -2px;
+  bottom: -2px;
+
+  width: 13px;
+  height: 13px;
+
+  border-radius: 50%;
+
+  border:
+    2px solid var(--sidebar-dark);
+
+  z-index: 5;
+}
+
+.sidebar-profile-status.online {
+  background: #4ade80;
+
+  box-shadow:
+    0 0 0 0 rgba(74, 222, 128, 0.65);
+
+  animation:
+    sidebar-online-pulse 2s infinite;
+}
+
+.sidebar-profile-status.offline {
+  background: #77777d;
+}
+
+@keyframes sidebar-online-pulse {
+
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(74, 222, 128, 0.65);
+  }
+
+  70% {
+    box-shadow:
+      0 0 0 7px rgba(74, 222, 128, 0);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+.warden-sidebar-info {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.warden-title {
+  display: block;
+
+  font-size: 0.56rem;
+
+  font-weight: 800;
+
+  letter-spacing: 0.15em;
+
+  color: var(--hostel-gold);
+
+  margin-bottom: 0.25rem;
+
+  line-height: 1.2;
+
+  animation:
+    title-glow 3s ease-in-out infinite;
+}
+
+@keyframes title-glow {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+
+    text-shadow:
+      0 0 12px rgba(253, 205, 3, 0.3);
+  }
+}
+
+.sidebar-warden-name {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 1rem;
+
+  font-weight: 700;
+
+  line-height: 1.3;
+
+  max-width: 145px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.warden-years {
+  margin: 0.3rem 0 0;
+
+  color: #98989e;
+
+  font-size: 0.72rem;
+
+  line-height: 1.35;
+
+  max-width: 150px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
