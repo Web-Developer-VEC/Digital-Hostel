@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Search, X, FileText, Send, CheckCircle } from 'lucide-react';
-import './SuperiorRequest.css';
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { ToastContainer, toast } from 'react-toastify';
-import axiosInstance from '../../../api/axios';
+import React, { useState, useEffect } from "react";
+import { Search, X, FileText, Send, CheckCircle } from "lucide-react";
+import "./SuperiorRequest.css";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { ToastContainer, toast } from "react-toastify";
+import axiosInstance from "../../../api/axios";
 
 function SuperiorRequest() {
   const [records, setRecords] = useState([]);
@@ -13,9 +13,14 @@ function SuperiorRequest() {
   const [passTypes, setPassTypes] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isMedical, setIsMedical] = useState(false);
-  const [activeGender, setActiveGender] = useState('');
+  const [activeGender, setActiveGender] = useState("");
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ year: '', department: '', passType: '', search: '' });
+  const [filters, setFilters] = useState({
+    year: "",
+    department: "",
+    passType: "",
+    search: "",
+  });
 
   // Parent OTP flow state
   const [otpError, setOtpError] = useState("");
@@ -28,24 +33,24 @@ function SuperiorRequest() {
   // Mapping Department Codes to Full Names
   const departmentLabels = {
     "AI&DS": "AI",
-    "AUTO": "Automobile",
-    "CIVIL": "Civil",
-    "CSE": "Computer Science",
-    "CYBER": "Cyber",
-    "EEE": "EEE",
-    "ECE": "ECE",
-    "EIE": "EIE",
-    "IT": "IT",
-    "MECH": "Mechanical",
-    "MBA": "MBA"
+    AUTO: "Automobile",
+    CIVIL: "Civil",
+    CSE: "Computer Science",
+    CYBER: "Cyber",
+    EEE: "EEE",
+    ECE: "ECE",
+    EIE: "EIE",
+    IT: "IT",
+    MECH: "Mechanical",
+    MBA: "MBA",
   };
 
   // Mapping Pass Types to Labels
   const passTypeLabels = {
-    "od": "OD",
-    "outpass": "Out Pass",
-    "staypass": "Stay Pass",
-    "leave": "Leave"
+    od: "OD",
+    outpass: "Out Pass",
+    staypass: "Stay Pass",
+    leave: "Leave",
   };
 
   // Normalizes parent_approval (which may be null, a boolean, or a
@@ -66,10 +71,9 @@ function SuperiorRequest() {
   };
 
   const handleGenderFilter = (gender) => {
-    const newGender = activeGender === gender ? '' : gender; // Toggle selection
+    const newGender = activeGender === gender ? "" : gender; // Toggle selection
     setActiveGender(newGender);
   };
-
 
   useEffect(() => {
     fetchWardenDetails();
@@ -78,7 +82,7 @@ function SuperiorRequest() {
 
   const fetchWardenDetails = async () => {
     try {
-      const response = await axiosInstance.get('/api/sidebar_warden');
+      const response = await axiosInstance.get("/api/sidebar_warden");
       // We don't overwrite wardenYears with year years because we handle academic years (1, 2, 3, 4) in this dashboard.
     } catch (error) {
       console.error("Error fetching warden details:", error);
@@ -88,14 +92,16 @@ function SuperiorRequest() {
   const fetchPendingPasses = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('/api/fetch_passes_');
+      const response = await axiosInstance.get("/api/fetch_passes_");
       const data = response.data;
       console.log("Data", data);
       if (data.data && data.data.length > 0) {
         setRecords(data.data);
-        setDepartments([...new Set(data.data.map(pass => pass.dept))]);
-        setPassTypes([...new Set(data.data.map(pass => pass.passtype))]);
-        setWardenYears([...new Set([1, 2, 3, 4, ...data.data.map(pass => pass.year)])]);
+        setDepartments([...new Set(data.data.map((pass) => pass.dept))]);
+        setPassTypes([...new Set(data.data.map((pass) => pass.passtype))]);
+        setWardenYears([
+          ...new Set([1, 2, 3, 4, ...data.data.map((pass) => pass.year)]),
+        ]);
       } else {
         setRecords([]);
         setWardenYears([1, 2, 3, 4]);
@@ -110,51 +116,60 @@ function SuperiorRequest() {
   };
 
   const handleAccept = async (pass_id, medical_status, comment) => {
-    console.log("🔵 Sending Accept request for pass_id:", pass_id, "Medical:", medical_status);
+    console.log(
+      "🔵 Sending Accept request for pass_id:",
+      pass_id,
+      "Medical:",
+      medical_status,
+    );
 
     try {
-      const response = await axiosInstance.post('/api/warden_decision', {
+      const response = await axiosInstance.post("/api/warden_decision", {
         pass_id,
-        action: 'approve',
+        action: "approve",
         medical_status,
-        comment
+        comment,
       });
 
       console.log("✅ Pass accepted successfully:", response.data);
-      setRecords(records.filter(record => record.pass_id !== pass_id));
+      setRecords(records.filter((record) => record.pass_id !== pass_id));
       setSelectedRecord(null);
       Swal.fire({
         title: "Success!",
         text: "✅ Pass request accepted successfully.",
         icon: "success",
         showConfirmButton: false,
-        timer: 2000
+        timer: 2000,
       });
     } catch (error) {
       console.error("❌ Error accepting pass:", error);
     }
   };
 
-
   const handleDecline = async (pass_id, medical_status, comment) => {
-    console.log("🔴 Decline button clicked for pass_id:", pass_id, "Medical:", medical_status);
+    console.log(
+      "🔴 Decline button clicked for pass_id:",
+      pass_id,
+      "Medical:",
+      medical_status,
+    );
     try {
-      const response = await axiosInstance.post('/api/warden_decision', {
+      const response = await axiosInstance.post("/api/warden_decision", {
         pass_id,
-        action: 'reject',
+        action: "reject",
         medical_status,
-        comment
+        comment,
       });
 
       console.log("✅ Pass declined successfully:", response.data);
-      setRecords(records.filter(record => record.pass_id !== pass_id));
+      setRecords(records.filter((record) => record.pass_id !== pass_id));
       setSelectedRecord(null);
       Swal.fire({
         title: "Success!",
         text: "✅ Pass request declined successfully.",
         icon: "success",
         showConfirmButton: false,
-        timer: 2000
+        timer: 2000,
       });
     } catch (error) {
       console.error("❌ Error declining pass:", error);
@@ -165,7 +180,7 @@ function SuperiorRequest() {
 
   const handleSendParentOTP = async (pass_id) => {
     try {
-      await axiosInstance.post('/api/send_parent_otp', { pass_id });
+      await axiosInstance.post("/api/send_parent_otp", { pass_id });
 
       toast.success(
         "OTP has been sent to the parent's registered mobile number.",
@@ -257,7 +272,7 @@ function SuperiorRequest() {
     }
 
     try {
-      const response = await axiosInstance.post('/api/verify_parent_otp', {
+      const response = await axiosInstance.post("/api/verify_parent_otp", {
         pass_id: otpPassId,
         otp: enteredOtp,
       });
@@ -311,7 +326,7 @@ function SuperiorRequest() {
     }, 100);
   };
 
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = records.filter((record) => {
     const searchQuery = filters.search.toLowerCase();
     return (
       (!activeGender || record.gender === activeGender) &&
@@ -321,8 +336,7 @@ function SuperiorRequest() {
       (!filters.search ||
         record.name.toLowerCase().includes(searchQuery) ||
         record.room_no.toLowerCase().includes(searchQuery) ||
-        record.place_to_visit.toLowerCase().includes(searchQuery)
-      )
+        record.place_to_visit.toLowerCase().includes(searchQuery))
     );
   });
 
@@ -345,40 +359,61 @@ function SuperiorRequest() {
               type="text"
               placeholder="Search by Name, Room No, or Place..."
               className="SR-search-input"
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, search: e.target.value }))
+              }
             />
           </div>
 
           <div className="SR-filters">
             <div className="SR-gender-buttons">
               <button
-                className={`SR-gender-button ${activeGender === 'Male' ? 'SR-gender-button-active' : ''}`}
-                onClick={() => handleGenderFilter(activeGender === 'Male' ? '' : 'Male')}
+                className={`SR-gender-button ${activeGender === "Male" ? "SR-gender-button-active" : ""}`}
+                onClick={() =>
+                  handleGenderFilter(activeGender === "Male" ? "" : "Male")
+                }
               >
                 Boys
               </button>
               <button
-                className={`SR-gender-button ${activeGender === 'Female' ? 'SR-gender-button-active' : ''}`}
-                onClick={() => handleGenderFilter(activeGender === 'Female' ? '' : 'Female')}
+                className={`SR-gender-button ${activeGender === "Female" ? "SR-gender-button-active" : ""}`}
+                onClick={() =>
+                  handleGenderFilter(activeGender === "Female" ? "" : "Female")
+                }
               >
                 Girls
               </button>
             </div>
             {/* Year Filter (Dynamically Generated) */}
-            <select className="SR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}>
+            <select
+              className="SR-filter-select"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, year: e.target.value }))
+              }
+            >
               <option value="">All Years</option>
-              {wardenYears.map(year => (
+              {wardenYears.map((year) => (
                 <option key={year} value={year}>
-                  {year === 1 ? "First Year" :
-                    year === 2 ? "Second Year" :
-                      year === 3 ? "Third Year" :
-                        year === 4 ? "Fourth Year" : `year ${year}`}
+                  {year === 1
+                    ? "First Year"
+                    : year === 2
+                      ? "Second Year"
+                      : year === 3
+                        ? "Third Year"
+                        : year === 4
+                          ? "Fourth Year"
+                          : `year ${year}`}
                 </option>
               ))}
             </select>
 
             {/* Department Filter */}
-            <select className="SR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}>
+            <select
+              className="SR-filter-select"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, department: e.target.value }))
+              }
+            >
               <option value="">All Departments</option>
               {departments.length > 0 ? (
                 departments.map((dept) => (
@@ -392,7 +427,12 @@ function SuperiorRequest() {
             </select>
 
             {/* Pass Type Filter (Dynamically Generated) */}
-            <select className="SR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, passType: e.target.value }))}>
+            <select
+              className="SR-filter-select"
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, passType: e.target.value }))
+              }
+            >
               <option value="">All Types</option>
               {passTypes.length > 0 ? (
                 passTypes.map((type) => (
@@ -405,16 +445,29 @@ function SuperiorRequest() {
               )}
             </select>
 
-            <div className='superior-req-button'>
-              <button onClick={() => navigate('/hostel/superior/requests/Profile-Change-Request')} className='profile-change-button'>
+            <div className="superior-req-button">
+              <button
+                onClick={() =>
+                  navigate("/hostel/superior/requests/Profile-Change-Request")
+                }
+                className="profile-change-button"
+              >
                 Profile Change Requests
               </button>
 
-              <button onClick={() => navigate('/hostel/superior/requests/vacate')} className='profile-change-button'>
+              <button
+                onClick={() => navigate("/hostel/superior/requests/vacate")}
+                className="profile-change-button"
+              >
                 Vacate Requests
               </button>
 
-              <button onClick={() => navigate('/hostel/superior/requests/Prev-Requests')} className='prev-requests-button'>
+              <button
+                onClick={() =>
+                  navigate("/hostel/superior/requests/Prev-Requests")
+                }
+                className="prev-requests-button"
+              >
                 Pass Log History
               </button>
             </div>
@@ -422,11 +475,17 @@ function SuperiorRequest() {
         </div>
 
         {loading ? (
-          <p>⏳ Loading pending passes...</p>
+          <p className="SR-loading-message">⏳ Loading pending passes...</p>
         ) : filteredRecords.length === 0 ? (
-          <p className="no-records-message">📋 No pending pass requests found.</p>
+          <div className="SR-no-data-message">
+            <div className="SR-no-data-icon">📋</div>
+            <p className="SR-no-data-title">No pending pass requests</p>
+            <p className="SR-no-data-subtext">
+              New requests will show up here as soon as they come in.
+            </p>
+          </div>
         ) : (
-          <div className='SR-table-container'>
+          <div className="SR-table-container">
             <table className="SR-table">
               <thead>
                 <tr>
@@ -456,23 +515,47 @@ function SuperiorRequest() {
                   };
 
                   return (
-                    <tr key={record.pass_id} className={getRowClass(record.late_count)} onClick={() => setSelectedRecord(record)}>
+                    <tr
+                      key={record.pass_id}
+                      className={getRowClass(record.late_count)}
+                      onClick={() => setSelectedRecord(record)}
+                    >
                       <td>{record.name}</td>
-                      <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td>
-                      <td>{record.room_no}</td>
-                      <td>{new Date(record.request_date_time).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
-                      <td>{passTypeLabels[record.passtype] || record.passtype}</td>
-                      <td>{new Date(record.from).toLocaleDateString('en-GB').replace(/\//g, ' - ')}</td>
                       <td>
-                        <span className={`SR-late-circle ${getRowClass(record.late_count)}`}>
+                        {["I", "II", "III", "IV"][record.year - 1] ||
+                          record.year}
+                      </td>
+                      <td>{record.room_no}</td>
+                      <td>
+                        {new Date(record.request_date_time)
+                          .toLocaleDateString("en-GB")
+                          .replace(/\//g, " - ")}
+                      </td>
+                      <td>
+                        {passTypeLabels[record.passtype] || record.passtype}
+                      </td>
+                      <td>
+                        {new Date(record.from)
+                          .toLocaleDateString("en-GB")
+                          .replace(/\//g, " - ")}
+                      </td>
+                      <td>
+                        <span
+                          className={`SR-late-circle ${getRowClass(record.late_count)}`}
+                        >
                           {record.late_count}
                         </span>
                       </td>
                       <td>
-                        <span className={`SR-status-circle ${getStatusClass(record.parent_approval)}`}>
-                          {getParentApprovalStatus(record.parent_approval) === "approved"
+                        <span
+                          className={`SR-status-circle ${getStatusClass(record.parent_approval)}`}
+                        >
+                          {getParentApprovalStatus(record.parent_approval) ===
+                          "approved"
                             ? "Accepted"
-                            : getParentApprovalStatus(record.parent_approval) === "declined"
+                            : getParentApprovalStatus(
+                                  record.parent_approval,
+                                ) === "declined"
                               ? "Declined"
                               : "Pending"}
                         </span>
@@ -598,7 +681,15 @@ const PairedInfo = ({ left, right }) => (
   </div>
 );
 
-function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, isMedical, setIsMedical }) {
+function DetailModal({
+  record,
+  onClose,
+  onAccept,
+  onDecline,
+  onSendParentOTP,
+  isMedical,
+  setIsMedical,
+}) {
   const [showDocument, setShowDocument] = useState(false);
   const [comment, setComment] = useState("");
 
@@ -622,18 +713,22 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
   const fromDateTime = new Date(record.from);
   const toDateTime = new Date(record.to);
 
-  const formattedFromDate = fromDateTime.toLocaleDateString('en-GB').replace(/\//g, ' - '); // Format: DD - MM - YYYY
-  const formattedFromTime = fromDateTime.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
+  const formattedFromDate = fromDateTime
+    .toLocaleDateString("en-GB")
+    .replace(/\//g, " - "); // Format: DD - MM - YYYY
+  const formattedFromTime = fromDateTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   }); // Format: HH:MM AM/PM
 
-  const formattedToDate = toDateTime.toLocaleDateString('en-GB').replace(/\//g, ' - '); // Format: DD - MM - YYYY
-  const formattedToTime = toDateTime.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
+  const formattedToDate = toDateTime
+    .toLocaleDateString("en-GB")
+    .replace(/\//g, " - "); // Format: DD - MM - YYYY
+  const formattedToTime = toDateTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   }); // Format: HH:MM AM/PM
 
   const handleDocumentButtonClick = (e) => {
@@ -646,7 +741,7 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     setTimeout(() => {
@@ -659,7 +754,8 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
     e.stopPropagation(); // Prevent click from propagating to overlay
   };
 
-  const handleMedicalChange = (e) => {  // <--- Here's the declaration
+  const handleMedicalChange = (e) => {
+    // <--- Here's the declaration
     setIsMedical(e.target.checked);
   };
 
@@ -669,24 +765,24 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
   };
 
   const getLateCountClass = (lateCount) => {
-    if (lateCount < 3) return "SR-status-green";  // Green
+    if (lateCount < 3) return "SR-status-green"; // Green
     if (lateCount <= 5) return "SR-status-orange"; // Orange
     return "SR-status-red"; // Red
   };
 
   const passTypeLabels = {
-    "od": "OD",
-    "outpass": "Out Pass",
-    "staypass": "Stay Pass",
-    "leave": "Leave"
+    od: "OD",
+    outpass: "Out Pass",
+    staypass: "Stay Pass",
+    leave: "Leave",
   };
 
   const reasonTypeLabels = {
-    "intern": "Intern",
-    "semester": "Semester",
-    "festival": "Festival",
-    "medical": "Medical",
-    "others": "Other"
+    intern: "Intern",
+    semester: "Semester",
+    festival: "Festival",
+    medical: "Medical",
+    others: "Other",
   };
 
   const BASE_URL = process.env.REACT_APP_QR_URL;
@@ -696,8 +792,12 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
   };
 
   return (
-    <div className="AR-modal-overlay" onClick={handleOverlayClick}> {/* Overlay click handler for main modal */}
-      <div className="AR-modal-container" onClick={handleModalClick}> {/* Modal click handler */}
+    <div className="AR-modal-overlay" onClick={handleOverlayClick}>
+      {" "}
+      {/* Overlay click handler for main modal */}
+      <div className="AR-modal-container" onClick={handleModalClick}>
+        {" "}
+        {/* Modal click handler */}
         <div className="AR-modal-content">
           <div className="AR-modal-header">
             <h2 className="AR-title">Request Details</h2>
@@ -724,15 +824,17 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
                   <span className="AR-badge AR-badge-primary">
                     {passTypeLabels[record.passtype] || record.passtype}
                   </span>
-                )
+                ),
               }}
               right={{
                 label: "Late Count",
                 value: (
-                  <span className={`SR-late-circle ${getLateCountClass(record.late_count)}`}>
+                  <span
+                    className={`SR-late-circle ${getLateCountClass(record.late_count)}`}
+                  >
                     {record.late_count}
                   </span>
-                )
+                ),
               }}
             />
 
@@ -753,14 +855,15 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
                   <span className="AR-badge SR-badge-secondary">
                     {reasonTypeLabels[record.reason_type] || record.reason_type}
                   </span>
-                )
+                ),
               }}
             />
 
             <div className="AR-parent-section">
               <span>Parent Approval</span>
 
-              {getParentApprovalStatus(record.parent_approval) === "approved" ? (
+              {getParentApprovalStatus(record.parent_approval) ===
+              "approved" ? (
                 <span className="AR-otp-verified-badge">
                   <CheckCircle size={16} />
                   Verified
@@ -780,7 +883,8 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
               )}
             </div>
 
-            {(record.parent_approval === null || record.parent_approval === false) && (
+            {(record.parent_approval === null ||
+              record.parent_approval === false) && (
               <div className="AR-warden-note">
                 <span className="AR-label-warden">Warden notes</span>
                 <textarea
@@ -790,15 +894,14 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
               </div>
             )}
 
-
-            {record.reason_type === 'others' && (
+            {record.reason_type === "others" && (
               <div className="AR-additional-info">
                 <span className="AR-label">Additional Details</span>
-                <p className="AR-value">{record.reason_for_visit || ''}</p>
+                <p className="AR-value">{record.reason_for_visit || ""}</p>
               </div>
             )}
 
-            {record.passtype === 'outpass' && (
+            {record.passtype === "outpass" && (
               <div className="AR-medical-checkbox">
                 <label className="AR-checkbox-label">
                   <input
@@ -813,15 +916,16 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
             )}
           </div>
 
-          {(record.passtype === 'od' || record.passtype === 'leave') && record.file_path && (
-            <button
-              onClick={handleDocumentButtonClick}  // Use the new handler
-              className="AR-document-button"
-            >
-              <FileText className="AR-icon" />
-              <span>View Document</span>
-            </button>
-          )}
+          {(record.passtype === "od" || record.passtype === "leave") &&
+            record.file_path && (
+              <button
+                onClick={handleDocumentButtonClick} // Use the new handler
+                className="AR-document-button"
+              >
+                <FileText className="AR-icon" />
+                <span>View Document</span>
+              </button>
+            )}
 
           <div className="AR-modal-footer">
             <button
@@ -834,7 +938,7 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
                   confirmButtonColor: "#dc3545",
                   cancelButtonColor: "#6c757d",
                   confirmButtonText: "Yes, Decline",
-                  cancelButtonText: "Cancel"
+                  cancelButtonText: "Cancel",
                 }).then((result) => {
                   if (result.isConfirmed) {
                     onDecline(record.pass_id, isMedical, comment);
@@ -855,7 +959,7 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
                   confirmButtonColor: "#28a745",
                   cancelButtonColor: "#6c757d",
                   confirmButtonText: "Yes, Accept",
-                  cancelButtonText: "Cancel"
+                  cancelButtonText: "Cancel",
                 }).then((result) => {
                   if (result.isConfirmed) {
                     onAccept(record.pass_id, isMedical, comment);
@@ -867,18 +971,18 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
               Accept
             </button>
           </div>
-
         </div>
       </div>
-
       {showDocument && (
         <div className="AR-document-modal" onClick={handleOverlayClick}>
           <div className="AR-document-container" onClick={handleModalClick}>
-
             {/* Header */}
             <div className="AR-document-header">
               <h3 className="AR-document-title">Document Preview</h3>
-              <button onClick={() => setShowDocument(false)} className="AR-close-button">
+              <button
+                onClick={() => setShowDocument(false)}
+                className="AR-close-button"
+              >
                 <X className="AR-icon" />
               </button>
             </div>
@@ -887,18 +991,29 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
             <div className="AR-document-content">
               {(() => {
                 const fileUrl = UrlParser(record.file_path); // get parsed URL
-                const fileExtension = fileUrl.split('.').pop().toLowerCase();
+                const fileExtension = fileUrl.split(".").pop().toLowerCase();
 
-                if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
-                  return <img src={fileUrl} alt="Document Preview" className="AR-document-image" />;
-                } else if (fileExtension === 'pdf') {
+                if (
+                  ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
+                    fileExtension,
+                  )
+                ) {
+                  return (
+                    <img
+                      src={fileUrl}
+                      alt="Document Preview"
+                      className="AR-document-image"
+                    />
+                  );
+                } else if (fileExtension === "pdf") {
                   return (
                     <iframe
                       src={fileUrl}
                       title="PDF Document"
                       className="AR-document-frame"
                     >
-                      Your browser does not support PDF viewing. <a href={fileUrl}>Download PDF</a>
+                      Your browser does not support PDF viewing.{" "}
+                      <a href={fileUrl}>Download PDF</a>
                     </iframe>
                   );
                 } else {
@@ -906,12 +1021,9 @@ function DetailModal({ record, onClose, onAccept, onDecline, onSendParentOTP, is
                 }
               })()}
             </div>
-
           </div>
         </div>
       )}
-
-
     </div>
   );
 }
