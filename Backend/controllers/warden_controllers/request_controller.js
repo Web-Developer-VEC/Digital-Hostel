@@ -1,4 +1,5 @@
 const { getDb } = require("../../config/db");
+const moment = require("moment-timezone");
 
 async function getFoodRequestChange(req, res) {
   try {
@@ -55,9 +56,7 @@ async function foodChangeApprove(req, res) {
     }
 
     let updateMessage = "Food type change request declined";
-    const currentTime = new Date();
-    const istTime = new Date(currentTime.getTime() + 5.5 * 60 * 60 * 1000);
-    const updateTimeIST = new Date(istTime.getTime() + 24 * 60 * 60 * 1000);
+    const updateTimeIST = moment.tz().add(1, "day").toDate();
 
     if (action === "approve") {
       await cronCollection.insertOne({

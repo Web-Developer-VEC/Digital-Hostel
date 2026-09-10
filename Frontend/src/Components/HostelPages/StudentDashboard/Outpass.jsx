@@ -15,6 +15,7 @@ import showSweetAlert from "../Alert";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { createFormDataRequest, createJsonRequest } from "../../../api/axios";
+import { getIstDateTimeInputValue } from "../../../utils/time";
 
 const ReasonTypeMapping = {
   od: ["Internship", "Symposium", "Hackathon", "Sports", "Others"],
@@ -33,15 +34,7 @@ const ReasonTypeMapping = {
 };
 
 const getCurrentDateTime = () => {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
+  return getIstDateTimeInputValue();
 };
 
 const pad2 = (n) => String(n).padStart(2, "0");

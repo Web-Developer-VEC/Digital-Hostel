@@ -1,6 +1,5 @@
 const { getDb } = require("../../config/db");
-const moment = require("moment");
-require("moment-timezone");
+const { getIstDayRange, getIstDateKey } = require("../../utils/time");
 
 async function passMeasureWarden(req, res) {
   try {
@@ -46,10 +45,9 @@ async function passMeasureWarden(req, res) {
       });
     }
 
-    const currentDate = moment().utc().startOf("day").toDate();
-    const nextDate = moment().utc().endOf("day").toDate();
+    const { startOfDay: currentDate, endOfDay: nextDate } = getIstDayRange();
     const now = new Date();
-    const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+    const istTime = now;
 
     const passTypes = ["od", "outpass", "staypass", "leave"];
     let finalResult = {};
@@ -59,6 +57,8 @@ async function passMeasureWarden(req, res) {
       let overall = {
         exitTimeCount: 0,
         reEntryTimeCount: 0,
+        exitTimeDetails: { names: [] },
+        reEntryTimeDetails: { names: [] },
         activeOutsideCount: 0,
         overdueReturnCount: 0,
         activeOutsideDetails: { names: [], passtypes: [] },
@@ -88,7 +88,7 @@ async function passMeasureWarden(req, res) {
               { to: { $gte: currentDate, $lt: nextDate } },
             ],
           })
-          .project({ name: 1 })
+          .project({ name: 1, _id: 0 })
           .toArray();
         // RE-ENTRY
         const reEntryData = await collection
@@ -96,26 +96,25 @@ async function passMeasureWarden(req, res) {
             ...baseFilter,
             re_entry_time: { $gte: currentDate, $lt: nextDate },
           })
-          .project({ name: 1 })
+          .project({ name: 1, _id: 0 })
           .toArray();
 
         // ACTIVE OUTSIDE
         const activeOutside = await collection
           .find({
             ...baseFilter,
-            exit_time: { $exists: true },
-            to: { $gt: istTime },
+            exit_time: { $type: "date" },
             re_entry_time: { $in: [null, ""] },
           })
           .project({ name: 1, passtype: 1 })
           .toArray();
-        console.log("Overall Times :", overall);
+        console.log("Overall Times :");
 
         // OVERDUE
         const overdue = await collection
           .find({
             ...baseFilter,
-            exit_time: { $exists: true },
+            exit_time: { $type: "date" },
             to: { $lt: istTime },
             re_entry_time: { $in: [null, ""] },
           })
@@ -151,6 +150,12 @@ async function passMeasureWarden(req, res) {
         genderResult[year] = {
           exitTimeCount: exitData.length,
           reEntryTimeCount: reEntryData.length,
+          exitTimeDetails: {
+            names: exitData.map((x) => x.name),
+          },
+          reEntryTimeDetails: {
+            names: reEntryData.map((x) => x.name),
+          },
           activeOutsideCount: activeOutside.length,
           overdueReturnCount: overdue.length,
           activeOutsideDetails: {
@@ -170,6 +175,10 @@ async function passMeasureWarden(req, res) {
         // OVERALL AGGREGATION
         overall.exitTimeCount += exitData.length;
         overall.reEntryTimeCount += reEntryData.length;
+        overall.exitTimeDetails.names.push(...exitData.map((x) => x.name));
+        overall.reEntryTimeDetails.names.push(
+          ...reEntryData.map((x) => x.name),
+        );
         overall.activeOutsideCount += activeOutside.length;
         overall.overdueReturnCount += overdue.length;
         overall.activeOutsideDetails.names.push(
@@ -248,14 +257,11 @@ async function analysisWarden(req, res) {
       });
     }
 
-    const baseDate = date ? new Date(`${date}T00:00:00.000Z`) : new Date();
+    const baseDate = date ? getIstDayRange(date).startOfDay : new Date();
+    const formattedDate = getIstDateKey(baseDate);
+    const { startOfDay, endOfDay } = getIstDayRange(formattedDate);
 
-    const formattedDate = baseDate.toISOString().split("T")[0];
-
-    const startOfDay = new Date(`${formattedDate}T00:00:00.000Z`);
-    const endOfDay = new Date(`${formattedDate}T23:59:59.999Z`);
-
-    const istTime = new Date(baseDate.getTime() + 5.5 * 60 * 60 * 1000);
+    const istTime = new Date();
 
     let yearFilter;
     if (["1", "2", "3", "4"].includes(year)) {
@@ -300,7 +306,7 @@ async function analysisWarden(req, res) {
     const overdueDocs = await collection
       .find({
         ...commonFilters,
-        exit_time: { $exists: true },
+        exit_time: { $type: "date" },
         to: { $lt: istTime },
         re_entry_time: { $in: [null, ""] },
       })
