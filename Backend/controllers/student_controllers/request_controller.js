@@ -1,6 +1,12 @@
 const { getDb } = require("../../config/db");
 const { v4: uuidv4 } = require("uuid");
 const { sendParentReachedSMS } = require("../../services/sendSMS.service");
+const {
+  getIstDayRange,
+  getIstHour,
+  getIstMinute,
+  parseDateTime,
+} = require("../../utils/time");
 const path = require("path");
 const fs = require("fs");
 const { error, log } = require("console");
@@ -74,8 +80,8 @@ async function submitPass(req, res) {
     }
 
     const gender = student.gender;
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = parseDateTime(from);
+    const toDate = parseDateTime(to);
 
     if (fromDate < new Date()) {
       return res.status(400).json({ error: "From date cannot be in the past" });
@@ -91,8 +97,8 @@ async function submitPass(req, res) {
         .json({ error: "To date cannot be earlier than From date" });
     }
 
-    const toHours = toDate.getHours();
-    const toMinutes = toDate.getMinutes();
+    const toHours = getIstHour(toDate);
+    const toMinutes = getIstMinute(toDate);
     const totalToMinutes = toHours * 60 + toMinutes;
 
     const maleTimeLimit = 21 * 60 + 30;
@@ -129,7 +135,7 @@ async function submitPass(req, res) {
       pass_id,
       name,
       mobile_number,
-      phone_number_parent:student.phone_number_parent,
+      phone_number_parent: student.phone_number_parent,
       dept: department_name,
       batch,
       year: yearInt,
@@ -170,7 +176,7 @@ async function submitPass(req, res) {
         registration_number,
       });
 
-      console.log("PassData :",PassData)
+      console.log("PassData :", PassData);
       if (existingDraft) {
         await DraftsCollection.updateOne(
           { registration_number: registration_number },
@@ -183,13 +189,14 @@ async function submitPass(req, res) {
       return res.status(201).json({ message: "Pass saved as draft" });
     }
 
+    const { startOfDay, endOfDay } = getIstDayRange();
     const activePassCount = await PassCollection.countDocuments({
       mobile_number,
       request_completed: false,
       expiry_status: false,
       request_time: {
-        $gte: new Date().setHours(0, 0, 0, 0),
-        $lt: new Date().setHours(23, 59, 59, 999),
+        $gte: startOfDay,
+        $lt: endOfDay,
       },
     });
 
@@ -335,8 +342,8 @@ async function EditPassDetails(req, res) {
       return res.status(404).json({ error: "Pass details not found" });
     }
 
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = parseDateTime(from);
+    const toDate = parseDateTime(to);
 
     if (fromDate < new Date()) {
       return res.status(400).json({ error: "From date cannot be in the past" });
@@ -352,8 +359,8 @@ async function EditPassDetails(req, res) {
         .json({ error: "To date cannot be earlier than From date" });
     }
 
-    const toHours = toDate.getHours();
-    const toMinutes = toDate.getMinutes();
+    const toHours = getIstHour(toDate);
+    const toMinutes = getIstMinute(toDate);
     const totalToMinutes = toHours * 60 + toMinutes;
 
     const maleTimeLimit = 21 * 60 + 30;

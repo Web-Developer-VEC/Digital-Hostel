@@ -1,5 +1,8 @@
 const { getDb } = require("../../config/db");
-const { sendParentReachedSMS } = require("../../services/sendSMS.service");
+const {
+  sendParentExitSMS,
+  sendParentReachedSMS,
+} = require("../../services/sendSMS.service");
 
 async function getPassDetails(req, res) {
   try {
@@ -74,6 +77,16 @@ async function passAccept(req, res) {
         },
       );
 
+      try {
+        await sendParentExitSMS(
+          pass_details.phone_number_parent,
+          pass_details.name,
+          exitTime,
+        );
+      } catch (smsError) {
+        console.error("❌ Error sending parent exit SMS:", smsError);
+      }
+
       return res.status(200).json({
         message: "Exit time updated successfully",
         pass_id: pass_id,
@@ -111,6 +124,17 @@ async function passAccept(req, res) {
           },
         },
       );
+
+      try {
+        await sendParentReachedSMS(
+          pass_details.phone_number_parent,
+          pass_details.name,
+          reEntryTime,
+        );
+      } catch (smsError) {
+        console.error("❌ Error sending parent re-entry SMS:", smsError);
+      }
+
       return res.status(200).json({
         message: "Re-entry time updated successfully",
         pass_id: pass_id,

@@ -198,7 +198,7 @@ function SuperiorRequest() {
             record={selectedRecord}
             onClose={() => setSelectedRecord(null)}
             onAccept={() => handleAction(selectedRecord.registration_number, "approve")}
-            onDecline={() => handleAction(selectedRecord.registration_number, "decline")}
+            onDecline={() => handleAction(selectedRecord.registration_number, "reject")}
           />
         )}
       </div>
@@ -253,7 +253,6 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                 <tr>
                   <th>Field</th>
                   <th>From (Previous)</th>
-                  <th></th>
                   <th>To (Updated)</th>
                 </tr>
               </thead>
@@ -262,7 +261,6 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                   <tr>
                     <td><strong>Name</strong></td>
                     <td>{record.from_data.name}</td>
-                    <td className="arrow-cell">→</td>
                     <td>{record.to_data.name}</td>
                   </tr>
                 )}
@@ -270,7 +268,6 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                   <tr>
                     <td><strong>Room Number</strong></td>
                     <td>{record.from_data.room_number}</td>
-                    <td className="arrow-cell">→</td>
                     <td>{record.to_data.room_number}</td>
                   </tr>
                 )}
@@ -278,7 +275,6 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                   <tr>
                     <td><strong>Student Mobile</strong></td>
                     <td>{record.from_data.phone_number_student}</td>
-                    <td className="arrow-cell">→</td>
                     <td>{record.to_data.phone_number_student}</td>
                   </tr>
                 )}
@@ -286,7 +282,6 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
                   <tr>
                     <td><strong>Parent's Mobile</strong></td>
                     <td>{record.from_data.phone_number_parent}</td>
-                    <td className="arrow-cell">→</td>
                     <td>{record.to_data.phone_number_parent}</td>
                   </tr>
                 )}
