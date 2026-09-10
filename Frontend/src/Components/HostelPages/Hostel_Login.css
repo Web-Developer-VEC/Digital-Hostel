@@ -1056,3 +1056,147 @@ body {
   }
 
 }
+
+
+/* =========================================================
+   SWEETALERT2 — "LOGIN SUCCESSFUL" POPUP
+   Minimal, clean card + a simple blurred backdrop only.
+   These rules only restyle the SweetAlert2 modal used
+   after login/logout — nothing else was touched.
+========================================================= */
+
+/* Backdrop — just a soft blur, no heavy color wash */
+
+.swal2-container.swal2-backdrop-show,
+.swal2-container.swal2-backdrop-hide {
+  background: rgba(20, 20, 20, 0.18);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* Popup card — plain, clean, minimal */
+
+.swal2-popup.swal2-popup {
+  width: auto;
+  min-width: 320px;
+  max-width: 380px;
+
+  padding: 2rem 1.8rem 1.8rem;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  border: 1px solid rgba(0, 0, 0, 0.06);
+
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+
+/* Title */
+
+.swal2-popup .swal2-title {
+  margin: 0 0 0.4rem;
+  padding: 0;
+
+  font-size: 1.35rem;
+  font-weight: 700;
+
+  color: #2b2b2b;
+
+  letter-spacing: -0.3px;
+}
+
+
+/* Body text */
+
+.swal2-popup .swal2-html-container {
+  margin: 0;
+  padding: 0;
+
+  font-size: 0.88rem;
+  font-weight: 450;
+
+  color: #6b6b6b;
+
+  line-height: 1.5;
+}
+
+
+/* Confirm / OK button (in case one shows) */
+
+.swal2-popup .swal2-confirm.swal2-styled {
+  margin-top: 1.4rem;
+
+  padding: 0.7rem 1.8rem;
+
+  border-radius: 10px;
+
+  background: #800000 !important;
+
+  color: #ffffff;
+
+  font-size: 0.85rem;
+  font-weight: 650;
+
+  box-shadow: none;
+}
+
+.swal2-popup .swal2-confirm.swal2-styled:focus {
+  box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.2);
+}
+
+
+/* Timer progress bar */
+
+.swal2-timer-progress-bar {
+  background: #800000;
+  height: 3px;
+}
+
+
+/* ---------------------------------------------------------
+   FIX: make the popup actually animate in/out fast (<=1s)
+   instead of sitting static. SweetAlert2 toggles its own
+   .swal2-show / .swal2-hide classes — we just speed those
+   built-in animations up instead of overriding them.
+--------------------------------------------------------- */
+
+.swal2-popup.swal2-show {
+  animation: swal2-show 0.25s !important;
+}
+
+.swal2-popup.swal2-hide {
+  animation: swal2-hide 0.25s forwards !important;
+}
+
+.swal2-backdrop-show {
+  animation: swal2-backdrop-show 0.25s !important;
+}
+
+.swal2-backdrop-hide {
+  animation: swal2-backdrop-hide 0.25s forwards !important;
+}
+
+
+/* Mobile tweaks */
+
+@media (max-width: 480px) {
+
+  .swal2-popup.swal2-popup {
+    min-width: 86vw;
+    max-width: 90vw;
+
+    padding: 1.7rem 1.3rem 1.5rem;
+  }
+
+  .swal2-popup .swal2-title {
+    font-size: 1.2rem;
+  }
+}
