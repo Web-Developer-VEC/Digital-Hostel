@@ -784,7 +784,7 @@ function WardenRequest() {
                                 </div>
                               )}
 
-                                                            {(record.passtype === "od" ||
+                              {(record.passtype === "od" ||
                                 record.passtype === "leave") &&
                                 record.file_path && (
                                   <button
@@ -922,7 +922,7 @@ function WardenRequest() {
                 >
                   ✓ Verify OTP
                 </button>
-                           </div>
+              </div>
             </div>
           </div>
         )}
@@ -949,7 +949,11 @@ function WardenRequest() {
               <div className="AR-document-content">
                 {(() => {
                   const fileUrl = UrlParser(selectedRecord.file_path);
-                  const fileExtension = fileUrl.split(".").pop().toLowerCase();
+                  const fileExtension = fileUrl
+                    .split("?")[0]
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
 
                   if (
                     ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
@@ -1181,7 +1185,11 @@ function DetailModal({
             <div className="AR-document-content">
               {(() => {
                 const fileUrl = UrlParser(record.file_path);
-                const fileExtension = fileUrl.split(".").pop().toLowerCase();
+                const fileExtension = fileUrl
+                  .split("?")[0]
+                  .split(".")
+                  .pop()
+                  .toLowerCase();
 
                 if (
                   ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(

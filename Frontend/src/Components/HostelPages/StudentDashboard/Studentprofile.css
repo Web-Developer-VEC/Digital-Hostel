@@ -1408,6 +1408,7 @@
     color: #800000;
 
     border: 2px solid #800000;
+    margin-bottom: 40px;
   }
 
 
@@ -1517,4 +1518,37 @@
     scroll-behavior: auto !important;
   }
 
+}
+.student-cancel-button {
+  background-color: #f1f5f9;
+  color: #475569;
+  margin-left: 10px;
+}
+
+.student-cancel-button:hover {
+  background-color: #e2e8f0;
+}
+.student-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-cancel-button {
+  background-color: #fee2e2;   /* mild red background */
+  color: #b91c1c;              /* deeper red text */
+  border: 1px solid #fca5a5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.student-cancel-button:hover {
+  background-color: #fecaca;
 }
