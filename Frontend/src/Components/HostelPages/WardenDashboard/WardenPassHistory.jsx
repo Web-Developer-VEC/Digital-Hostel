@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, FileText, Filter, ArrowLeft } from 'lucide-react';
+import "./WardenRequest.css";
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../api/axios';
 import { useNavigate } from 'react-router-dom';
