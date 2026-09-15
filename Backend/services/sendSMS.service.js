@@ -73,8 +73,8 @@ const sendSMS = async (phone_number_parent, message) => {
 
     // const response = await awsSmsClient.send(command);
     console.log("SMS sent successfully");
-    console.log("Message ID:", response.MessageId);
-    return response;
+    // console.log("Message ID:", response.MessageId);
+    return ;
 
     return { MessageId: "SMS_DISABLED" };
   } catch (error) {
