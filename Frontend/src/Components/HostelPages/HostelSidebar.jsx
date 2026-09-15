@@ -507,7 +507,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
     } catch (error) {
       console.error(
         "Logout Error:",
-        error
+        error.response
       );
 
       Swal.fire({

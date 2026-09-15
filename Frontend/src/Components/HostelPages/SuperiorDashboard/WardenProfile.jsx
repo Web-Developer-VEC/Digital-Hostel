@@ -330,7 +330,7 @@ const WardenProfile = () => {
         });
       }
     } catch (error) {
-      console.error("Error adding warden", error);
+      console.error("Error adding warden", error.response);
       Swal.fire({
         title: "Error ❌",
         text:
@@ -880,7 +880,7 @@ const WardenProfile = () => {
                       <Edit size={19} />
                     </div>
                     <div>
-                      <h2>Edit Warden Profile</h2>
+                      <h2 className="edit-warden-title">Edit Warden Profile</h2>
                       <p>Update {selectedWarden.name}'s details</p>
                     </div>
                   </div>
