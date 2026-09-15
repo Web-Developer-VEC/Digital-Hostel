@@ -113,8 +113,11 @@ const StudentHistory = () => {
         setHistory(formattedHistory);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching passes:", error);
-
+        console.error("Error fetching passes:", error.response);
+        if(error.response.status===404){
+          setLoading(false);
+          return;
+        }
         // Handle 401 authentication error
         if (handle401Error(error)) {
           setLoading(false);
