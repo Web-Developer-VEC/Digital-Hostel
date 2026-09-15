@@ -20,13 +20,13 @@ function SuperiorStudent() {
   const [students, setStudents] = useState({ male: [], female: [] });
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
-  
+
   // States
   const [selectedGender, setSelectedGender] = useState('Male'); // Default to Boys
   const [selectedStudent, setSelectedStudent] = useState(null); // Modal state
-  
+
   // State for Inline Editing Food Type
-  const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' }); 
+  const [inlineEdit, setInlineEdit] = useState({ field: null, value: '' });
 
   // Increment Student Year states
   const [isModalOpen, setIsModalOpen] = useState(false); // Control confirmation modal visibility
@@ -107,7 +107,7 @@ function SuperiorStudent() {
     const matchesYear = filters.year === "All" || student.year === yearToAlphabet[filters.year];
     const matchesDepartment = filters.department === "All" || student.department === filters.department;
     const matchesFoodType = filters.foodType === "All" || student.foodType === filters.foodType;
-    
+
     const matchesTransitStatus =
       filters.transitStatus === "All" ||
       (filters.transitStatus === "true" && student.transitStatus) ||
@@ -216,7 +216,7 @@ function SuperiorStudent() {
 
   const handleSaveStudentField = async (field, newValue, successMessage = "Updated successfully!") => {
     if (!selectedStudent) return;
-    
+
     const updateFields = {
       [field]: newValue
     };
@@ -229,9 +229,9 @@ function SuperiorStudent() {
 
       if (response.status === 200) {
         const formattedFood = newValue === 'Veg' ? 'Vegetarian' : (newValue === 'Non-Veg' ? 'Non-Vegetarian' : newValue);
-        
+
         setSelectedStudent(prev => ({ ...prev, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood }));
-        
+
         setStudents(prev => ({
           male: prev.male.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s),
           female: prev.female.map(s => s.id === selectedStudent.id ? { ...s, [field === 'room_number' ? 'roomNumber' : 'foodType']: formattedFood } : s)
@@ -326,7 +326,7 @@ function SuperiorStudent() {
   return (
     <div className="superior-container">
       <div className="superior-content">
-        
+
         {/* Top Header Row */}
         <div className="warden-header-controls">
           <div className="search-wrapper">
@@ -369,12 +369,12 @@ function SuperiorStudent() {
               <Download size={18} />
               <DownloadPdf studentData={filteredStudents} />
             </button>
-            
+
             <div className="filter-wrapper" ref={filterRef}>
               <button className="action-btn" onClick={() => setShowFilters(!showFilters)}>
                 <Filter size={18} /> Filters
               </button>
-              
+
               {showFilters && (
                 <div className="filter-popup">
                   <div className="filter-section">
@@ -416,13 +416,19 @@ function SuperiorStudent() {
           {filteredStudents.map(student => (
             <div key={student.id} className="student-card">
               <div className="status-icon-top">
-                {student.transitStatus ? (
-                  <Footprints size={18} color="#f59e0b" />
-                ) : (
-                  <Home size={18} color="#3b82f6" />
-                )}
+                <div className="tooltip-container">
+                  {student.transitStatus ? (
+                    <Footprints size={18} color="#f59e0b" />
+                  ) : (
+                    <Home size={18} color="#3b82f6" />
+                  )}
+
+                  <span className="tooltip">
+                    {student.transitStatus ? "In Transit" : "In Hostel"}
+                  </span>
+                </div>
               </div>
-              
+
               <div className="card-info-row">
                 <div className="avatar-circle">
                   {getInitials(student.name)}
@@ -434,7 +440,7 @@ function SuperiorStudent() {
                   <p>{student.department}</p>
                 </div>
               </div>
-              
+
               <button className="view-more-btn" onClick={() => setSelectedStudent(student)}>
                 View More
               </button>
@@ -486,7 +492,7 @@ function SuperiorStudent() {
                       </>
                     )}
                   </div>
-                  
+
                   {/* Inline Food Type Editor with Tick and Cross buttons */}
                   <div className="info-item">
                     <span className="info-label">FOOD</span>

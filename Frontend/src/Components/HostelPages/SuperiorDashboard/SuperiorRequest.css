@@ -14,6 +14,63 @@
 }
 
 /* =========================================
+   no requests
+   ========================================= */
+/* Empty State */
+.SR-no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3.5rem 1.5rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #111827;
+}
+
+.SR-no-data-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #fdcc03;
+  color: #111827;
+  font-size: 28px;
+  margin-bottom: 0.5rem;
+}
+
+.SR-no-data-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.SR-no-data-subtext {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.SR-loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem 1.5rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+/* =========================================
    Header & Controls
    ========================================= */
 .warden-header-controls {
@@ -741,6 +798,28 @@
    Mobile Responsiveness
    ========================================= */
 @media (max-width: 768px) {
+
+    .SR-no-data-message,
+  .SR-loading-message {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .SR-no-data-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .SR-no-data-title {
+    font-size: 0.95rem;
+  }
+
+  .SR-no-data-subtext {
+    font-size: 0.8rem;
+    padding: 0 0.5rem;
+  }
+
+  
   .superior-container {
     margin-left: 0;
     padding-bottom: 5rem;
