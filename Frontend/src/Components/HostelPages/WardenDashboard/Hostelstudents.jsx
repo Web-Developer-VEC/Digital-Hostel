@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BarChart, ClipboardList, GraduationCap, Search, Filter, Check, X, Footprints, Download } from 'lucide-react';
-import { Home, Walk } from "lucide-react";
-
+import { Home, Footprints as Walk } from "lucide-react";
 import './Hostelstudents.css';
 import axios from 'axios';
 import DownloadPdf from '../pdf';

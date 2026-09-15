@@ -31,7 +31,7 @@ function WardenProfile() {
     warden_name: "",
     phone_number: "",
     image_path: "",
-    gender: "",
+    gender: [],
     category: "",
     joined_date: "",
     handling_years: [],
@@ -201,18 +201,6 @@ function WardenProfile() {
           {/* SECONDARY DETAILS */}
 
           <div className="student-secondary-details">
-            {/* GENDER */}
-
-            <div className="student-form-group">
-              <label>Gender</label>
-
-              <input
-                type="text"
-                value={warden.gender}
-                disabled
-                className="student-input"
-              />
-            </div>
 
             {/* JOINED DATE */}
 
@@ -251,8 +239,8 @@ function WardenProfile() {
 
               <input
                 type="text"
-                value={ Array.isArray(warden.handling_years)
-                    ? warden.handling_years.join(", ")
+                value={ Array.isArray(warden.incharge_of)
+                    ? warden.incharge_of.join(", ")
                     : ""}
                 disabled
                 className="student-input"
