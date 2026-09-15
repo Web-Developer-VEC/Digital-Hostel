@@ -12,9 +12,8 @@ const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 const DashboardCard = ({ title, number, isInteractive, isDanger, onClick }) => {
   return (
     <div
-      className={`hl-metric-card ${
-        isInteractive ? "interactive" : ""
-      } ${isDanger ? "danger" : ""}`}
+      className={`hl-metric-card ${isInteractive ? "interactive" : ""
+        } ${isDanger ? "danger" : ""}`}
       onClick={isInteractive ? onClick : undefined}
     >
       <div className="hl-card-header">
@@ -386,6 +385,9 @@ const Dashboard1 = () => {
     setShowNames(false);
     setShowChartPopup(false);
     setShowNameList(false);
+    setNameListData([]);
+    setShowCalendar(false);
+    setError(null);
   };
 
   // =====================================================
@@ -408,78 +410,96 @@ const Dashboard1 = () => {
 
   const handlePieClick = async (data) => {
     if (!data || !data.value) {
-      fireSwal({
-        title: "No Data",
-        text: "No active passes found for this category.",
+      Swal.fire({
+        title: "No Records Found",
+        text: "Zero student passes filed in this category.",
         icon: "info",
         confirmButtonText: "OK",
       });
-
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setShowNameList(false);
+    setNameListData([]);
+    setShowCalendar(false);
 
-    fireSwal({
-      title: "Loading Category Data",
-      text: "Fetching pass analysis records...",
+    Swal.fire({
+      title: "Fetching Category Data",
+      text: "Loading pass analysis records...",
       allowOutsideClick: false,
-
       didOpen: () => {
         Swal.showLoading();
       },
     });
 
     try {
+      const passType = data.name
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
       const response = await axiosInstance.post(
-        "/api/pass_analysis_superior",
+        "/api/pass_analysis_warden",
         {
-          type: data.name.trim().toLowerCase().replace(/\s+/g, ""),
-
+          type: passType,
           year: selectedYear,
-
-          gender: selectedGender === "Boys" ? "Male" : "Female",
         },
         {
           withCredentials: true,
-        },
+        }
       );
+
+      if (response.status === 200) {
+        Swal.close();
+
+        const fetched = response.data;
+
+        setFetchedPassAnalysis(fetched);
+
+        const popupChartData = Object.entries(
+          fetched.reasonTypeCounts || {}
+        ).map(([reason, count], index) => ({
+          name: reason,
+          value: count,
+          color: getRandomThemeColor(index),
+        }));
+
+        setChartPopupData({
+          title: data.name,
+          count: data.value,
+          dates: [],
+          popupChartData,
+        });
+
+        setShowChartPopup(true);
+      } else {
+        throw new Error(
+          response.data?.error || "Failed to fetch pass analysis data"
+        );
+      }
+    } catch (err) {
+      console.error("Superior Warden pass analysis error:", err);
 
       Swal.close();
 
-      const resData = response.data || {};
-
-      setFetchedPassAnalysis(resData);
-
-      const popupChartData = Object.entries(resData.reasonTypeCounts || {}).map(
-        ([reason, count], idx) => ({
-          name: reason,
-          value: count,
-          color: getRandomThemeColor(idx),
-        }),
-      );
-
-      setChartPopupData({
-        title: data.name,
-        count: data.value,
-        popupChartData,
-      });
-
-      setShowChartPopup(true);
-    } catch (err) {
-      console.error("Error fetching pass analysis:", err);
-
-      setError(err.message || "Failed to fetch data.");
-
-      fireSwal({
-        title: "Error!",
+      Swal.fire({
+        title: "Query Failed",
         text:
           err.response?.data?.message ||
-          "Failed to fetch pass analysis data. Please try again.",
+          err.response?.data?.error ||
+          "Could not retrieve breakdown.",
         icon: "error",
         confirmButtonText: "OK",
       });
+
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to fetch data."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -587,7 +607,6 @@ const Dashboard1 = () => {
     }
 
     setNameListData(namesArray);
-
     setShowNameList(true);
   };
 
@@ -620,9 +639,8 @@ const Dashboard1 = () => {
 
           <div className="hl-gender-toggle-wrapper">
             <span
-              className={`hl-toggle-tag ${
-                selectedGender === "Boys" ? "active" : ""
-              }`}
+              className={`hl-toggle-tag ${selectedGender === "Boys" ? "active" : ""
+                }`}
             >
               Boys
             </span>
@@ -638,9 +656,8 @@ const Dashboard1 = () => {
             </label>
 
             <span
-              className={`hl-toggle-tag ${
-                selectedGender === "Girls" ? "active" : ""
-              }`}
+              className={`hl-toggle-tag ${selectedGender === "Girls" ? "active" : ""
+                }`}
             >
               Girls
             </span>
@@ -979,76 +996,47 @@ const Dashboard1 = () => {
                 {/* STUDENT LIST */}
 
                 {showNameList && (
-                  <div className="hl-submodal-overlay">
-                    <div className="hl-submodal-content">
-                      <div className="hl-submodal-head">
-                        <h4>Student Names:</h4>
+                  <div className="hl-inline-student-section">
+                    <div className="hl-inline-student-header">
+                      <h4>Student Manifest</h4>
 
-                        <button
-                          className="hl-btn-close"
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            fontSize: "0.9rem",
-                          }}
-                          onClick={() => setShowNameList(false)}
-                        >
-                          ×
-                        </button>
-                      </div>
+                      <button
+                        className="hl-inline-close-btn"
+                        onClick={() => {
+                          setShowNameList(false);
+                          setNameListData([]);
+                        }}
+                        aria-label="Close student list"
+                      >
+                        ×
+                      </button>
+                    </div>
 
-                      <div className="hl-submodal-scroll">
+                    <div className="hl-inline-student-list">
+                      {nameListData.length > 0 ? (
                         <ul>
                           {nameListData.map((name, index) => (
-                            <li key={index}>{name}</li>
+                            <li key={index}>
+                              <span className="student-index">
+                                {index + 1}.
+                              </span>
+
+                              <span>
+                                {typeof name === "string"
+                                  ? name
+                                  : name?.name || "Unknown Student"}
+                              </span>
+                            </li>
                           ))}
                         </ul>
-                      </div>
+                      ) : (
+                        <p>No students found</p>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* REASON CHART */}
-
-                <div
-                  style={{
-                    padding: "0 24px 20px 24px",
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={
-                          chartPopupData?.popupChartData?.length > 0
-                            ? chartPopupData.popupChartData
-                            : [
-                                {
-                                  name: "No Data",
-                                  value: 1,
-                                },
-                              ]
-                        }
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={75}
-                        dataKey="value"
-                      >
-                        {chartPopupData?.popupChartData?.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={
-                              entry.color ||
-                              BRAND_COLORS[index % BRAND_COLORS.length]
-                            }
-                          />
-                        ))}
-                      </Pie>
-
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                
               </>
             )}
           </div>
