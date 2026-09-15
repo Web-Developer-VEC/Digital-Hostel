@@ -1040,6 +1040,12 @@
 }
 
 
+@property --attendance-pie-reveal {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
 .attendance-pie {
   width: 160px;
   height: 160px;
@@ -1055,6 +1061,44 @@
   transition:
     background 1s ease-out,
     transform 0.5s ease;
+
+  /* --- reveal mask setup --- */
+  --attendance-pie-reveal: 0%;
+
+  -webkit-mask-image:
+    conic-gradient(
+      #000 var(--attendance-pie-reveal),
+      transparent var(--attendance-pie-reveal)
+    );
+
+  mask-image:
+    conic-gradient(
+      #000 var(--attendance-pie-reveal),
+      transparent var(--attendance-pie-reveal)
+    );
+
+  animation:
+    attendance-pie-load
+    1.3s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+
+@keyframes attendance-pie-load {
+
+  from {
+    --attendance-pie-reveal: 0%;
+    opacity: 0.4;
+    transform: scale(0.9) rotate(-90deg);
+  }
+
+  to {
+    --attendance-pie-reveal: 100%;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
 }
 
 
@@ -1892,7 +1936,8 @@
   .attendance-food-section,
   .attendance-modal,
   .attendance-modal-overlay,
-  .attendance-filter-group {
+  .attendance-filter-group,
+  .attendance-pie {
     animation-duration: 0.01ms !important;
 
     animation-iteration-count: 1 !important;
