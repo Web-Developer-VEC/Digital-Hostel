@@ -51,17 +51,17 @@ const navItems = {
       icon: <User />,
     },
     {
-      path: "/hostel/student/tutorial",
-      label: "Tutorial Page",
-      mobileLabel: "Tutorial",
-      icon: <BookOpenCheck />,
-    },
-    {
       path: "/hostel/student/vacate",
       label: "Vacate Form",
       mobileLabel: "Vacate",
       icon: <DoorOpen />,
     },
+    {
+      path: "/hostel/student/tutorial",
+      label: "Tutorial Page",
+      mobileLabel: "Tutorial",
+      icon: <BookOpenCheck />,
+    }
   ],
 
   warden: [
@@ -312,7 +312,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
 
   const getProfileImage = () => {
     if (!profileImagePath) {
-      return "https://via.placeholder.com/150";
+      return "https://img.magnific.com/premium-vector/yellow-robot_667648-1123.jpg?semt=ais_hybrid&w=740&q=80";
     }
 
     // If backend already sends a complete URL
@@ -716,7 +716,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                   <div className="profile-popup-id-row">
 
                     <span>
-                      ID
+                      ID:
                     </span>
 
                     <strong>
@@ -730,7 +730,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                       {profileGender && (
                         <div className="profile-popup-id-row">
                           <span>
-                            Gender
+                            Gender:
                           </span>
 
                           <strong>
@@ -742,7 +742,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
                       {profileCategory && (
                         <div className="profile-popup-id-row">
                           <span>
-                            Category
+                            Category:
                           </span>
 
                           <strong>

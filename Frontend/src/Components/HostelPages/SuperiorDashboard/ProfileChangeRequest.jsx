@@ -91,7 +91,7 @@ function SuperiorRequest() {
     const searchQuery = filters.search.toLowerCase();
     return (
       (!activeGender || record.gender === activeGender) && // ✅ Add gender filtering here
-      (!filters.year || record.year.toString() === filters.year) &&
+      (!filters.year || record.year === filters.year) &&
       (!filters.department || record.department === filters.department) &&
       (!filters.search ||
         record.name.toLowerCase().includes(searchQuery) ||

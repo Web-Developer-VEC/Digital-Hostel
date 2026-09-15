@@ -7,11 +7,14 @@ import {
   UserX,
   AlertTriangle,
   Utensils,
-  X
-} from 'lucide-react';
+  X,
+  Carrot,
+  Ham
+} from "lucide-react";
 import './SuperiorAttendance.css';
 import axiosInstance from '../../../api/axios';
 import Swal from 'sweetalert2';
+
 
 
 function AttendanceDashboard() {
@@ -25,8 +28,36 @@ function AttendanceDashboard() {
   const [showMismatchModal, setShowMismatchModal] = useState(false);
   const [maledata, setMaleData] = useState(null);
   const [femaledata, setFemaledata] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [count, setCount] = useState({ veg_count: 0, non_veg_count: 0 });
 
+  const [isLoading, setIsLoading] = useState(true);
+  const yearToAlphabet = {
+    '1': 'First Year',
+    '2': 'Second Year',
+    '3': 'Third Year',
+    '4': 'Fourth Year',
+    '10': 'MBA',
+    '9': 'ME',
+    'overall': 'Overall'
+  };
+
+  const vegCount = count.veg_count || 0;
+  const nonVegCount = count.non_veg_count || 0;
+  const totalStudents = vegCount + nonVegCount;
+  // Donut chart geometry
+  const RADIUS = 80;
+  const STROKE_WIDTH = 26;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const GAP_DEG = totalStudents > 0 && vegCount > 0 && nonVegCount > 0 ? 6 : 0;
+  const usableDeg = 360 - GAP_DEG * 2;
+
+  const animatedFoodTotal = animatedVeg + animatedNonVeg;
+  const vegRingPct = animatedFoodTotal > 0 ? (animatedVeg / animatedFoodTotal) * 100 : 0;
+  const nonVegRingPct = animatedFoodTotal > 0 ? 100 - vegRingPct : 0;
+
+  const vegArcLen = (vegRingPct / 100) * usableDeg / 360 * CIRCUMFERENCE;
+  const nonVegArcLen = (nonVegRingPct / 100) * usableDeg / 360 * CIRCUMFERENCE;
+  const gapArcLen = (GAP_DEG / 360) * CIRCUMFERENCE;
   useEffect(() => {
     if (showAbsentModal || showMismatchModal || showIframe) {
       document.body.style.overflow = "hidden"; // Disable scrolling when any modal is open
@@ -77,14 +108,19 @@ function AttendanceDashboard() {
 
   const handleYearChange = (e) => {
     const newYear = e.target.value;
+
     setSelectedYear(newYear);
 
-    // Check if data exists for the selected filters
-    const data = getCurrentData();
+    // IMPORTANT:
+    // Use newYear directly instead of waiting for React state update
+    const data = getCurrentData(newYear, selectedGender);
+
+    setCount(data);
+
     if (data.veg_count === 0 && data.non_veg_count === 0) {
       Swal.fire({
         title: "No Data",
-        text: `📋 No food count data available for the selected filters.`,
+        text: "📋 No food count data available for the selected filters.",
         icon: "info",
         showConfirmButton: true,
         timer: 3000
@@ -94,58 +130,94 @@ function AttendanceDashboard() {
 
   const handleGenderChange = (e) => {
     const newGender = e.target.value;
+
     setSelectedGender(newGender);
 
-    // Check if data exists for the selected filters
-    setTimeout(() => {
-      const data = getCurrentData();
-      if (data.veg_count === 0 && data.non_veg_count === 0) {
-        Swal.fire({
-          title: "No Data",
-          text: `📋 No food count data available for the selected filters.`,
-          icon: "info",
-          showConfirmButton: true,
-          timer: 3000
-        });
-      }
-    }, 100);
+    // IMPORTANT:
+    // Use newGender directly
+    const data = getCurrentData(selectedYear, newGender);
+
+    setCount(data);
+
+    if (data.veg_count === 0 && data.non_veg_count === 0) {
+      Swal.fire({
+        title: "No Data",
+        text: "📋 No food count data available for the selected filters.",
+        icon: "info",
+        showConfirmButton: true,
+        timer: 3000
+      });
+    }
   };
 
 
-  const getCurrentData = () => {
-    // Determine the gender key based on the selected gender
-    const genderKey = selectedGender === 'boys' ? 'Male' : selectedGender === 'girls' ? 'Female' : null;
+  const getCurrentData = (
+    year = selectedYear,
+    gender = selectedGender
+  ) => {
+    const genderKey =
+      gender === 'boys'
+        ? 'Male'
+        : gender === 'girls'
+          ? 'Female'
+          : null;
 
-    // Determine the year key based on the selected year
-    const yearKey = selectedYear === 'first' ? '1' :
-      selectedYear === 'second' ? '2' :
-        selectedYear === 'third' ? '3' :
-          selectedYear === 'fourth' ? '4' :
-            selectedYear === 'me1' ? '8' :
-              selectedYear === 'me2' ? '7' :
-                selectedYear === 'mba1' ? '10' :
-                  selectedYear === 'mba2' ? '9' : 'Overall';
+    const yearKey =
+      year === 'first' ? '1' :
+        year === 'second' ? '2' :
+          year === 'third' ? '3' :
+            year === 'fourth' ? '4' :
+              year === 'me1' ? '8' :
+                year === 'me2' ? '7' :
+                  year === 'mba1' ? '10' :
+                    year === 'mba2' ? '9' :
+                      'Overall';
 
-    // If "overall" is selected for gender, combine Male and Female data
-    if (selectedGender === 'overall') {
-      const maleData = maledata?.[yearKey] || { veg_count: 0, non_veg_count: 0 };
-      const femaleData = femaledata?.[yearKey] || { veg_count: 0, non_veg_count: 0 };
+    if (gender === 'overall') {
+      const maleData =
+        maledata?.[yearKey] || {
+          veg_count: 0,
+          non_veg_count: 0
+        };
+
+      const femaleData =
+        femaledata?.[yearKey] || {
+          veg_count: 0,
+          non_veg_count: 0
+        };
 
       return {
         veg_count: maleData.veg_count + femaleData.veg_count,
-        non_veg_count: maleData.non_veg_count + femaleData.non_veg_count,
+        non_veg_count:
+          maleData.non_veg_count + femaleData.non_veg_count
       };
     }
 
-    // If a specific gender is selected, return the corresponding data
-    if (genderKey) {
-      const genderData = genderKey === 'Male' ? maledata : femaledata;
-      return genderData?.[yearKey] || { veg_count: 0, non_veg_count: 0 };
-    }
+    const genderData =
+      genderKey === 'Male' ? maledata : femaledata;
 
-    // Default fallback
-    return { veg_count: 0, non_veg_count: 0 };
+    return (
+      genderData?.[yearKey] || {
+        veg_count: 0,
+        non_veg_count: 0
+      }
+    );
   };
+  useEffect(() => {
+    if (!maledata && !femaledata) return;
+
+    const data = getCurrentData(
+      selectedYear,
+      selectedGender
+    );
+
+    setCount(data);
+  }, [
+    selectedYear,
+    selectedGender,
+    maledata,
+    femaledata
+  ]);
 
   const closeAbsentModal = () => {
     setShowAbsentModal(false);
@@ -335,7 +407,7 @@ function AttendanceDashboard() {
           <div className="attendance-food-section">
             <div className="attendance-food-counts">
               <div className="attendance-food-type">
-                <Utensils className="attendance-food-icon attendance-veg" />
+                <Carrot className="attendance-food-icon attendance-veg" />
                 <div className="attendance-food-details">
                   <h3>Vegetarian</h3>
                   <p className="attendance-food-number">{animatedVeg}</p>
@@ -347,7 +419,7 @@ function AttendanceDashboard() {
                 </div>
               </div>
               <div className="attendance-food-type">
-                <Utensils className="attendance-food-icon attendance-non-veg" />
+                <Ham className="attendance-food-icon attendance-non-veg" />
                 <div className="attendance-food-details">
                   <h3>Non-Vegetarian</h3>
                   <p className="attendance-food-number">{animatedNonVeg}</p>
@@ -361,26 +433,87 @@ function AttendanceDashboard() {
             </div>
 
             <div className="attendance-pie-chart">
-              <div
-                className="attendance-pie"
-                style={{
-                  background: `conic-gradient(
-                #10b981 0% ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}%,
-                #10b981 ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}% ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}%,
-                #ef4444 ${(currentData.veg_count / (currentData.veg_count + currentData.non_veg_count)) * 100}% 100%
-              )`
-                }}
-              />
-              <div className="attendance-pie-legend">
-                <div className="attendance-legend-item">
-                  <span className="attendance-legend-color attendance-veg"></span>
-                  <span>Vegetarian</span>
-                </div>
-                <div className="attendance-legend-item">
-                  <span className="attendance-legend-color attendance-non-veg"></span>
-                  <span>Non-Vegetarian</span>
-                </div>
+              <div className="attendance-donut-wrap">
+                <svg viewBox="0 0 200 200" className="attendance-donut-svg">
+                  <defs>
+                    <linearGradient id="vegGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#4ade80" />
+                      <stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                    <linearGradient id="nonVegGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#fb923c" />
+                      <stop offset="100%" stopColor="#dc2626" />
+                    </linearGradient>
+                    <filter id="donutShadow" x="-40%" y="-40%" width="180%" height="180%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.15" />
+                    </filter>
+                  </defs>
+
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r={RADIUS}
+                    className="attendance-donut-track"
+                    strokeWidth={STROKE_WIDTH}
+                  />
+
+                  {totalStudents > 0 && (
+                    <>
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="url(#vegGradient)"
+                        strokeWidth={STROKE_WIDTH}
+                        strokeLinecap="round"
+                        strokeDasharray={`${vegArcLen} ${CIRCUMFERENCE - vegArcLen}`}
+                        strokeDashoffset="0"
+                        transform="rotate(-90 100 100)"
+                        filter="url(#donutShadow)"
+                        className="attendance-donut-segment"
+                      />
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="url(#nonVegGradient)"
+                        strokeWidth={STROKE_WIDTH}
+                        strokeLinecap="round"
+                        strokeDasharray={`${nonVegArcLen} ${CIRCUMFERENCE - nonVegArcLen}`}
+                        strokeDashoffset={-(vegArcLen + gapArcLen)}
+                        transform="rotate(-90 100 100)"
+                        filter="url(#donutShadow)"
+                        className="attendance-donut-segment"
+                      />
+                    </>
+                  )}
+
+                  <text x="100" y="94" textAnchor="middle" className="attendance-donut-center-number">
+                    {totalStudents}
+                  </text>
+                  <text x="100" y="116" textAnchor="middle" className="attendance-donut-center-label">
+                    Total Students
+                  </text>
+                </svg>
               </div>
+               <div className="attendance-pie-legend">
+              <div className="attendance-legend-item">
+                <span className="attendance-legend-color attendance-veg"></span>
+                <span className="attendance-legend-text">Vegetarian</span>
+                <span className="attendance-legend-pct">
+                  {totalStudents > 0 ? ((vegCount / totalStudents) * 100).toFixed(0) : 0}%
+                </span>
+              </div>
+              <div className="attendance-legend-item">
+                <span className="attendance-legend-color attendance-non-veg"></span>
+                <span className="attendance-legend-text">Non-Vegetarian</span>
+                <span className="attendance-legend-pct">
+                  {totalStudents > 0 ? ((nonVegCount / totalStudents) * 100).toFixed(0) : 0}%
+                </span>
+              </div>
+            </div>
             </div>
           </div>
 
