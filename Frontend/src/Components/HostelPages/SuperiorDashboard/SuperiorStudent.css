@@ -997,8 +997,9 @@
 }
 
 .student-modal-input:focus {
-  border-color: var(--yellow);
-  box-shadow: 0 0 0 3px rgba(253, 204, 3, .12);
+  border: 1px solid var(--yellow);
+  outline: none;
+  box-shadow: none;
 }
 
 .student-modal-edit-buttons {
@@ -1101,7 +1102,42 @@ a.student-modal-contact-value:hover {
   }
 }
 
+/* =========================================================
+   1024px LAPTOP/TABLET-LANDSCAPE FIX
+   Fixes header controls getting clipped at this width
+   ========================================================= */
 
+@media (min-width: 1001px) and (max-width: 1279px) {
+  .superior-container {
+    margin-top: 0;          /* cancel the -20px that clips content above */
+    padding-top: 1.75rem;   /* restore some breathing room */
+  }
+
+  .warden-header-controls {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .gender-toggle {
+    margin-top: 6px;
+  }
+
+  .header-actions {
+    margin-top: 6px;
+  }
+
+  .action-btn {
+    margin-top: 6px;
+  }
+
+  .year-select {
+    margin-top: 6px;
+  }
+
+  .search-wrapper {
+    margin-top: 6px;
+  }
+}
 /* =========================================================
    768px
    ========================================================= */
@@ -1415,12 +1451,10 @@ a.student-modal-contact-value:hover {
 /* =========================================================
    ACCESSIBILITY
    ========================================================= */
-
-button:focus-visible,
-select:focus-visible,
-input:focus-visible {
-  outline: 3px solid rgba(253, 204, 3, .35);
-  outline-offset: 2px;
+.student-modal-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: 1px solid var(--yellow);
 }
 
 @media (prefers-reduced-motion: reduce) {
