@@ -492,9 +492,13 @@ function WardenRequest() {
             ⏳ Loading pending pass requests...
           </p>
         ) : filteredRecords.length === 0 ? (
-          <p className="AR-no-data-message">
-            📋 No pending pass requests found.
-          </p>
+          <div className="AR-no-data-message">
+            <div className="AR-no-data-icon">📋</div>
+            <p className="AR-no-data-title">No pending pass requests</p>
+            <p className="AR-no-data-subtext">
+              New requests will show up here as soon as they come in.
+            </p>
+          </div>
         ) : (
           <div className="AR-table-container">
             <table className="AR-table">
