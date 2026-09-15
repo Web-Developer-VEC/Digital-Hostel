@@ -158,7 +158,7 @@ async function setNewPassword(req, res) {
 
     const db = getDb();
 
-    const { user } = req.session;
+    const { user, warden_id } = req.session;
 
     if (!user || !user.registration_number) {
       return res
@@ -166,12 +166,10 @@ async function setNewPassword(req, res) {
         .json({ message: "Session expired. Please login again." });
     }
 
-    const warden_id = user.registration_number;
-
     const wardenCollection = db.collection("warden_database");
 
     const updateResult = await wardenCollection.updateOne(
-      { registration_number: warden_id },
+      { unique_id: warden_id },
       { $set: { password: hashedPassword } },
     );
 

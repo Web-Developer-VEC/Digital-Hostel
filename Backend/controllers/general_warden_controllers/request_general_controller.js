@@ -175,9 +175,9 @@ async function WardenDecision(req, res) {
     }
 
     if (action === "approve") {
-      // if (passData.parent_approval != "approved") {
-      //   return res.status(400).json({ message: "Parents Approval Needed!" });
-      // }
+      if (passData.parent_approval != "approved") {
+        return res.status(400).json({ message: "Parents Approval Needed!" });
+      }
       if (passData.parent_approval != "Approved") {
         return res.status(400).json({ message: "Parents Approval Needed!" });
       }
