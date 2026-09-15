@@ -1281,4 +1281,29 @@
   .AR-otp-actions {
     flex-direction: column;
   }
+}/* =========================================
+   SWEETALERT BUTTON ALIGNMENT FIX
+   ========================================= */
+
+.swal2-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  margin-top: 20px !important;
+}
+
+.swal2-actions button {
+  margin: 0 !important;
+  transform: none !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+.swal2-confirm {
+  min-width: 160px !important;
+}
+
+.swal2-cancel {
+  min-width: 100px !important;
 }
