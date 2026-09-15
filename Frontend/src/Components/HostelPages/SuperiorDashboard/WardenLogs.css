@@ -136,9 +136,9 @@
 
   background: #fff;
 
-  padding: 15px;
+  padding: 18px 20px;
 
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 
   border-left: 5px solid #fbbf24;
 
@@ -148,19 +148,135 @@
 
   /* Prevent long text from breaking layout */
   overflow-wrap: anywhere;
+
+  /* Stack the rows with even spacing */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 
 /* Desktop hover */
 
 .HOS-W-warden-entry:hover {
-  background: #eef5ff;
+  background: #fff8e1;
+  border-left-color: #fad051;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.25);
   transform: translateY(-2px);
 }
 
 
 /* ================================
-   TEXT
+   ENTRY ROWS
+================================ */
+
+.HOS-W-entry-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.HOS-W-entry-name-row {
+  padding-bottom: 4px;
+}
+
+.HOS-W-entry-status-row {
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e2e5ea;
+
+  /* THIS puts Deactivated + Activated on the same line */
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.HOS-W-entry-transfer {
+  padding-top: 2px;
+}
+
+
+/* Label above the transfer row */
+
+.HOS-W-entry-label {
+  font-size: 12px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  color: #b8860b;
+}
+
+
+/* ================================
+   NAME
+================================ */
+
+.HOS-W-entry-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2b2b2b;
+}
+
+
+/* ================================
+   STATUS BLOCKS
+   (Deactivated block | — | Activated block, same line)
+================================ */
+
+.HOS-W-status-block {
+  display: flex;
+  align-items: center;
+
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.HOS-W-status-divider {
+  color: #ccc;
+  font-weight: 400;
+}
+
+.HOS-W-status-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 3px 10px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
+  line-height: 1.6;
+}
+
+.HOS-W-status-badge-deactivated {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.HOS-W-status-badge-activated {
+  background: #eafaf1;
+  color: #1e8449;
+}
+
+.HOS-W-entry-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: #777;
+
+  white-space: nowrap;
+}
+
+
+/* ================================
+   TEXT (legacy, kept for compatibility)
 ================================ */
 
 .HOS-W-warden-status-text {
@@ -170,7 +286,7 @@
 
   line-height: 1.5;
 
-  margin: 0 0 12px 0;
+  margin: 0;
 }
 
 
@@ -179,12 +295,43 @@
 }
 
 
-.HOS-W-transfer-text {
-  display: inline-block;
+/* ================================
+   TRANSFER LIST
+================================ */
 
+.HOS-W-transfer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  margin-top: 0;
+  padding-left: 0;
+}
+
+
+.HOS-W-transfer-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.6;
+  color: #444;
 
   overflow-wrap: anywhere;
+}
+
+.HOS-W-transfer-year,
+.HOS-W-transfer-name {
+  font-weight: 700;
+  color: #333;
+}
+
+
+.HOS-W-transfer-arrow {
+  color: #999;
+  font-weight: 400;
 }
 
 
@@ -382,6 +529,42 @@
     border-left-width: 4px;
 
     border-radius: 6px;
+
+    gap: 10px;
+  }
+
+
+  /* --------------------------------
+     ENTRY ROWS (mobile)
+  -------------------------------- */
+
+  .HOS-W-entry-status-row {
+    /* stack Deactivated / Activated on mobile — no room side by side */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    padding-bottom: 10px;
+  }
+
+  .HOS-W-status-divider {
+    display: none;
+  }
+
+  .HOS-W-entry-label {
+    font-size: 11px;
+  }
+
+  .HOS-W-entry-name {
+    font-size: 15px;
+  }
+
+  .HOS-W-entry-date {
+    font-size: 12px;
+  }
+
+  .HOS-W-status-badge {
+    font-size: 10px;
   }
 
 
@@ -395,13 +578,13 @@
 
     line-height: 1.6;
 
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
 
 
   .HOS-W-transfer-text {
 
-    font-size: 14px;
+    font-size: 13px;
 
     line-height: 1.8;
   }
@@ -411,7 +594,7 @@
 
   .HOS-W-warden-entry:hover {
 
-    background: #fff;
+    background: #fff8e1;
 
     transform: none;
   }
@@ -475,6 +658,8 @@
     padding: 12px;
 
     border-left-width: 4px;
+
+    gap: 8px;
   }
 
 
@@ -488,9 +673,23 @@
 
   .HOS-W-transfer-text {
 
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .HOS-W-entry-label {
+    font-size: 10px;
+  }
+
+  .HOS-W-entry-name {
+    font-size: 14px;
+  }
+
+  .HOS-W-status-badge {
+    font-size: 9px;
+    padding: 3px 8px;
   }
 }
+
 @media screen and (max-width: 768px) {
   .HOS-W-warden-logs-container {
     width: 100%;
