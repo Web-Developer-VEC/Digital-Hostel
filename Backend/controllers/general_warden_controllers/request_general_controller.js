@@ -5,6 +5,7 @@ const {
   sendParentApprovalSMS,
 } = require("../../services/sendSMS.service");
 const crypto = require("crypto");
+const { getIstDayRange } = require("../../utils/time");
 
 const hashOTP = (otp) => {
   return crypto.createHash("sha256").update(String(otp)).digest("hex");
@@ -37,10 +38,7 @@ async function fetchPassWarden(req, res) {
     let query = {};
 
     if (date) {
-      const targetDate = date ? new Date(date) : new Date();
-
-      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+      const { startOfDay, endOfDay } = getIstDayRange(date);
 
       query.request_time = { $gte: startOfDay, $lte: endOfDay };
       query.request_completed = true;
@@ -191,7 +189,7 @@ async function WardenDecision(req, res) {
       if (medical_status === true) {
         updateData.reason_type = "medical";
       }
-      updateData.request_completed=true;
+      updateData.request_completed = true;
 
       await passCollection.updateOne({ pass_id }, { $set: updateData });
 
@@ -204,7 +202,7 @@ async function WardenDecision(req, res) {
     if (action === "reject") {
       updateData.qrcode_path = null;
       updateData.qrcode_status = false;
-      updateData.request_completed=true;
+      updateData.request_completed = true;
     }
 
     await passCollection.updateOne({ pass_id }, { $set: updateData });

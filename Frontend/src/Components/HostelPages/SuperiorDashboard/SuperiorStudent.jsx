@@ -416,11 +416,17 @@ function SuperiorStudent() {
           {filteredStudents.map(student => (
             <div key={student.id} className="student-card">
               <div className="status-icon-top">
-                {student.transitStatus ? (
-                  <Footprints size={18} color="#f59e0b" />
-                ) : (
-                  <Home size={18} color="#3b82f6" />
-                )}
+                <div className="tooltip-container">
+                  {student.transitStatus ? (
+                    <Footprints size={18} color="#f59e0b" />
+                  ) : (
+                    <Home size={18} color="#3b82f6" />
+                  )}
+
+                  <span className="tooltip">
+                    {student.transitStatus ? "In Transit" : "In Hostel"}
+                  </span>
+                </div>
               </div>
 
               <div className="card-info-row">
@@ -462,14 +468,83 @@ function SuperiorStudent() {
 
               <div className="student-modal-header">
 
-                {/* Close */}
-                <button
-                  type="button"
-                  className="student-modal-close"
-                  onClick={closeModal}
-                  aria-label="Close"
-                >
-                  <X size={21} />
+              <div className="modal-body">
+                <h4 className="section-title">HOSTEL</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">ROOM</span>
+                    {editingRoom ? (
+                      <div className="inline-edit-group">
+                        <input
+                          type="text"
+                          className="inline-input"
+                          value={tempRoom}
+                          onChange={(e) => setTempRoom(e.target.value)}
+                        />
+                        <button className="inline-btn inline-confirm" onClick={confirmEditRoom} title="Save">✓</button>
+                        <button className="inline-btn inline-cancel" onClick={cancelEditRoom} title="Cancel">✕</button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="info-value">{selectedStudent.roomNumber || 'N/A'}</span>
+                        <span className="edit-link" onClick={startEditRoom}>Edit</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Inline Food Type Editor with Tick and Cross buttons */}
+                  <div className="info-item">
+                    <span className="info-label">FOOD</span>
+                    {inlineEdit.field === 'foodType' ? (
+                      <div className="inline-edit-group">
+                        <select
+                          className="inline-select"
+                          value={inlineEdit.value}
+                          onChange={(e) => setInlineEdit({ ...inlineEdit, value: e.target.value })}
+                        >
+                          <option value="Veg">Vegetarian</option>
+                          <option value="Non-Veg">Non-Vegetarian</option>
+                        </select>
+                        <button className="inline-btn inline-confirm" onClick={confirmEditFood} title="Save">✓</button>
+                        <button className="inline-btn inline-cancel" onClick={cancelInlineEdit} title="Cancel">✕</button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="info-value">{selectedStudent.foodType}</span>
+                        <span className="edit-link" onClick={startEditFood}>Edit</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="info-item">
+                    <span className="info-label">STATUS</span>
+                    <span className="info-value status-indicator">
+                      <span className={`status-dot ${selectedStudent.transitStatus ? 'transit' : 'hostel'}`}></span>
+                      {selectedStudent.transitStatus ? 'In Transit' : 'In Hostel'}
+                    </span>
+                  </div>
+                </div>
+
+                <h4 className="section-title">CONTACT</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">STUDENT</span>
+                    <span className="info-value">{selectedStudent.studentMobile || 'N/A'}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">PARENT</span>
+                    <span className="info-value">{selectedStudent.parentMobile || 'N/A'}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">AREA</span>
+                    <span className="info-value">{selectedStudent.area || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-vaccate" onClick={() => handleDelete(selectedStudent.registrationNumber, selectedStudent.name)}>
+                  Mark Vaccate
                 </button>
 
 

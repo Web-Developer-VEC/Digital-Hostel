@@ -224,48 +224,63 @@ const StudentHistory = () => {
   };
 
   const getStatusBadge = (status, type) => {
-    if (type === "parent") {
-      if (status === null) {
-        return (
-          <span className="status pending">
-            <Clock size={14} /> Pending
-          </span>
-        );
-      } else if (status) {
-        return (
-          <span className="status completed">
-            <CheckCircle size={14} /> Approved
-          </span>
-        );
-      } else {
-        return (
-          <span className="status rejected">
-            <AlertCircle size={14} /> Rejected
-          </span>
-        );
-      }
-    } else {
-      if (status === null) {
-        return (
-          <span className="status pending">
-            <Clock size={14} /> Pending
-          </span>
-        );
-      } else if (status) {
-        return (
-          <span className="status completed">
-            <CheckCircle size={14} /> Approved
-          </span>
-        );
-      } else {
-        return (
-          <span className="status rejected">
-            <AlertCircle size={14} /> Rejected
-          </span>
-        );
-      }
+  // PARENT APPROVAL
+  if (type === "parent") {
+    const parentStatus =
+      typeof status === "string" ? status.trim().toLowerCase() : status;
+
+    if (parentStatus === null || parentStatus === "pending") {
+      return (
+        <span className="status pending">
+          <Clock size={14} /> Pending
+        </span>
+      );
+    } else if (parentStatus === "approved") {
+      return (
+        <span className="status completed">
+          <CheckCircle size={14} /> Approved
+        </span>
+      );
+    } else if (parentStatus === "rejected") {
+      return (
+        <span className="status rejected">
+          <AlertCircle size={14} /> Rejected
+        </span>
+      );
     }
-  };
+
+    // Unknown parent status
+    return (
+      <span className="status pending">
+        <Clock size={14} /> Pending
+      </span>
+    );
+  }
+
+  // WARDEN / SUPERIOR WARDEN
+  // ORIGINAL LOGIC — DO NOT CHANGE
+  else {
+    if (status === null) {
+      return (
+        <span className="status pending">
+          <Clock size={14} /> Pending
+        </span>
+      );
+    } else if (status) {
+      return (
+        <span className="status completed">
+          <CheckCircle size={14} /> Approved
+        </span>
+      );
+    } else {
+      return (
+        <span className="status rejected">
+          <AlertCircle size={14} /> Rejected
+        </span>
+      );
+    }
+  }
+};
 
   const filteredHistory =
     selectedYear === "Overall"

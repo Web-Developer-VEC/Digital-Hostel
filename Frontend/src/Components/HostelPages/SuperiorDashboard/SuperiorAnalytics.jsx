@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./SuperiorAnalytics.css";
@@ -13,20 +7,9 @@ import axiosInstance from "../../../api/axios";
 import { format } from "date-fns";
 import Swal from "sweetalert2";
 
-const BRAND_COLORS = [
-  "#a73d1a",
-  "#ea580c",
-  "#7c2d12",
-  "#f97316",
-];
+const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 
-const DashboardCard = ({
-  title,
-  number,
-  isInteractive,
-  isDanger,
-  onClick,
-}) => {
+const DashboardCard = ({ title, number, isInteractive, isDanger, onClick }) => {
   return (
     <div
       className={`hl-metric-card ${
@@ -59,80 +42,64 @@ const Dashboard1 = () => {
   // BASIC STATES
   // =====================================================
 
-  const [selectedGender, setSelectedGender] =
-    useState("Boys");
+  const [selectedGender, setSelectedGender] = useState("Boys");
 
-  const [selectedCard, setSelectedCard] =
-    useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
 
-  const [showNames, setShowNames] =
-    useState(false);
+  const [showNames, setShowNames] = useState(false);
 
-  const [highlightedData, setHighlightedData] =
-    useState(null);
+  const [highlightedData, setHighlightedData] = useState(null);
 
-  const [showChartPopup, setShowChartPopup] =
-    useState(false);
+  const [showChartPopup, setShowChartPopup] = useState(false);
 
-  const [chartPopupData, setChartPopupData] =
-    useState(null);
+  const [chartPopupData, setChartPopupData] = useState(null);
 
-  const [selectedDate, setSelectedDate] =
-    useState(format(new Date(), "yyyy-MM-dd"));
+  const [selectedDate, setSelectedDate] = useState(
+    format(new Date(), "yyyy-MM-dd"),
+  );
 
-  const [showCalendar, setShowCalendar] =
-    useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
-  const [selectedYear, setSelectedYear] =
-    useState("overall");
+  const [selectedYear, setSelectedYear] = useState("overall");
 
-  const [years, setYears] =
-    useState([]);
+  const [years, setYears] = useState([]);
 
   // =====================================================
   // SUPERIOR WARDEN DATA
   // =====================================================
 
-  const [fetchedData, setFetchData] =
-    useState({
-      boys: {},
-      girls: {},
-    });
+  const [fetchedData, setFetchData] = useState({
+    boys: {},
+    girls: {},
+  });
 
   // =====================================================
   // ANALYSIS STATES
   // =====================================================
 
-  const [showNameList, setShowNameList] =
-    useState(false);
+  const [showNameList, setShowNameList] = useState(false);
 
-  const [nameListData, setNameListData] =
-    useState([]);
+  const [nameListData, setNameListData] = useState([]);
 
-  const [
-    fetchedPassAnalysis,
-    setFetchedPassAnalysis,
-  ] = useState(null);
+  const [fetchedPassAnalysis, setFetchedPassAnalysis] = useState(null);
 
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [error, setError] =
-    useState(null);
+  const [error, setError] = useState(null);
 
   // =====================================================
   // YEAR DISPLAY
   // =====================================================
 
   const yearToAlphabet = {
-    "1": "First Year",
-    "2": "Second Year",
-    "3": "Third Year",
-    "4": "Fourth Year",
-    "10": "MBA First Year",
-    "9": "MBA Second Year",
-    "8": "ME First Year",
-    "7": "ME Second Year",
+    1: "First Year",
+    2: "Second Year",
+    3: "Third Year",
+    4: "Fourth Year",
+    10: "MBA First Year",
+    9: "MBA Second Year",
+    8: "ME First Year",
+    7: "ME Second Year",
     overall: "Overall",
   };
 
@@ -152,9 +119,7 @@ const Dashboard1 = () => {
   // =====================================================
 
   const handleGenderToggle = () => {
-    setSelectedGender((prev) =>
-      prev === "Boys" ? "Girls" : "Boys"
-    );
+    setSelectedGender((prev) => (prev === "Boys" ? "Girls" : "Boys"));
   };
 
   // =====================================================
@@ -185,24 +150,13 @@ const Dashboard1 = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log(
-          "Fetching Superior Warden Analytics..."
-        );
+        console.log("Fetching Superior Warden Analytics...");
 
-        const response =
-          await axiosInstance.get(
-            "/api/pass_measures_warden"
-          );
+        const response = await axiosInstance.get("/api/pass_measures_warden");
 
-        console.log(
-          "Superior Analytics RAW Response:",
-          response
-        );
+        console.log("Superior Analytics RAW Response:", response);
 
-        console.log(
-          "Superior Analytics Data:",
-          response.data
-        );
+        console.log("Superior Analytics Data:", response.data);
 
         const resData = response.data || {};
 
@@ -210,10 +164,9 @@ const Dashboard1 = () => {
         // YEARS
         // =================================================
 
-        const backendYears =
-          Array.isArray(resData.primary_years)
-            ? resData.primary_years.map(String)
-            : [];
+        const backendYears = Array.isArray(resData.primary_years)
+          ? resData.primary_years.map(String)
+          : [];
 
         setYears(backendYears);
 
@@ -231,25 +184,13 @@ const Dashboard1 = () => {
         // data.Female
         // =================================================
 
-        const boysData =
-          resData?.data?.male ||
-          resData?.data?.Male ||
-          {};
+        const boysData = resData?.data?.male || resData?.data?.Male || {};
 
-        const girlsData =
-          resData?.data?.female ||
-          resData?.data?.Female ||
-          {};
+        const girlsData = resData?.data?.female || resData?.data?.Female || {};
 
-        console.log(
-          "Boys Analytics Data:",
-          boysData
-        );
+        console.log("Boys Analytics Data:", boysData);
 
-        console.log(
-          "Girls Analytics Data:",
-          girlsData
-        );
+        console.log("Girls Analytics Data:", girlsData);
 
         setFetchData({
           boys: boysData,
@@ -260,32 +201,17 @@ const Dashboard1 = () => {
         // DEFAULT YEAR
         // =================================================
 
-        if (
-          boysData?.overall ||
-          girlsData?.overall
-        ) {
+        if (boysData?.overall || girlsData?.overall) {
           setSelectedYear("overall");
         } else if (backendYears.length > 0) {
-          setSelectedYear(
-            String(backendYears[0])
-          );
+          setSelectedYear(String(backendYears[0]));
         }
-
       } catch (err) {
-        console.error(
-          "❌ Error Fetching Superior Analytics:",
-          err
-        );
+        console.error("❌ Error Fetching Superior Analytics:", err);
 
-        console.error(
-          "Error Response:",
-          err.response
-        );
+        console.error("Error Response:", err.response);
 
-        console.error(
-          "Error Data:",
-          err.response?.data
-        );
+        console.error("Error Data:", err.response?.data);
 
         fireSwal({
           title: "Network Error",
@@ -308,27 +234,14 @@ const Dashboard1 = () => {
 
   const activeGenderData =
     selectedGender === "Boys"
-      ? fetchedData?.boys?.[
-          String(selectedYear)
-        ] || {}
-      : fetchedData?.girls?.[
-          String(selectedYear)
-        ] || {};
+      ? fetchedData?.boys?.[String(selectedYear)] || {}
+      : fetchedData?.girls?.[String(selectedYear)] || {};
 
-  console.log(
-    "Selected Gender:",
-    selectedGender
-  );
+  console.log("Selected Gender:", selectedGender);
 
-  console.log(
-    "Selected Year:",
-    selectedYear
-  );
+  console.log("Selected Year:", selectedYear);
 
-  console.log(
-    "Active Analytics Data:",
-    activeGenderData
-  );
+  console.log("Active Analytics Data:", activeGenderData);
 
   // =====================================================
   // TOP FOUR CARDS
@@ -337,31 +250,29 @@ const Dashboard1 = () => {
   const cardData = [
     {
       title: "Outgoing",
-      number:
-        activeGenderData?.exitTimeCount ?? 0,
-      isInteractive: false,
+      number: activeGenderData?.exitTimeCount ?? 0,
+      names: activeGenderData?.exitTimeDetails || { names: [] },
+      isInteractive: true,
       isDanger: false,
     },
 
     {
       title: "Arrive",
-      number:
-        activeGenderData?.reEntryTimeCount ?? 0,
-      isInteractive: false,
+      number: activeGenderData?.reEntryTimeCount ?? 0,
+      names: activeGenderData?.reEntryTimeDetails || { names: [] },
+      isInteractive: true,
       isDanger: false,
     },
 
     {
-      title: "Waiting",
+      title: "ActiveOutside",
 
-      number:
-        activeGenderData?.activeOutsideCount ?? 0,
+      number: activeGenderData?.activeOutsideCount ?? 0,
 
-      names:
-        activeGenderData?.activeOutsideDetails || {
-          names: [],
-          passtypes: [],
-        },
+      names: activeGenderData?.activeOutsideDetails || {
+        names: [],
+        passtypes: [],
+      },
 
       isInteractive: true,
       isDanger: false,
@@ -370,14 +281,12 @@ const Dashboard1 = () => {
     {
       title: "Overtime",
 
-      number:
-        activeGenderData?.overdueReturnCount ?? 0,
+      number: activeGenderData?.overdueReturnCount ?? 0,
 
-      names:
-        activeGenderData?.overdueReturnDetails || {
-          names: [],
-          late_by: [],
-        },
+      names: activeGenderData?.overdueReturnDetails || {
+        names: [],
+        late_by: [],
+      },
 
       isInteractive: true,
       isDanger: true,
@@ -400,30 +309,22 @@ const Dashboard1 = () => {
   const chartData = [
     {
       name: "OD",
-      value:
-        activeGenderData?.passTypeCounts?.od
-          ?.count ?? 0,
+      value: activeGenderData?.passTypeCounts?.od?.count ?? 0,
     },
 
     {
       name: "Leave",
-      value:
-        activeGenderData?.passTypeCounts?.leave
-          ?.count ?? 0,
+      value: activeGenderData?.passTypeCounts?.leave?.count ?? 0,
     },
 
     {
       name: "Stay Pass",
-      value:
-        activeGenderData?.passTypeCounts
-          ?.staypass?.count ?? 0,
+      value: activeGenderData?.passTypeCounts?.staypass?.count ?? 0,
     },
 
     {
       name: "Out Pass",
-      value:
-        activeGenderData?.passTypeCounts
-          ?.outpass?.count ?? 0,
+      value: activeGenderData?.passTypeCounts?.outpass?.count ?? 0,
     },
   ];
 
@@ -431,12 +332,10 @@ const Dashboard1 = () => {
   // TOTAL PASS COUNT
   // =====================================================
 
-  const totalPassCount =
-    chartData.reduce(
-      (acc, curr) =>
-        acc + (Number(curr.value) || 0),
-      0
-    );
+  const totalPassCount = chartData.reduce(
+    (acc, curr) => acc + (Number(curr.value) || 0),
+    0,
+  );
 
   // =====================================================
   // COLORS
@@ -462,8 +361,7 @@ const Dashboard1 = () => {
   const handleCardClick = (card) => {
     if (!card.isInteractive) return;
 
-    const list =
-      card.names?.names || [];
+    const list = card.names?.names || [];
 
     if (!list.length) {
       fireSwal({
@@ -512,8 +410,7 @@ const Dashboard1 = () => {
     if (!data || !data.value) {
       fireSwal({
         title: "No Data",
-        text:
-          "No active passes found for this category.",
+        text: "No active passes found for this category.",
         icon: "info",
         confirmButtonText: "OK",
       });
@@ -526,8 +423,7 @@ const Dashboard1 = () => {
 
     fireSwal({
       title: "Loading Category Data",
-      text:
-        "Fetching pass analysis records...",
+      text: "Fetching pass analysis records...",
       allowOutsideClick: false,
 
       didOpen: () => {
@@ -536,47 +432,33 @@ const Dashboard1 = () => {
     });
 
     try {
-      const response =
-        await axiosInstance.post(
-          "/api/pass_analysis_superior",
-          {
-            type: data.name
-              .trim()
-              .toLowerCase()
-              .replace(/\s+/g, ""),
+      const response = await axiosInstance.post(
+        "/api/pass_analysis_superior",
+        {
+          type: data.name.trim().toLowerCase().replace(/\s+/g, ""),
 
-            year: selectedYear,
+          year: selectedYear,
 
-            gender:
-              selectedGender === "Boys"
-                ? "Male"
-                : "Female",
-          },
-          {
-            withCredentials: true,
-          }
-        );
+          gender: selectedGender === "Boys" ? "Male" : "Female",
+        },
+        {
+          withCredentials: true,
+        },
+      );
 
       Swal.close();
 
-      const resData =
-        response.data || {};
+      const resData = response.data || {};
 
-      setFetchedPassAnalysis(
-        resData
+      setFetchedPassAnalysis(resData);
+
+      const popupChartData = Object.entries(resData.reasonTypeCounts || {}).map(
+        ([reason, count], idx) => ({
+          name: reason,
+          value: count,
+          color: getRandomThemeColor(idx),
+        }),
       );
-
-      const popupChartData =
-        Object.entries(
-          resData.reasonTypeCounts || {}
-        ).map(
-          ([reason, count], idx) => ({
-            name: reason,
-            value: count,
-            color:
-              getRandomThemeColor(idx),
-          })
-        );
 
       setChartPopupData({
         title: data.name,
@@ -585,17 +467,10 @@ const Dashboard1 = () => {
       });
 
       setShowChartPopup(true);
-
     } catch (err) {
-      console.error(
-        "Error fetching pass analysis:",
-        err
-      );
+      console.error("Error fetching pass analysis:", err);
 
-      setError(
-        err.message ||
-          "Failed to fetch data."
-      );
+      setError(err.message || "Failed to fetch data.");
 
       fireSwal({
         title: "Error!",
@@ -605,7 +480,6 @@ const Dashboard1 = () => {
         icon: "error",
         confirmButtonText: "OK",
       });
-
     } finally {
       setIsLoading(false);
     }
@@ -616,15 +490,9 @@ const Dashboard1 = () => {
   // =====================================================
 
   const handleDateChange = async (date) => {
-    const formattedDate =
-      format(
-        date,
-        "yyyy-MM-dd"
-      );
+    const formattedDate = format(date, "yyyy-MM-dd");
 
-    setSelectedDate(
-      formattedDate
-    );
+    setSelectedDate(formattedDate);
 
     setShowCalendar(false);
 
@@ -642,70 +510,44 @@ const Dashboard1 = () => {
     });
 
     try {
-      const response =
-        await axiosInstance.post(
-          "/api/pass_analysis_by_date_superior",
-          {
-            type:
-              chartPopupData?.title
-                ?.trim()
-                .toLowerCase()
-                .replace(/\s+/g, ""),
+      const response = await axiosInstance.post(
+        "/api/pass_analysis_by_date_superior",
+        {
+          type: chartPopupData?.title?.trim().toLowerCase().replace(/\s+/g, ""),
 
-            year:
-              selectedYear,
+          year: selectedYear,
 
-            gender:
-              selectedGender === "Boys"
-                ? "Male"
-                : "Female",
+          gender: selectedGender === "Boys" ? "Male" : "Female",
 
-            date:
-              formattedDate,
-          },
-          {
-            withCredentials: true,
-          }
-        );
+          date: formattedDate,
+        },
+        {
+          withCredentials: true,
+        },
+      );
 
       Swal.close();
 
-      const resData =
-        response.data || {};
+      const resData = response.data || {};
 
-      setFetchedPassAnalysis(
-        resData
+      setFetchedPassAnalysis(resData);
+
+      const popupChartData = Object.entries(resData.reasonTypeCounts || {}).map(
+        ([reason, count], idx) => ({
+          name: reason,
+          value: count,
+          color: getRandomThemeColor(idx),
+        }),
       );
 
-      const popupChartData =
-        Object.entries(
-          resData.reasonTypeCounts || {}
-        ).map(
-          ([reason, count], idx) => ({
-            name: reason,
-            value: count,
-            color:
-              getRandomThemeColor(idx),
-          })
-        );
-
-      setChartPopupData(
-        (prev) => ({
-          ...prev,
-          popupChartData,
-        })
-      );
-
+      setChartPopupData((prev) => ({
+        ...prev,
+        popupChartData,
+      }));
     } catch (err) {
-      console.error(
-        "Error fetching pass analysis data:",
-        err
-      );
+      console.error("Error fetching pass analysis data:", err);
 
-      setError(
-        err.message ||
-          "Failed to fetch data."
-      );
+      setError(err.message || "Failed to fetch data.");
 
       fireSwal({
         title: "Error!",
@@ -715,7 +557,6 @@ const Dashboard1 = () => {
         icon: "error",
         confirmButtonText: "OK",
       });
-
     } finally {
       setIsLoading(false);
     }
@@ -726,26 +567,18 @@ const Dashboard1 = () => {
   // =====================================================
 
   const handleToggleCalendar = () => {
-    setShowCalendar(
-      (prev) => !prev
-    );
+    setShowCalendar((prev) => !prev);
   };
 
   // =====================================================
   // STUDENT NAME LIST
   // =====================================================
 
-  const openStudentList = (
-    namesArray
-  ) => {
-    if (
-      !namesArray ||
-      namesArray.length === 0
-    ) {
+  const openStudentList = (namesArray) => {
+    if (!namesArray || namesArray.length === 0) {
       fireSwal({
         title: "No Data",
-        text:
-          "No students registered in this category.",
+        text: "No students registered in this category.",
         icon: "info",
         confirmButtonText: "OK",
       });
@@ -753,9 +586,7 @@ const Dashboard1 = () => {
       return;
     }
 
-    setNameListData(
-      namesArray
-    );
+    setNameListData(namesArray);
 
     setShowNameList(true);
   };
@@ -766,82 +597,59 @@ const Dashboard1 = () => {
 
   return (
     <div className="hl-warden-dashboard">
-
       {/* HEADER */}
 
       <header className="hl-warden-header">
-
         <div>
-
           <div className="hl-badge-live">
             <span className="hl-pulse-dot" />
             Superior Oversight Monitoring
           </div>
 
           <h1 className="hl-title">
-            Pass Measures & Analytics —{" "}
-            {selectedGender}
+            Pass Measures & Analytics — {selectedGender}
           </h1>
 
           <p className="hl-subtitle">
-            Campus-wide administrative overview
-            and pass movement audits
+            Campus-wide administrative overview and pass movement audits
           </p>
-
         </div>
 
         <div className="hl-header-actions">
-
           {/* GENDER */}
 
           <div className="hl-gender-toggle-wrapper">
-
             <span
               className={`hl-toggle-tag ${
-                selectedGender === "Boys"
-                  ? "active"
-                  : ""
+                selectedGender === "Boys" ? "active" : ""
               }`}
             >
               Boys
             </span>
 
             <label className="hl-switch">
-
               <input
                 type="checkbox"
-                onChange={
-                  handleGenderToggle
-                }
-                checked={
-                  selectedGender === "Girls"
-                }
+                onChange={handleGenderToggle}
+                checked={selectedGender === "Girls"}
               />
 
               <span className="hl-slider" />
-
             </label>
 
             <span
               className={`hl-toggle-tag ${
-                selectedGender === "Girls"
-                  ? "active"
-                  : ""
+                selectedGender === "Girls" ? "active" : ""
               }`}
             >
               Girls
             </span>
-
           </div>
 
           {/* YEAR */}
 
           <div className="hl-filter-control">
-
-            <label
-              htmlFor="hl-year-select"
-              className="hl-filter-label"
-            >
+            <label htmlFor="hl-year-select" className="hl-filter-label">
               Select Year:
             </label>
 
@@ -851,107 +659,59 @@ const Dashboard1 = () => {
               value={selectedYear}
               onChange={handleYearChange}
             >
-
-              <option value="overall">
-                Overall
-              </option>
+              <option value="overall">Overall</option>
 
               {years
-                ?.filter(
-                  (year) =>
-                    String(year) !==
-                    "overall"
-                )
-                .map(
-                  (year) => (
-                    <option
-                      key={String(year)}
-                      value={String(year)}
-                    >
-                      {yearToAlphabet[
-                        String(year)
-                      ] ||
-                        `Year ${year}`}
-                    </option>
-                  )
-                )}
-
+                ?.filter((year) => String(year) !== "overall")
+                .map((year) => (
+                  <option key={String(year)} value={String(year)}>
+                    {yearToAlphabet[String(year)] || `Year ${year}`}
+                  </option>
+                ))}
             </select>
-
           </div>
-
         </div>
-
       </header>
 
       {/* TOP METRICS */}
 
       <section className="hl-metrics-grid">
-
-        {cardData.map(
-          (card, index) => (
-            <DashboardCard
-              key={index}
-              title={card.title}
-              number={card.number}
-              isInteractive={
-                card.isInteractive
-              }
-              isDanger={
-                card.isDanger
-              }
-              onClick={() =>
-                handleCardClick(
-                  card
-                )
-              }
-            />
-          )
-        )}
-
+        {cardData.map((card, index) => (
+          <DashboardCard
+            key={index}
+            title={card.title}
+            number={card.number}
+            isInteractive={card.isInteractive}
+            isDanger={card.isDanger}
+            onClick={() => handleCardClick(card)}
+          />
+        ))}
       </section>
 
       {/* MAIN CHART */}
 
       <section className="hl-chart-card">
-
         <div className="hl-chart-header">
-
           <div>
-
             <h3 className="hl-chart-title">
-              Pass Classification (
-              {selectedGender})
+              Pass Classification ({selectedGender})
             </h3>
 
             <p className="hl-chart-sub">
-              Distribution of issued passes.
-              Click any slice or legend item
-              to view details.
+              Distribution of issued passes. Click any slice or legend item to
+              view details.
             </p>
-
           </div>
 
           <div className="hl-total-badge">
-            Total Passes:{" "}
-            <strong>
-              {totalPassCount}
-            </strong>
+            Total Passes: <strong>{totalPassCount}</strong>
           </div>
-
         </div>
 
         <div className="hl-chart-content-split">
-
           <div className="hl-chart-wrapper">
-
-            <ResponsiveContainer
-              width="100%"
-              height={340}
-            >
-
+            <ResponsiveContainer width="100%" height={340}>
               <PieChart>
-
                 <Pie
                   data={chartData}
                   cx="50%"
@@ -960,74 +720,36 @@ const Dashboard1 = () => {
                   outerRadius={140}
                   paddingAngle={5}
                   dataKey="value"
-                  onMouseEnter={
-                    handlePieMouseEnter
-                  }
-                  onMouseLeave={
-                    handlePieMouseLeave
-                  }
-                  onClick={
-                    handlePieClick
-                  }
+                  onMouseEnter={handlePieMouseEnter}
+                  onMouseLeave={handlePieMouseLeave}
+                  onClick={handlePieClick}
                   cursor="pointer"
                 >
-
-                  {chartData.map(
-                    (
-                      entry,
-                      index
-                    ) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          BRAND_COLORS[
-                            index %
-                              BRAND_COLORS.length
-                          ]
-                        }
-                        opacity={
-                          highlightedData &&
-                          highlightedData.name !==
-                            entry.name
-                            ? 0.4
-                            : 1
-                        }
-                        stroke="#ffffff"
-                        strokeWidth={2}
-                      />
-                    )
-                  )}
-
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={BRAND_COLORS[index % BRAND_COLORS.length]}
+                      opacity={
+                        highlightedData && highlightedData.name !== entry.name
+                          ? 0.4
+                          : 1
+                      }
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                    />
+                  ))}
                 </Pie>
 
                 <Tooltip
-                  content={({
-                    active,
-                    payload,
-                  }) => {
-                    if (
-                      active &&
-                      payload &&
-                      payload.length
-                    ) {
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
                       return (
                         <div className="hl-tooltip-box">
-
                           <span className="hl-tooltip-title">
-                            {
-                              payload[0]
-                                .name
-                            }
+                            {payload[0].name}
                           </span>
 
-                          <span>
-                            {
-                              payload[0]
-                                .value
-                            }{" "}
-                            Passes
-                          </span>
-
+                          <span>{payload[0].value} Passes</span>
                         </div>
                       );
                     }
@@ -1035,583 +757,303 @@ const Dashboard1 = () => {
                     return null;
                   }}
                 />
-
               </PieChart>
-
             </ResponsiveContainer>
 
             <div className="hl-chart-hub-center">
+              <span className="hl-hub-label">TOTAL ISSUED</span>
 
-              <span className="hl-hub-label">
-                TOTAL ISSUED
-              </span>
-
-              <span className="hl-hub-count">
-                {totalPassCount}
-              </span>
-
+              <span className="hl-hub-count">{totalPassCount}</span>
             </div>
-
           </div>
 
           {/* LEGEND */}
 
           <div className="hl-legend-stack">
-
-            {chartData.map(
-              (
-                item,
-                idx
-              ) => (
-
+            {chartData.map((item, idx) => (
+              <div
+                key={idx}
+                className="hl-legend-pill"
+                onClick={() => handlePieClick(item)}
+              >
                 <div
-                  key={idx}
-                  className="hl-legend-pill"
-                  onClick={() =>
-                    handlePieClick(
-                      item
-                    )
-                  }
-                >
+                  className="hl-color-swatch"
+                  style={{
+                    backgroundColor: BRAND_COLORS[idx % BRAND_COLORS.length],
+                  }}
+                />
 
-                  <div
-                    className="hl-color-swatch"
-                    style={{
-                      backgroundColor:
-                        BRAND_COLORS[
-                          idx %
-                            BRAND_COLORS.length
-                        ],
-                    }}
-                  />
+                <div className="hl-legend-meta">
+                  <span className="hl-legend-name">{item.name}</span>
 
-                  <div className="hl-legend-meta">
-
-                    <span className="hl-legend-name">
-                      {item.name}
-                    </span>
-
-                    <span className="hl-legend-sub">
-                      Click to inspect
-                      category
-                    </span>
-
-                  </div>
-
-                  <div className="hl-legend-val">
-                    {item.value}
-                  </div>
-
+                  <span className="hl-legend-sub">
+                    Click to inspect category
+                  </span>
                 </div>
 
-              )
-            )}
-
+                <div className="hl-legend-val">{item.value}</div>
+              </div>
+            ))}
           </div>
-
         </div>
-
       </section>
 
       {/* WAITING / OVERTIME MODAL */}
 
-      {showNames &&
-        selectedCard && (
+      {showNames && selectedCard && (
+        <div className="hl-modal-mask" onClick={closeModal}>
+          <div className="hl-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="hl-modal-head">
+              <h3>
+                {selectedCard.title} Residents ({selectedGender})
+              </h3>
 
-          <div
-            className="hl-modal-mask"
-            onClick={closeModal}
-          >
-
-            <div
-              className="hl-modal-box"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
-
-              <div className="hl-modal-head">
-
-                <h3>
-                  {
-                    selectedCard.title
-                  }{" "}
-                  Residents (
-                  {selectedGender})
-                </h3>
-
-                <button
-                  className="hl-btn-close"
-                  onClick={
-                    closeModal
-                  }
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-
-              </div>
-
-              <div className="hl-scroll-body">
-
-                <ul className="hl-roster-list">
-
-                  {selectedCard.names?.names?.map(
-                    (
-                      entry,
-                      i
-                    ) => (
-
-                      <li
-                        key={i}
-                        className="hl-roster-entry"
-                      >
-
-                        <div className="hl-roster-name">
-
-                          <span className="hl-roster-index">
-                            {i + 1}.
-                          </span>
-
-                          {
-                            typeof entry ===
-                            "string"
-                              ? entry
-                              : entry.name
-                          }
-
-                        </div>
-
-                        <div className="hl-tags-tray">
-
-                          {selectedCard.names
-                            ?.late_by?.[
-                            i
-                          ] && (
-
-                            <span className="hl-tag danger">
-                              Late:{" "}
-                              {
-                                selectedCard
-                                  .names
-                                  .late_by[
-                                  i
-                                ]
-                              }
-                            </span>
-
-                          )}
-
-                          {selectedCard.names
-                            ?.passtypes?.[
-                            i
-                          ] && (
-
-                            <span className="hl-tag info">
-
-                              {
-                                passTypeParse[
-                                  selectedCard
-                                    .names
-                                    .passtypes[
-                                    i
-                                  ]
-                                ] ||
-                                  selectedCard
-                                    .names
-                                    .passtypes[
-                                    i
-                                  ]
-                              }
-
-                            </span>
-
-                          )}
-
-                        </div>
-
-                      </li>
-
-                    )
-                  )}
-
-                </ul>
-
-              </div>
-
+              <button
+                className="hl-btn-close"
+                onClick={closeModal}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
 
-          </div>
+            <div className="hl-scroll-body">
+              <ul className="hl-roster-list">
+                {selectedCard.names?.names?.map((entry, i) => (
+                  <li key={i} className="hl-roster-entry">
+                    <div className="hl-roster-name">
+                      <span className="hl-roster-index">{i + 1}.</span>
 
-        )}
+                      {typeof entry === "string" ? entry : entry.name}
+                    </div>
+
+                    <div className="hl-tags-tray">
+                      {selectedCard.names?.late_by?.[i] && (
+                        <span className="hl-tag danger">
+                          Late: {selectedCard.names.late_by[i]}
+                        </span>
+                      )}
+
+                      {selectedCard.names?.passtypes?.[i] && (
+                        <span className="hl-tag info">
+                          {passTypeParse[selectedCard.names.passtypes[i]] ||
+                            selectedCard.names.passtypes[i]}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PASS ANALYSIS MODAL */}
 
-      {showChartPopup &&
-        chartPopupData && (
-
+      {showChartPopup && chartPopupData && (
+        <div className="hl-modal-mask" onClick={closeModal}>
           <div
-            className="hl-modal-mask"
-            onClick={closeModal}
+            className="hl-modal-box hl-popup-box"
+            onClick={(e) => e.stopPropagation()}
           >
-
-            <div
-              className="hl-modal-box hl-popup-box"
-              onClick={(e) =>
-                e.stopPropagation()
-              }
-            >
-
-              <div className="hl-modal-head">
-
-                <div>
-
-                  <h3>
-                    {
-                      chartPopupData.title
-                    }{" "}
-                    Details (
-                    {selectedGender})
-                  </h3>
-
-                </div>
-
-                <button
-                  className="hl-btn-close"
-                  onClick={
-                    closeModal
-                  }
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-
+            <div className="hl-modal-head">
+              <div>
+                <h3>
+                  {chartPopupData.title} Details ({selectedGender})
+                </h3>
               </div>
 
-              <div className="hl-date-strip">
-
-                {chartPopupData.title !==
-                  "Out Pass" && (
-
-                  <div>
-
-                    <button
-                      className="hl-date-toggle-btn"
-                      onClick={
-                        handleToggleCalendar
-                      }
-                    >
-                      Date:{" "}
-                      {selectedDate}
-                    </button>
-
-                    {showCalendar && (
-
-                      <div className="hl-calendar-wrapper">
-
-                        <Calendar
-                          onChange={
-                            handleDateChange
-                          }
-                          value={
-                            new Date(
-                              selectedDate
-                            )
-                          }
-                        />
-
-                      </div>
-
-                    )}
-
-                  </div>
-
-                )}
-
-              </div>
-
-              {isLoading && (
-
-                <p
-                  style={{
-                    textAlign:
-                      "center",
-                    padding:
-                      "20px",
-                    color:
-                      "#333333",
-                  }}
-                >
-                  Loading analysis...
-                </p>
-
-              )}
-
-              {error && (
-
-                <p
-                  style={{
-                    textAlign:
-                      "center",
-                    padding:
-                      "16px",
-                    color:
-                      "#b91c1c",
-                  }}
-                >
-                  {error}
-                </p>
-
-              )}
-
-              {!isLoading &&
-                !error && (
-
-                  <>
-
-                    <div className="hl-summary-pods">
-
-                      <div
-                        className="hl-summary-pod"
-                        onClick={() =>
-                          openStudentList(
-                            fetchedPassAnalysis
-                              ?.activePasses
-                              ?.names
-                          )
-                        }
-                      >
-
-                        <span>
-                          Total Active
-                        </span>
-
-                        <strong>
-                          {
-                            fetchedPassAnalysis
-                              ?.activePasses
-                              ?.count || 0
-                          }
-                        </strong>
-
-                        <small>
-                          View names
-                        </small>
-
-                      </div>
-
-                      <div
-                        className="hl-summary-pod"
-                        onClick={() =>
-                          openStudentList(
-                            fetchedPassAnalysis
-                              ?.toFieldMatch
-                              ?.names
-                          )
-                        }
-                      >
-
-                        <span>
-                          {chartPopupData.title !==
-                          "Out Pass"
-                            ? `Returning (${selectedDate})`
-                            : "Returning Students"}
-                        </span>
-
-                        <strong>
-                          {
-                            fetchedPassAnalysis
-                              ?.toFieldMatch
-                              ?.count || 0
-                          }
-                        </strong>
-
-                        <small>
-                          View names
-                        </small>
-
-                      </div>
-
-                      <div
-                        className="hl-summary-pod danger"
-                        onClick={() =>
-                          openStudentList(
-                            fetchedPassAnalysis
-                              ?.overduePasses
-                              ?.names
-                          )
-                        }
-                      >
-
-                        <span>
-                          {chartPopupData.title !==
-                          "Out Pass"
-                            ? `OverDay (${selectedDate})`
-                            : "Overtime"}
-                        </span>
-
-                        <strong>
-                          {
-                            fetchedPassAnalysis
-                              ?.overduePasses
-                              ?.count || 0
-                          }
-                        </strong>
-
-                        <small>
-                          View names
-                        </small>
-
-                      </div>
-
-                    </div>
-
-                    {/* STUDENT LIST */}
-
-                    {showNameList && (
-
-                      <div className="hl-submodal-overlay">
-
-                        <div className="hl-submodal-content">
-
-                          <div className="hl-submodal-head">
-
-                            <h4>
-                              Student Names:
-                            </h4>
-
-                            <button
-                              className="hl-btn-close"
-                              style={{
-                                width:
-                                  "24px",
-                                height:
-                                  "24px",
-                                fontSize:
-                                  "0.9rem",
-                              }}
-                              onClick={() =>
-                                setShowNameList(
-                                  false
-                                )
-                              }
-                            >
-                              ×
-                            </button>
-
-                          </div>
-
-                          <div className="hl-submodal-scroll">
-
-                            <ul>
-
-                              {nameListData.map(
-                                (
-                                  name,
-                                  index
-                                ) => (
-
-                                  <li
-                                    key={
-                                      index
-                                    }
-                                  >
-                                    {name}
-                                  </li>
-
-                                )
-                              )}
-
-                            </ul>
-
-                          </div>
-
-                        </div>
-
-                      </div>
-
-                    )}
-
-                    {/* REASON CHART */}
-
-                    <div
-                      style={{
-                        padding:
-                          "0 24px 20px 24px",
-                      }}
-                    >
-
-                      <ResponsiveContainer
-                        width="100%"
-                        height={200}
-                      >
-
-                        <PieChart>
-
-                          <Pie
-                            data={
-                              chartPopupData
-                                ?.popupChartData
-                                ?.length > 0
-                                ? chartPopupData.popupChartData
-                                : [
-                                    {
-                                      name:
-                                        "No Data",
-                                      value:
-                                        1,
-                                    },
-                                  ]
-                            }
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={45}
-                            outerRadius={75}
-                            dataKey="value"
-                          >
-
-                            {chartPopupData
-                              ?.popupChartData
-                              ?.map(
-                                (
-                                  entry,
-                                  index
-                                ) => (
-
-                                  <Cell
-                                    key={`cell-${index}`}
-                                    fill={
-                                      entry.color ||
-                                      BRAND_COLORS[
-                                        index %
-                                          BRAND_COLORS.length
-                                      ]
-                                    }
-                                  />
-
-                                )
-                              )}
-
-                          </Pie>
-
-                          <Tooltip />
-
-                        </PieChart>
-
-                      </ResponsiveContainer>
-
-                    </div>
-
-                  </>
-
-                )}
-
+              <button
+                className="hl-btn-close"
+                onClick={closeModal}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
 
+            <div className="hl-date-strip">
+              {chartPopupData.title !== "Out Pass" && (
+                <div>
+                  <button
+                    className="hl-date-toggle-btn"
+                    onClick={handleToggleCalendar}
+                  >
+                    Date: {selectedDate}
+                  </button>
+
+                  {showCalendar && (
+                    <div className="hl-calendar-wrapper">
+                      <Calendar
+                        onChange={handleDateChange}
+                        value={new Date(selectedDate)}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isLoading && (
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#333333",
+                }}
+              >
+                Loading analysis...
+              </p>
+            )}
+
+            {error && (
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "16px",
+                  color: "#b91c1c",
+                }}
+              >
+                {error}
+              </p>
+            )}
+
+            {!isLoading && !error && (
+              <>
+                <div className="hl-summary-pods">
+                  <div
+                    className="hl-summary-pod"
+                    onClick={() =>
+                      openStudentList(fetchedPassAnalysis?.activePasses?.names)
+                    }
+                  >
+                    <span>Total Active</span>
+
+                    <strong>
+                      {fetchedPassAnalysis?.activePasses?.count || 0}
+                    </strong>
+
+                    <small>View names</small>
+                  </div>
+
+                  <div
+                    className="hl-summary-pod"
+                    onClick={() =>
+                      openStudentList(fetchedPassAnalysis?.toFieldMatch?.names)
+                    }
+                  >
+                    <span>
+                      {chartPopupData.title !== "Out Pass"
+                        ? `Returning (${selectedDate})`
+                        : "Returning Students"}
+                    </span>
+
+                    <strong>
+                      {fetchedPassAnalysis?.toFieldMatch?.count || 0}
+                    </strong>
+
+                    <small>View names</small>
+                  </div>
+
+                  <div
+                    className="hl-summary-pod danger"
+                    onClick={() =>
+                      openStudentList(fetchedPassAnalysis?.overduePasses?.names)
+                    }
+                  >
+                    <span>
+                      {chartPopupData.title !== "Out Pass"
+                        ? `OverDay (${selectedDate})`
+                        : "Overtime"}
+                    </span>
+
+                    <strong>
+                      {fetchedPassAnalysis?.overduePasses?.count || 0}
+                    </strong>
+
+                    <small>View names</small>
+                  </div>
+                </div>
+
+                {/* STUDENT LIST */}
+
+                {showNameList && (
+                  <div className="hl-submodal-overlay">
+                    <div className="hl-submodal-content">
+                      <div className="hl-submodal-head">
+                        <h4>Student Names:</h4>
+
+                        <button
+                          className="hl-btn-close"
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            fontSize: "0.9rem",
+                          }}
+                          onClick={() => setShowNameList(false)}
+                        >
+                          ×
+                        </button>
+                      </div>
+
+                      <div className="hl-submodal-scroll">
+                        <ul>
+                          {nameListData.map((name, index) => (
+                            <li key={index}>{name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* REASON CHART */}
+
+                <div
+                  style={{
+                    padding: "0 24px 20px 24px",
+                  }}
+                >
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={
+                          chartPopupData?.popupChartData?.length > 0
+                            ? chartPopupData.popupChartData
+                            : [
+                                {
+                                  name: "No Data",
+                                  value: 1,
+                                },
+                              ]
+                        }
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={75}
+                        dataKey="value"
+                      >
+                        {chartPopupData?.popupChartData?.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={
+                              entry.color ||
+                              BRAND_COLORS[index % BRAND_COLORS.length]
+                            }
+                          />
+                        ))}
+                      </Pie>
+
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
           </div>
-
-        )}
-
+        </div>
+      )}
     </div>
   );
 };

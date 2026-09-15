@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { format } from "date-fns";
 import "./WardenAnalytics.css";
 import axios from "axios";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import { getRequest } from "../../../api/axios";
-
+import { getIstDateKey } from "../../../utils/time";
 
 const BRAND_COLORS = ["#a73d1a", "#ea580c", "#7c2d12", "#f97316"];
 
-const DashboardCard = ({ title, number, tag, isInteractive, isDanger, onClick }) => {
+const DashboardCard = ({
+  title,
+  number,
+  tag,
+  isInteractive,
+  isDanger,
+  onClick,
+}) => {
   return (
     <div
       className={`hl-metric-card ${isInteractive ? "interactive" : ""} ${isDanger ? "danger" : ""}`}
@@ -48,9 +49,7 @@ const Dashboard = () => {
   const [highlightedData, setHighlightedData] = useState(null);
   const [showChartPopup, setShowChartPopup] = useState(false);
   const [chartPopupData, setChartPopupData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate] = useState(getIstDateKey());
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedYear, setSelectedYear] = useState("overall");
   const [fetchData, setFetchData] = useState(null);
@@ -64,30 +63,36 @@ const Dashboard = () => {
   console.log("Fetched Data", fetchData);
 
   const ReasonTypeMapping = {
-    od: ['Internship', 'Symposium', 'Hackathon', 'Sports', 'Others'],
-    leave: ['Function', 'Medical', 'Exams', 'Emergency', 'Others'],
-    outpass: ['Shopping', 'Classes', 'Internship', 'Medical', 'Others'],
-    staypass: ['Holiday', 'Weekend Holiday', 'Semester Holiday', 'Festival Holiday', 'Others'],
+    od: ["Internship", "Symposium", "Hackathon", "Sports", "Others"],
+    leave: ["Function", "Medical", "Exams", "Emergency", "Others"],
+    outpass: ["Shopping", "Classes", "Internship", "Medical", "Others"],
+    staypass: [
+      "Holiday",
+      "Weekend Holiday",
+      "Semester Holiday",
+      "Festival Holiday",
+      "Others",
+    ],
   };
 
   const yearToAlphabet = {
-    '1': 'First Year',
-    '2': 'Second Year',
-    '3': 'Third Year',
-    '4': 'Fourth Year',
-    '10': 'MBA First Year',
-    '9': 'MBA Second year',
-    '8': 'ME First Year',
-    '7': 'ME Second Year',
-    'overall': 'Overall'
+    1: "First Year",
+    2: "Second Year",
+    3: "Third Year",
+    4: "Fourth Year",
+    10: "MBA First Year",
+    9: "MBA Second year",
+    8: "ME First Year",
+    7: "ME Second Year",
+    overall: "Overall",
   };
 
   const passTypeParse = {
-    'od': 'OD',
-    'outpass': 'Out Pass',
-    'staypass': 'Stay Pass',
-    'leave': 'Leave'
-  }
+    od: "OD",
+    outpass: "Out Pass",
+    staypass: "Stay Pass",
+    leave: "Leave",
+  };
 
   const handleYearChange = (event) => {
     setSelectedYear(event.target.value);
@@ -98,20 +103,20 @@ const Dashboard = () => {
       background: "#fefbf4",
       color: "#7c2d12",
       confirmButtonColor: "#a73d1a",
-      ...config
+      ...config,
     });
   };
 
   // pass measure fetching
-useEffect(() => {
-  const fetchPassMeasures = async () => {
-    try {
-      const response = await getRequest("/api/pass_measures_warden");
+  useEffect(() => {
+    const fetchPassMeasures = async () => {
+      try {
+        const response = await getRequest("/api/pass_measures_warden");
 
-      console.log("RAW API RESPONSE:", response);
-      console.log("API DATA:", response.data);
+        console.log("RAW API RESPONSE:", response);
+        console.log("API DATA:", response.data);
 
-      /*
+        /*
         Backend response:
 
         {
@@ -124,49 +129,48 @@ useEffect(() => {
         }
       */
 
-      const backendResponse = response.data;
+        const backendResponse = response.data;
 
-      // IMPORTANT:
-      // Actual dashboard data is inside `data`
-      const backendData = backendResponse?.data || {};
+        // IMPORTANT:
+        // Actual dashboard data is inside `data`
+        const backendData = backendResponse?.data || {};
 
-      // Use primary_years from backend
-      const primaryYears = backendResponse?.primary_years || [];
+        // Use primary_years from backend
+        const primaryYears = backendResponse?.primary_years || [];
 
-      // Convert years to strings because <select> values are strings
-      const availableYears = [
-        ...primaryYears.map(String),
-        ...(backendData.overall ? ["overall"] : [])
-      ];
+        // Convert years to strings because <select> values are strings
+        const availableYears = [
+          ...primaryYears.map(String),
+          ...(backendData.overall ? ["overall"] : []),
+        ];
 
-      console.log("PRIMARY YEARS:", primaryYears);
-      console.log("AVAILABLE YEARS:", availableYears);
-      console.log("PASS DATA:", backendData);
+        console.log("PRIMARY YEARS:", primaryYears);
+        console.log("AVAILABLE YEARS:", availableYears);
+        console.log("PASS DATA:", backendData);
 
-      setYears(availableYears);
-      setFetchData(backendData);
+        setYears(availableYears);
+        setFetchData(backendData);
 
-      // Default to overall
-      if (backendData?.overall) {
-        setSelectedYear("overall");
-      } else if (availableYears.length > 0) {
-        setSelectedYear(availableYears[0]);
+        // Default to overall
+        if (backendData?.overall) {
+          setSelectedYear("overall");
+        } else if (availableYears.length > 0) {
+          setSelectedYear(availableYears[0]);
+        }
+      } catch (err) {
+        console.error("Error Fetching data", err);
+
+        Swal.fire({
+          title: "Network Error",
+          text: "Failed to fetch pass analytics data. Please refresh.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
+    };
 
-    } catch (err) {
-      console.error("Error Fetching data", err);
-
-      Swal.fire({
-        title: "Network Error",
-        text: "Failed to fetch pass analytics data. Please refresh.",
-        icon: "error",
-        confirmButtonText: "OK"
-      });
-    }
-  };
-
-  fetchPassMeasures();
-}, []);
+    fetchPassMeasures();
+  }, []);
 
   const passMeasure = fetchData?.[selectedYear] || {};
 
@@ -177,7 +181,7 @@ useEffect(() => {
       number: passMeasure?.exitTimeCount,
       names: passMeasure?.exitTimeDetails || passMeasure?.exitDetails, // Attach backend exit list
       isInteractive: true,
-      isDanger: false
+      isDanger: false,
     },
     {
       title: "Arrive",
@@ -185,15 +189,15 @@ useEffect(() => {
       number: passMeasure?.reEntryTimeCount,
       names: passMeasure?.reEntryTimeDetails || passMeasure?.reEntryDetails, // Attach backend return list
       isInteractive: true,
-      isDanger: false
+      isDanger: false,
     },
     {
-      title: "Waiting",
-      tag: "Waiting",
+      title: "ActiveOutside",
+      tag: "Outside",
       number: passMeasure?.activeOutsideCount,
       names: passMeasure?.activeOutsideDetails,
       isInteractive: true,
-      isDanger: false
+      isDanger: false,
     },
     {
       title: "Overtime",
@@ -201,46 +205,54 @@ useEffect(() => {
       number: passMeasure?.overdueReturnCount,
       names: passMeasure?.overdueReturnDetails,
       isInteractive: true,
-      isDanger: true
-    }
+      isDanger: true,
+    },
   ];
 
   const chartData = [
-  {
-    name: "OD",
-    value: passMeasure?.passTypeCounts?.od?.count ?? 0
-  },
-  {
-    name: "Leave",
-    value: passMeasure?.passTypeCounts?.leave?.count ?? 0
-  },
-  {
-    name: "Stay Pass",
-    value: passMeasure?.passTypeCounts?.staypass?.count ?? 0
-  },
-  {
-    name: "Out Pass",
-    value: passMeasure?.passTypeCounts?.outpass?.count ?? 0
-  }
-];
+    {
+      name: "OD",
+      value: passMeasure?.passTypeCounts?.od?.count ?? 0,
+    },
+    {
+      name: "Leave",
+      value: passMeasure?.passTypeCounts?.leave?.count ?? 0,
+    },
+    {
+      name: "Stay Pass",
+      value: passMeasure?.passTypeCounts?.staypass?.count ?? 0,
+    },
+    {
+      name: "Out Pass",
+      value: passMeasure?.passTypeCounts?.outpass?.count ?? 0,
+    },
+  ];
 
   const totalPassCount = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
   const getRandomThemeColor = (idx) => {
-    const palette = ["#a73d1a", "#ea580c", "#7c2d12", "#c2410c", "#9a3412", "#f97316"];
+    const palette = [
+      "#a73d1a",
+      "#ea580c",
+      "#7c2d12",
+      "#c2410c",
+      "#9a3412",
+      "#f97316",
+    ];
     return palette[idx % palette.length];
   };
 
   const handleCardClick = (card) => {
     // Check if the card has a student list with names
-    const namesList = card.names?.names || (Array.isArray(card.names) ? card.names : []);
+    const namesList =
+      card.names?.names || (Array.isArray(card.names) ? card.names : []);
 
     if (!namesList || namesList.length === 0) {
       Swal.fire({
         title: "No Data",
         text: `No student records found for ${card.title}.`,
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -269,7 +281,7 @@ useEffect(() => {
         title: "No Records Found",
         text: "Zero student passes filed in this category.",
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -283,7 +295,7 @@ useEffect(() => {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
@@ -291,9 +303,9 @@ useEffect(() => {
         "/api/pass_analysis_warden",
         {
           type: data.name.trim().toLowerCase().replace(/\s+/g, ""),
-          year: selectedYear
+          year: selectedYear,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.status === 200) {
@@ -301,24 +313,26 @@ useEffect(() => {
         const fetched = response.data;
         setFetchedPassAnalysis(fetched);
 
-        const popupChartData = Object.entries(fetched.reasonTypeCounts || {}).map(
-          ([reason, count], idx) => ({
-            name: reason,
-            value: count,
-            color: getRandomThemeColor(idx)
-          })
-        );
+        const popupChartData = Object.entries(
+          fetched.reasonTypeCounts || {},
+        ).map(([reason, count], idx) => ({
+          name: reason,
+          value: count,
+          color: getRandomThemeColor(idx),
+        }));
 
         setChartPopupData({
           title: data.name,
           count: data.value,
           dates: [],
-          popupChartData
+          popupChartData,
         });
 
         setShowChartPopup(true);
       } else {
-        throw new Error(response.data.error || "Failed to fetch pass analysis data");
+        throw new Error(
+          response.data.error || "Failed to fetch pass analysis data",
+        );
       }
     } catch (err) {
       console.error("Error fetching pass analysis data:", err);
@@ -326,7 +340,7 @@ useEffect(() => {
         title: "Query Failed",
         text: err.response?.data?.message || "Could not retrieve breakdown.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       setError(err.message || "Failed to fetch data.");
     } finally {
@@ -347,7 +361,7 @@ useEffect(() => {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
 
     try {
@@ -356,9 +370,9 @@ useEffect(() => {
         {
           type: chartPopupData?.title.trim().toLowerCase().replace(/\s+/g, ""),
           year: selectedYear,
-          date: formattedDate
+          date: formattedDate,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.status === 200) {
@@ -366,17 +380,17 @@ useEffect(() => {
         const fetched = response.data;
         setFetchedPassAnalysis(fetched);
 
-        const popupChartData = Object.entries(fetched.reasonTypeCounts || {}).map(
-          ([reason, count], idx) => ({
-            name: reason,
-            value: count,
-            color: getRandomThemeColor(idx)
-          })
-        );
+        const popupChartData = Object.entries(
+          fetched.reasonTypeCounts || {},
+        ).map(([reason, count], idx) => ({
+          name: reason,
+          value: count,
+          color: getRandomThemeColor(idx),
+        }));
 
         setChartPopupData((prev) => ({
           ...prev,
-          popupChartData
+          popupChartData,
         }));
       } else {
         throw new Error(response.data.error || "Failed to query date metrics");
@@ -385,9 +399,10 @@ useEffect(() => {
       console.error("Error:", err);
       Swal.fire({
         title: "Filter Failed",
-        text: err.response?.data?.message || "Failed to fetch data for this date.",
+        text:
+          err.response?.data?.message || "Failed to fetch data for this date.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       setError(err.message || "Failed to fetch data for selected date.");
     } finally {
@@ -406,7 +421,7 @@ useEffect(() => {
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -421,7 +436,7 @@ useEffect(() => {
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -436,7 +451,7 @@ useEffect(() => {
         title: "No Data",
         text: "No students registered in this category.",
         icon: "info",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
       return;
     }
@@ -449,7 +464,6 @@ useEffect(() => {
       {/* Top Header */}
       <header className="hl-warden-header">
         <div>
-
           <h1 className="hl-title">Pass Measures & Analytics</h1>
           <p className="hl-subtitle">
             Hostel warden administrative overview and pass clearance audits
@@ -496,7 +510,8 @@ useEffect(() => {
           <div>
             <h3 className="hl-chart-title">Pass Classification</h3>
             <p className="hl-chart-sub">
-              Distribution of issued passes. Click any slice or legend item to drill down.
+              Distribution of issued passes. Click any slice or legend item to
+              drill down.
             </p>
           </div>
           <div className="hl-total-badge">
@@ -540,7 +555,9 @@ useEffect(() => {
                     if (active && payload && payload.length) {
                       return (
                         <div className="hl-tooltip-box">
-                          <span className="hl-tooltip-title">{payload[0].name}</span>
+                          <span className="hl-tooltip-title">
+                            {payload[0].name}
+                          </span>
                           <span>{payload[0].value} Passes</span>
                         </div>
                       );
@@ -566,12 +583,14 @@ useEffect(() => {
                 <div
                   className="hl-color-swatch"
                   style={{
-                    backgroundColor: BRAND_COLORS[idx % BRAND_COLORS.length]
+                    backgroundColor: BRAND_COLORS[idx % BRAND_COLORS.length],
                   }}
                 />
                 <div className="hl-legend-meta">
                   <span className="hl-legend-name">{item.name}</span>
-                  <span className="hl-legend-sub">Click to inspect entries</span>
+                  <span className="hl-legend-sub">
+                    Click to inspect entries
+                  </span>
                 </div>
                 <div className="hl-legend-val">{item.value}</div>
               </div>
@@ -586,17 +605,29 @@ useEffect(() => {
           <div className="hl-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="hl-modal-head">
               <h3>{selectedCard.title} Residents</h3>
-              <button className="hl-btn-close" onClick={closeModal} aria-label="Close">
+              <button
+                className="hl-btn-close"
+                onClick={closeModal}
+                aria-label="Close"
+              >
                 ×
               </button>
             </div>
             <div className="hl-scroll-body">
               {(() => {
-                const list = selectedCard.names?.names || (Array.isArray(selectedCard.names) ? selectedCard.names : []);
+                const list =
+                  selectedCard.names?.names ||
+                  (Array.isArray(selectedCard.names) ? selectedCard.names : []);
 
                 if (list.length === 0) {
                   return (
-                    <p style={{ textAlign: "center", color: "#333333", padding: "16px" }}>
+                    <p
+                      style={{
+                        textAlign: "center",
+                        color: "#333333",
+                        padding: "16px",
+                      }}
+                    >
                       No resident records logged in this category.
                     </p>
                   );
@@ -644,7 +675,11 @@ useEffect(() => {
               <div>
                 <h3>{chartPopupData.title} Details</h3>
               </div>
-              <button className="hl-btn-close" onClick={closeModal} aria-label="Close">
+              <button
+                className="hl-btn-close"
+                onClick={closeModal}
+                aria-label="Close"
+              >
                 ×
               </button>
             </div>
@@ -672,13 +707,25 @@ useEffect(() => {
             </div>
 
             {isLoading && (
-              <p style={{ textAlign: "center", padding: "20px", color: "#9a3412" }}>
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#9a3412",
+                }}
+              >
                 Loading analysis...
               </p>
             )}
 
             {error && (
-              <p style={{ textAlign: "center", padding: "16px", color: "#c2410c" }}>
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "16px",
+                  color: "#c2410c",
+                }}
+              >
                 {error}
               </p>
             )}
@@ -688,27 +735,39 @@ useEffect(() => {
                 <div className="hl-summary-pods">
                   <div className="hl-summary-pod" onClick={handleTotalClick}>
                     <span>Total Active</span>
-                    <strong>{fetchedPassAnalysis?.activePasses?.count || 0}</strong>
+                    <strong>
+                      {fetchedPassAnalysis?.activePasses?.count || 0}
+                    </strong>
                     <small>View names</small>
                   </div>
 
-                  <div className="hl-summary-pod" onClick={handleReturningClick}>
+                  <div
+                    className="hl-summary-pod"
+                    onClick={handleReturningClick}
+                  >
                     <span>
                       {chartPopupData.title !== "Out Pass"
                         ? `Returning (${selectedDate})`
                         : "Returning Count"}
                     </span>
-                    <strong>{fetchedPassAnalysis?.toFieldMatch?.count || 0}</strong>
+                    <strong>
+                      {fetchedPassAnalysis?.toFieldMatch?.count || 0}
+                    </strong>
                     <small>View names</small>
                   </div>
 
-                  <div className="hl-summary-pod danger" onClick={handleOvertimeClick}>
+                  <div
+                    className="hl-summary-pod danger"
+                    onClick={handleOvertimeClick}
+                  >
                     <span>
                       {chartPopupData.title !== "Out Pass"
                         ? `OverDay (${selectedDate})`
                         : "Overtime"}
                     </span>
-                    <strong>{fetchedPassAnalysis?.overduePasses?.count || 0}</strong>
+                    <strong>
+                      {fetchedPassAnalysis?.overduePasses?.count || 0}
+                    </strong>
                     <small>View names</small>
                   </div>
                 </div>
@@ -721,7 +780,11 @@ useEffect(() => {
                         <h4>Student Manifest</h4>
                         <button
                           className="hl-btn-close"
-                          style={{ width: "24px", height: "24px", fontSize: "0.9rem" }}
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            fontSize: "0.9rem",
+                          }}
                           onClick={() => setShowNameList(false)}
                         >
                           ×

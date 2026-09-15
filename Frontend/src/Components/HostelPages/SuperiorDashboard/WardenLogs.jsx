@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./WardenLogs.css";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import axiosInstance from "../../../api/axios";
+import { getIstDateKey } from "../../../utils/time";
 
 const yearToAlphabet = {
-  '1': 'First Year',
-  '2': 'Second Year',
-  '3': 'Third Year',
-  '4': 'Fourth Year',
-  '10': 'MBA',
-  '9': 'ME',
-  'overall': 'Overall'
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Fourth Year",
+  10: "MBA",
+  9: "ME",
+  overall: "Overall",
 };
 
 const WardenLogs = () => {
@@ -22,15 +23,25 @@ const WardenLogs = () => {
   const [error, setError] = useState(null);
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June", 
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
         const response = await axiosInstance.get("/api/fetch_logs");
-        
+
         setLogs(response.data.logs);
         setLoading(false);
       } catch (err) {
@@ -41,7 +52,7 @@ const WardenLogs = () => {
           title: "Error ❌",
           text: "Failed to fetch warden logs. Please refresh the page.",
           icon: "error",
-          confirmButtonText: "OK"
+          confirmButtonText: "OK",
         });
       }
     };
@@ -64,8 +75,10 @@ const WardenLogs = () => {
       const actionKey = `${log.inactive_warden_name}-${log.deactivated_date}`;
 
       if (!grouped[monthYear]) grouped[monthYear] = [];
-      
-      let existingEntry = grouped[monthYear].find((entry) => entry.actionKey === actionKey);
+
+      let existingEntry = grouped[monthYear].find(
+        (entry) => entry.actionKey === actionKey,
+      );
 
       if (!existingEntry) {
         existingEntry = {
@@ -91,21 +104,28 @@ const WardenLogs = () => {
   // **Apply Search & Filter**
   const filteredData = useMemo(() => {
     const searchText = searchQuery.toLowerCase();
-    const dateFilter = deactivatedDateFilter ? new Date(deactivatedDateFilter).toISOString().split("T")[0] : "";
+    const dateFilter = deactivatedDateFilter
+      ? getIstDateKey(deactivatedDateFilter)
+      : "";
 
     return Object.keys(groupedData).reduce((acc, monthYear) => {
-      if (selectedFilter === "current-month" && monthYear !== currentMonthYear) return acc;
+      if (selectedFilter === "current-month" && monthYear !== currentMonthYear)
+        return acc;
 
-      const monthData = Object.values(groupedData[monthYear]).filter((entry) => {
-        const entryDeactivatedDate = new Date(entry.deactivatedDate).toISOString().split("T")[0];
+      const monthData = Object.values(groupedData[monthYear]).filter(
+        (entry) => {
+          const entryDeactivatedDate = getIstDateKey(entry.deactivatedDate);
 
-        return (
-          (entry.wardenName.toLowerCase().includes(searchText) || 
-          // entry.reassignedTo.some((w) => w.name.toLowerCase().includes(searchText)) || 
-          entry.reassignedTo.some((w) => w.years.toString().includes(searchText))) &&
-          (dateFilter === "" || entryDeactivatedDate === dateFilter) 
-        );
-      });
+          return (
+            (entry.wardenName.toLowerCase().includes(searchText) ||
+              // entry.reassignedTo.some((w) => w.name.toLowerCase().includes(searchText)) ||
+              entry.reassignedTo.some((w) =>
+                w.years.toString().includes(searchText),
+              )) &&
+            (dateFilter === "" || entryDeactivatedDate === dateFilter)
+          );
+        },
+      );
 
       if (monthData.length > 0) {
         acc[monthYear] = monthData;
@@ -113,15 +133,31 @@ const WardenLogs = () => {
 
       return acc;
     }, {});
-  }, [searchQuery, deactivatedDateFilter, selectedFilter, groupedData, currentMonthYear]);
+  }, [
+    searchQuery,
+    deactivatedDateFilter,
+    selectedFilter,
+    groupedData,
+    currentMonthYear,
+  ]);
 
-  if (loading) return <div className="HOS-W-warden-logs-container"><p className="HOS-W-loading-message">⏳ Loading warden logs...</p></div>;
-  if (error) return <div className="HOS-W-warden-logs-container"><p className="error">❌ {error}</p></div>;
+  if (loading)
+    return (
+      <div className="HOS-W-warden-logs-container">
+        <p className="HOS-W-loading-message">⏳ Loading warden logs...</p>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="HOS-W-warden-logs-container">
+        <p className="error">❌ {error}</p>
+      </div>
+    );
 
   return (
     <div className="HOS-W-warden-logs-container">
       <h1 className="HOS-W-warden-logs-title">WARDEN LOGS</h1>
-      
+
       {/* Search & Filter */}
       <div className="HOS-W-warden-logs-controls">
         <input
@@ -151,7 +187,10 @@ const WardenLogs = () => {
 
       {/* Display Logs */}
       {Object.keys(filteredData).length === 0 ? (
-        <p className="HOS-W-no-logs-message">📋 No logs found for the selected filters. Try adjusting your search or filter criteria.</p>
+        <p className="HOS-W-no-logs-message">
+          📋 No logs found for the selected filters. Try adjusting your search
+          or filter criteria.
+        </p>
       ) : (
         Object.keys(filteredData).map((monthYear) => (
           <div key={monthYear} className="HOS-W-month-section">
@@ -160,7 +199,11 @@ const WardenLogs = () => {
             {filteredData[monthYear].map((entry) => (
               <div key={entry.actionKey} className="HOS-W-warden-entry">
                 <p className="HOS-W-warden-status-text">
-                  <strong>{entry.wardenName}</strong> was <strong>DEACTIVATED</strong> on <strong>{new Date(entry.deactivatedDate).toLocaleString()}</strong>
+                  <strong>{entry.wardenName}</strong> was{" "}
+                  <strong>DEACTIVATED</strong> on{" "}
+                  <strong>
+                    {new Date(entry.deactivatedDate).toLocaleString()}
+                  </strong>
                 </p>
 
                 {/* Show the transferred details with arrows */}
@@ -169,7 +212,10 @@ const WardenLogs = () => {
                     Responsibilities transferred: <br />
                     {entry.reassignedTo.map((warden, idx) => (
                       <span key={idx} className="HOS-W-transfer-text">
-                        <strong>{yearToAlphabet[warden.years] || warden.years}</strong> → <strong>{warden.name}</strong> 
+                        <strong>
+                          {yearToAlphabet[warden.years] || warden.years}
+                        </strong>{" "}
+                        → <strong>{warden.name}</strong>
                         <br />
                       </span>
                     ))}
@@ -177,7 +223,10 @@ const WardenLogs = () => {
                 )}
 
                 <p className="HOS-W-warden-status-text">
-                  Activated again on <strong>{new Date(entry.activatedDate).toLocaleString()}</strong>
+                  Activated again on{" "}
+                  <strong>
+                    {new Date(entry.activatedDate).toLocaleString()}
+                  </strong>
                 </p>
               </div>
             ))}
