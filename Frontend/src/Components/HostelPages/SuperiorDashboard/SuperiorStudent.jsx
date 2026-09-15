@@ -435,9 +435,9 @@ function SuperiorStudent() {
                 </div>
                 <div className="card-details">
                   <h3 title={student.name}>{student.name}</h3>
-                  <p>Admission No: {student.admissionNumber}</p>
-                  <p>{student.year}</p>
-                  <p>{student.department}</p>
+                  <h6>{student.admissionNumber}</h6>
+                  <h6>{student.year}</h6>
+                  <h6>{student.department}</h6>
                 </div>
               </div>
 
