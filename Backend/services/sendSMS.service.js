@@ -60,16 +60,16 @@ const sendSMS = async (phone_number_parent, message) => {
 
     // phoneNumber is accepted but ignored during testing
     console.log("Original destination:", phoneNumber);
-    console.log("Testing destination:", phoneNumber);
+    console.log("Message :", message);
 
-    const command = new SendTextMessageCommand({
-      // Always send to .env phone during testing
-      DestinationPhoneNumber: phoneNumber,
+    // const command = new SendTextMessageCommand({
+    //   // Always send to .env phone during testing
+    //   DestinationPhoneNumber: phoneNumber,
 
-      MessageBody: message,
+    //   MessageBody: message,
 
-      MessageType: "TRANSACTIONAL",
-    });
+    //   MessageType: "TRANSACTIONAL",
+    // });
 
     const response = await awsSmsClient.send(command);
 
