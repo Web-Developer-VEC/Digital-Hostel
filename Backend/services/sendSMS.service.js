@@ -71,7 +71,7 @@ const sendSMS = async (phone_number_parent, message) => {
     //   MessageType: "TRANSACTIONAL",
     // });
 
-    const response = await awsSmsClient.send(command);
+    // const response = await awsSmsClient.send(command);
     console.log("SMS sent successfully");
     console.log("Message ID:", response.MessageId);
     return response;
