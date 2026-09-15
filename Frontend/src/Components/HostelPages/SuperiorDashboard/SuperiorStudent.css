@@ -31,6 +31,10 @@
   --shadow-lg: 0 24px 60px rgba(17, 24, 39, .22);
 
   --ease: 180ms ease;
+
+  /* Sidebar width — keep this equal to the sidebar's actual rendered
+     width across the whole app, so every page's margin-left stays in sync. */
+  --sidebar-width: 17rem;
 }
 
 
@@ -45,11 +49,11 @@
 
 .superior-container {
   min-height: 100vh;
-  margin-left: 16rem;
-  margin-top: -20px;
-  padding: 1.5rem;
+  margin-left: var(--sidebar-width);
+  padding: 2rem 2rem 1.5rem;   /* extra top/left breathing room instead of a negative margin */
   background: var(--page-bg);
   color: var(--text);
+  overflow-x: hidden;          /* stops any stray sidebar/nav elements bleeding in */
 }
 
 .superior-content {
@@ -1094,7 +1098,8 @@ a.student-modal-contact-value:hover {
 @media (max-width: 1000px) {
   .superior-container {
     margin-left: 0;
-    margin-top: 58px;
+    margin-top: 0;
+    padding-top: 58px;   /* room for a collapsed/top sidebar instead of a negative margin */
   }
 
   .modal-content {
@@ -1109,8 +1114,7 @@ a.student-modal-contact-value:hover {
 
 @media (min-width: 1001px) and (max-width: 1279px) {
   .superior-container {
-    margin-top: 0;          /* cancel the -20px that clips content above */
-    padding-top: 1.75rem;   /* restore some breathing room */
+    padding-top: 1.75rem;   /* consistent breathing room, no negative offset to cancel */
   }
 
   .warden-header-controls {
@@ -1145,7 +1149,7 @@ a.student-modal-contact-value:hover {
 @media (max-width: 768px) {
   .superior-container {
     min-height: auto;
-    padding: 1rem 1rem 6rem;
+    padding: 58px 1rem 6rem;   /* keep top clearance for the fixed header — don't reset with a shorthand */
   }
 
   .warden-header-controls {
@@ -1242,7 +1246,7 @@ a.student-modal-contact-value:hover {
 
 @media (max-width: 600px) {
   .superior-container {
-    padding: .85rem .85rem 6rem;
+    padding: 58px .85rem 6rem;   /* keep top clearance for the fixed header — don't reset with a shorthand */
   }
 
   .warden-header-controls {
