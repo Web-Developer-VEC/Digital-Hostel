@@ -1,3 +1,17 @@
+/* PAGE SCROLL ISOLATION */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 :root {
   --header-height: 125px;
@@ -20,8 +34,9 @@
 
 
 .Hostel-sidebar {
-  width: 16rem;
-  height: calc(100vh - var(--header-height));
+  /* Responsive desktop sidebar */
+  width: clamp(14rem, 18vw, 18rem);
+  height: calc(100dvh - var(--header-height));
 
   position: fixed;
   top: var(--header-height);
@@ -548,16 +563,12 @@
 }
 
 
-/* =========================================================
-   CONTENT
-========================================================= */
-
 .Hostel-sidebar-content {
   position: relative;
 
-  flex: 1;
-
+  flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
 
   padding: 1rem 0.85rem;
 
@@ -587,8 +598,14 @@
 
 .Hostel-sidebar-menu {
   flex: 1;
+  min-height: 0;
+  min-width: 0;
 
+  /* ONLY this area scrolls */
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 
   scrollbar-width: thin;
 
@@ -1081,10 +1098,189 @@
 }
 
 
+
+:root {
+  --hostel-sidebar-width: clamp(14rem, 18vw, 18rem);
+  --hostel-mobile-dock-height: 58px;
+}
+
+/* Prevent accidental horizontal overflow */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Desktop sidebar */
+.Hostel-sidebar {
+  width: var(--hostel-sidebar-width);
+  height: calc(100dvh - var(--header-height));
+
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  z-index: 500;
+}
+
+/*
+  The sidebar content has a real available height.
+  This is important for the internal scrollbar to work.
+*/
+.Hostel-sidebar-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+/* Only the menu itself scrolls */
+.Hostel-sidebar-menu {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: thin;
+}
+
+.Hostel-main-content,
+.hostel-main-content,
+.Hostel-page-content,
+.hostel-page-content,
+.Hostel-content,
+.hostel-content,
+.Hostel-layout-content,
+.hostel-layout-content {
+  width: calc(100% - var(--hostel-sidebar-width));
+  max-width: calc(100% - var(--hostel-sidebar-width));
+  margin-left: var(--hostel-sidebar-width);
+  min-width: 0;
+}
+
+
+.Hostel-layout,
+.hostel-layout {
+  width: 100%;
+  min-width: 0;
+}
+
+.Hostel-layout > main,
+.hostel-layout > main {
+  width: calc(100% - var(--hostel-sidebar-width));
+  max-width: calc(100% - var(--hostel-sidebar-width));
+  margin-left: var(--hostel-sidebar-width);
+  min-width: 0;
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  :root {
+    --hostel-sidebar-width: 18rem;
+  }
+
+  .Hostel-sidebar-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Desktop / laptop */
+@media (max-width: 1439px) and (min-width: 1201px) {
+  :root {
+    --hostel-sidebar-width: 16rem;
+  }
+}
+
+/* Smaller laptop */
+@media (max-width: 1200px) and (min-width: 769px) {
+  :root {
+    --hostel-sidebar-width: 15rem;
+  }
+
+  .warden-sidebar-top {
+    padding: 1rem 0.8rem;
+  }
+
+  .warden-contact {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .Hostel-sidebar-content {
+    padding: 0.8rem 0.65rem;
+  }
+
+  .Hostel-nav-button {
+    gap: 0.65rem;
+    padding: 0.75rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .Hostel-nav-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sidebar-warden-name {
+    max-width: 125px;
+  }
+
+  .warden-years {
+    max-width: 130px;
+  }
+}
+
+
 @media (max-width: 768px) {
 
+
+  .Hostel-sidebar,
+  .Hostel-main-content,
+  .hostel-main-content,
+  .Hostel-page-content,
+  .hostel-page-content,
+  .Hostel-content,
+  .hostel-content,
+  .Hostel-layout-content,
+  .hostel-layout-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
   .Hostel-sidebar {
-    display: none;
+    display: none !important;
+  }
+
+  .Hostel-layout > main,
+  .hostel-layout > main {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  
+  body {
+    padding-bottom: 0;
   }
 
   .Hostel-mobile-dock {
@@ -1094,17 +1290,21 @@
     right: 0;
     bottom: 0;
 
-    height: calc(58px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100vw;
+
+    height: calc(
+      var(--hostel-mobile-dock-height) +
+      env(safe-area-inset-bottom)
+    );
 
     padding-bottom: env(safe-area-inset-bottom);
 
     display: flex;
-
     align-items: stretch;
     justify-content: space-evenly;
 
     background: #171719;
-
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
@@ -1112,86 +1312,159 @@
     z-index: 2000;
   }
 
-
-  /* AUTO EQUAL WIDTH FOR ALL ICONS */
-
   .Hostel-mobile-dock-item {
     flex: 1 1 0;
-
     min-width: 0;
+    max-width: none;
 
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
 
     gap: 2px;
-
     padding: 6px 2px;
 
     border: none;
     border-radius: 0;
 
     background: transparent;
-
     color: #8a8a8f;
 
     text-decoration: none;
-
     font-family: inherit;
-
     cursor: pointer;
 
     transition: color 0.2s ease;
   }
 
-
   .Hostel-mobile-dock-icon {
+    width: 100%;
     height: 22px;
 
     display: flex;
     align-items: center;
     justify-content: center;
-  }
 
+    flex-shrink: 0;
+  }
 
   .Hostel-mobile-dock-icon svg {
     width: 22px;
     height: 22px;
+    flex-shrink: 0;
   }
 
-
   .Hostel-mobile-dock-label {
+    display: block;
     width: 100%;
+    max-width: 100%;
 
     font-size: 10px;
     font-weight: 500;
 
+    line-height: 1.2;
     text-align: center;
 
     white-space: nowrap;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
   }
 
-
   .Hostel-mobile-dock-item.active {
     color: var(--hostel-gold);
-
     background: transparent;
-
     transform: none;
+  }
+
+  
+  .warden-profile-popup {
+    left: 8px;
+    right: 8px;
+
+    width: auto;
+    max-width: calc(100vw - 16px);
+
+    max-height: calc(
+      100dvh -
+      var(--hostel-mobile-dock-height) -
+      env(safe-area-inset-bottom) -
+      20px
+    );
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .warden-profile-header {
+    min-width: 0;
+  }
+
+  .warden-popup-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .warden-popup-info h3 {
+    max-width: 100%;
+  }
+
+  .warden-contact-card {
+    min-width: 0;
+  }
+
+  .warden-contact-card strong {
+    max-width: 100%;
+  }
+  .profile-popup-id-row strong {
+    color:white;
+  }
+  .profile-popup-id-row span{
+    color:white;
   }
 }
 
+/* Medium phones */
+@media (max-width: 560px) and (min-width: 421px) {
+  :root {
+    --hostel-mobile-dock-height: 56px;
+  }
 
+  .Hostel-mobile-dock-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .Hostel-mobile-dock-label {
+    font-size: 9.5px;
+  }
+
+  .warden-profile-popup {
+    left: 8px;
+    right: 8px;
+    max-width: calc(100vw - 16px);
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+  .profile-popup-id-row strong {
+    color:white;
+  }
+  .profile-popup-id-row span{
+    color:white;
+  }
+}
+
+/* Small phones */
 @media (max-width: 420px) {
+  :root {
+    --hostel-mobile-dock-height: 54px;
+  }
 
-  .Hostel-mobile-dock {
-    height: calc(54px + env(safe-area-inset-bottom));
+  .Hostel-mobile-dock-icon {
+    height: 20px;
   }
 
   .Hostel-mobile-dock-icon svg {
@@ -1201,6 +1474,42 @@
 
   .Hostel-mobile-dock-label {
     font-size: 9px;
+  }
+
+  .warden-profile-popup {
+    left: 6px;
+    right: 6px;
+    max-width: calc(100vw - 12px);
+    border-radius: 18px;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .warden-popup-photo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .warden-popup-image-wrapper {
+    flex-shrink: 0;
+  }
+
+  .warden-popup-small-title {
+    font-size: 0.5rem;
+  }
+
+  .warden-popup-info h3 {
+    font-size: 0.9rem;
+  }
+
+  .warden-popup-info p {
+    font-size: 0.68rem;
+  }
+  .profile-popup-id-row strong {
+    color:white;
+  }
+  .profile-popup-id-row span{
+    color:white;
   }
 }
 
@@ -1284,6 +1593,10 @@
   position: fixed;
   left: 10px;
   right: 10px;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   bottom: max(96px, calc(env(safe-area-inset-bottom) + 90px));
 
   background:
