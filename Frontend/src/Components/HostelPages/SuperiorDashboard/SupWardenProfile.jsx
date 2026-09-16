@@ -137,7 +137,7 @@ function WardenProfile() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[#f5f6f8] px-4 py-5 md:px-5 lg:ml-64 lg:w-[calc(100%-16rem)]">
+    <div className="w-full min-h-screen bg-[#f5f6f8] px-4 py-5 md:px-5 lg:ml-[17.5rem] lg:w-[calc(100%-17.5rem)]">
       <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-6">
         <div className="w-full rounded-[18px] bg-white p-4 shadow-md sm:p-5 lg:p-7">
           <h2 className="student-title">Profile Details</h2>
