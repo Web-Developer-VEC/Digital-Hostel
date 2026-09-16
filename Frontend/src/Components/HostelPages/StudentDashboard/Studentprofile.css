@@ -488,24 +488,7 @@
     0 5px 12px rgba(0, 0, 0, 0.05);
 }
 
-.student-secondary-details::after {
-  content: "";
 
-  position: absolute;
-
-  right: 1.5rem;
-  top: 1.5rem;
-
-  width: 10px;
-  height: 10px;
-
-  border-radius: 50%;
-
-  background: #fdcd03;
-
-  box-shadow:
-    0 0 0 6px rgba(253, 205, 3, 0.2);
-}
 
 
 /* =========================================================
