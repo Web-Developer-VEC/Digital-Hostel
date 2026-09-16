@@ -312,7 +312,7 @@ function Hostelsidebar({ role, activeNav, setActiveNav }) {
 
   const getProfileImage = () => {
     if (!profileImagePath) {
-      return "https://via.placeholder.com/150";
+      return "https://img.magnific.com/premium-vector/yellow-robot_667648-1123.jpg?semt=ais_hybrid&w=740&q=80";
     }
 
     // If backend already sends a complete URL

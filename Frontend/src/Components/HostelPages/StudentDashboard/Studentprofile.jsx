@@ -96,59 +96,133 @@ function Studentprofile() {
   };
 
   const handleRequestChange = async () => {
-    let changes = {};
-    let foodTypeChanged = false;
-    let profileChanged = false;
-    
+    if (!formData || !initialFormData) {
+      console.error("❌ Form data is not available");
+      return;
+    }
 
-    Object.keys(formData).forEach((key) => {
+    const changes = {};
+
+    // Compare only the fields that can actually be edited
+    const editableFields = [
+      "name",
+      "admin_number",
+      "city",
+      "phone_number_student",
+      "phone_number_parent",
+      "foodtype",
+    ];
+
+    editableFields.forEach((key) => {
       if (formData[key] !== initialFormData[key]) {
         changes[key] = formData[key];
-
-        if (key === "foodtype") {
-          foodTypeChanged = true;
-        } else if (key !== "phone_number_student" || key !== "phone_number_parent") {
-          profileChanged = true;
-        }
       }
     });
 
+    console.log("🔍 Changed fields:", changes);
+
+    // Nothing changed
+    if (Object.keys(changes).length === 0) {
+      console.log("⚠️ No changes detected");
+      return;
+    }
+
     setChangedFields(changes);
-    setIsEditing(false);
-    setFormData(initialFormData);
+
+    const foodTypeChanged =
+      Object.prototype.hasOwnProperty.call(changes, "foodtype");
+
+    const profileChanged = Object.keys(changes).some(
+      (key) => key !== "foodtype"
+    );
+
+    console.log("🍴 Food changed:", foodTypeChanged);
+    console.log("👤 Profile changed:", profileChanged);
 
     try {
+      // ==========================================
+      // FOOD TYPE CHANGE
+      // ==========================================
       if (foodTypeChanged) {
+        const foodPayload = {
+          admissionNumber: formData.admin_number,
+          foodtype: formData.foodtype,
+        };
+
+        console.log(
+          "📤 FOOD TYPE PAYLOAD:",
+          JSON.stringify(foodPayload, null, 2)
+        );
+
         try {
-          await axiosInstance.post("/api/change_food_type", {
-            admissionNumber: formData.admin_number,
-            foodtype: formData.foodtype,
-          });
+          const response = await axiosInstance.post(
+            "/api/change_food_type",
+            foodPayload
+          );
+
+          console.log(
+            "✅ Food type request successful:",
+            response.data
+          );
         } catch (error) {
-          console.error("Food change request failed:", error.response?.data?.message || error.message);
+          console.error(
+            "❌ Food change request failed:",
+            error.response?.data || error.message
+          );
         }
       }
 
+      // ==========================================
+      // PROFILE CHANGE
+      // ==========================================
       if (profileChanged) {
+        const profilePayload = {
+          phone_number_student: formData.phone_number_student,
+          phone_number_parent: formData.phone_number_parent,
+          name: formData.name,
+          year: formData.year,
+          admin_number: formData.admin_number,
+          city: formData.city,
+        };
+
+        console.log(
+          "📤 PROFILE UPDATE PAYLOAD:",
+          JSON.stringify(profilePayload, null, 2)
+        );
+
         try {
-          await axiosInstance.post("/api/request_profile_update", {
-            phone_number_student: formData.phone_number_student,
-            phone_number_parent: formData.phone_number_parent,
-            name: formData.name,
-            year: formData.year,
-            admin_number: formData.admin_number,
-            city: formData.city,
-          });
+          const response = await axiosInstance.post(
+            "/api/request_profile_update",
+            profilePayload
+          );
+
+          console.log(
+            "✅ Profile update request successful:",
+            response.data
+          );
         } catch (error) {
-          console.error("Profile update request failed:", error.response?.data?.message || error.message);
+          console.error(
+            "❌ Profile update request failed:",
+            error.response?.data || error.message
+          );
         }
       }
 
+      // ==========================================
+      // RESET / REFRESH
+      // ==========================================
       if (foodTypeChanged || profileChanged) {
+        setIsEditing(false);
+        setHasChanges(false);
+
         await fetchProfile();
       }
+
     } catch (error) {
-      console.error("Error requesting change:", error);
+      console.error(
+        "❌ Error requesting change:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -232,7 +306,7 @@ function Studentprofile() {
                 name="admissionNumber"
                 value={formData?.admin_number || ""}
                 onChange={handleInputChange}
-                disabled={!isEditing}
+                disabled
                 className="student-input"
               />
             </div>
@@ -244,7 +318,7 @@ function Studentprofile() {
                 name="city"
                 value={formData?.city || ""}
                 onChange={handleInputChange}
-                disabled={!isEditing}
+                disabled
                 className="student-input"
               />
             </div>

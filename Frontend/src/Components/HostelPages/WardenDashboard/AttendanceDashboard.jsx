@@ -36,7 +36,7 @@ function AttendanceDashboard() {
   const vegCount = foodCount?.[selectedYear]?.veg_count || 0;
   const nonVegCount = foodCount?.[selectedYear]?.non_veg_count || 0;
   const totalStudents = vegCount + nonVegCount;
-
+  
   // Donut chart geometry
   const RADIUS = 80;
   const STROKE_WIDTH = 26;
