@@ -333,7 +333,7 @@ function SuperiorStudent() {
             <Search className="search-icon" size={18} />
             <input
               type="text"
-              placeholder="Search students by anything"
+              placeholder="Search students"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"

@@ -90,8 +90,8 @@ function SuperiorRequest() {
   const filteredRecords = records.filter(record => {
     const searchQuery = filters.search.toLowerCase();
     return (
-      (!activeGender || record.gender === activeGender) && // ✅ Add gender filtering here
-      (!filters.year || record.year === filters.year) &&
+      (!activeGender || record.gender === activeGender) &&
+      (!filters.year || record.year.toString() === filters.year) &&
       (!filters.department || record.department === filters.department) &&
       (!filters.search ||
         record.name.toLowerCase().includes(searchQuery) ||
@@ -102,41 +102,44 @@ function SuperiorRequest() {
   });
 
   return (
-    <div className="VR-app">
-      <div className="VR-main">
+    <div className="SR-app">
+      <div className="SR-main">
         <div className='flex items-center justify-start gap-2'>
-          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}><ArrowLeft className='w-5' />Back</button>
-          <h1 className="VR-page-title">Profile Change Requests</h1>
+          <button className='flex gap-1 justify-center items-center back-btn' onClick={() => navigate(-1)}>
+            <ArrowLeft className='w-5' />Back
+          </button>
+          <h1 className="SR-page-title">Profile Change Requests</h1>
         </div>
 
         {/* Filter Bar */}
-        <div className="VR-filter-bar">
-          <div className="VR-search-container">
-            <Search className="VR-search-icon" />
+        <div className="SR-filter-bar">
+          <div className="SR-search-container">
+            <Search className="SR-search-icon" />
             <input
               type="text"
               placeholder="Search by Name, Room Number, or Registration No..."
-              className="VR-search-input"
+              className="SR-search-input"
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
             />
           </div>
-          <div className="VR-filters">
-            <div className="SR-gender-buttons">
+          <div className="SR-filters">
+            <div className="gender-toggle">
               <button
-                className={`SR-gender-button ${activeGender === 'Male' ? 'SR-gender-button-active' : ''}`}
-                onClick={() => handleGenderFilter(activeGender === 'Male' ? '' : 'Male')}
+                className={`gender-btn ${activeGender === 'Male' ? 'active' : ''}`}
+                onClick={() => handleGenderFilter('Male')}
               >
                 Boys
               </button>
               <button
-                className={`SR-gender-button ${activeGender === 'Female' ? 'SR-gender-button-active' : ''}`}
-                onClick={() => handleGenderFilter(activeGender === 'Female' ? '' : 'Female')}
+                className={`gender-btn ${activeGender === 'Female' ? 'active' : ''}`}
+                onClick={() => handleGenderFilter('Female')}
               >
                 Girls
               </button>
             </div>
+
             {/* Year Filter */}
-            <select className="VR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}>
+            <select className="SR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}>
               <option value="">All Years</option>
               {wardenYears.map(year => (
                 <option key={year} value={year}>
@@ -149,7 +152,7 @@ function SuperiorRequest() {
             </select>
 
             {/* Department Filter */}
-            <select className="VR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}>
+            <select className="SR-filter-select" onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}>
               <option value="">All Departments</option>
               {departments.map(dept => (
                 <option key={dept} value={dept}>{dept}</option>
@@ -164,32 +167,32 @@ function SuperiorRequest() {
         ) : filteredRecords.length === 0 ? (
           <p className="no-records-message">📋 No profile change requests found.</p>
         ) : (
-          <table className="VR-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Department</th>
-                {/* <th>Year</th> */}
-                <th>Room</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record.registration_number} onClick={() => setSelectedRecord(record)}>
-                  <td>{record.from_data.name}</td>
-                  <td>{record.department}</td>
-                  {/* <td>{["I", "II", "III", "IV"][record.year - 1] || record.year}</td> */}
-                  <td>{record.room_number}</td>
-                  <td>
-                    <span className={`VR-status ${record.edit_status === null ? "VR-status-warning" : record.edit_status ? "VR-status-success" : "VR-status-danger"}`}>
-                      {record.edit_status === null ? "Pending" : record.edit_status ? "Accepted" : "Declined"}
-                    </span>
-                  </td>
+          <div className="SR-table-container">
+            <table className="SR-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Room</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredRecords.map((record) => (
+                  <tr key={record.registration_number} onClick={() => setSelectedRecord(record)}>
+                    <td className="SR-cell-name">{record.from_data.name}</td>
+                    <td>{record.department}</td>
+                    <td>{record.room_number}</td>
+                    <td>
+                      <span className={`SR-status ${record.edit_status === null ? "SR-status-warning" : record.edit_status ? "SR-status-success" : "SR-status-danger"}`}>
+                        {record.edit_status === null ? "Pending" : record.edit_status ? "Accepted" : "Declined"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* Modal */}
@@ -234,7 +237,7 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
     return changedFields;
   };
 
-  const changedFields = getChangedFields(); // Get only changed fields
+  const changedFields = getChangedFields();
 
   return (
     <div className="SR-modal-overlay">
@@ -339,6 +342,5 @@ function DetailModal({ record, onClose, onAccept, onDecline }) {
     </div>
   );
 }
-
 
 export default SuperiorRequest;
