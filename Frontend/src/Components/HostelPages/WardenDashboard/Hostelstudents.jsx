@@ -557,7 +557,7 @@ function Hostelstudents() {
             <Search className="details-search-icon" />
             <input
               type="text"
-              placeholder="Search students by anything"
+              placeholder="Search students"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="details-search-input"
