@@ -1200,3 +1200,19 @@ body {
     font-size: 1.2rem;
   }
 }
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
+
+.HL-password-wrapper input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+
+.HL-password-wrapper input {
+  -webkit-appearance: none;
+  appearance: none;
+}
