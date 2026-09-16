@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BarChart, ClipboardList, GraduationCap, Search, Filter, Check, X, Footprints, Download } from 'lucide-react';
+import { BarChart, ClipboardList, GraduationCap, Search, Filter, Check, X, Footprints, Download, Phone } from 'lucide-react';
 import { Home, Footprints as Walk } from "lucide-react";
 import './Hostelstudents.css';
 import axios from 'axios';
@@ -366,6 +366,7 @@ function Hostelstudents() {
 
   const saveRoomNumber = async (studentId) => {
     const newRoomNumber = tempRoomNumbers[studentId];
+
     if (!newRoomNumber) {
       Swal.fire({
         title: "Invalid Input",
@@ -379,12 +380,27 @@ function Hostelstudents() {
     const student = studentsData?.find(s => s.id === studentId);
     if (!student) return;
 
-    // Confirmation dialog
+    // SAME ROOM NUMBER → just go back, don't call API
+    if (String(newRoomNumber).trim() === String(student.roomNumber).trim()) {
+      setEditingRoomStates(prev => ({
+        ...prev,
+        [studentId]: false
+      }));
+
+      setTempRoomNumbers(prev => ({
+        ...prev,
+        [studentId]: null
+      }));
+
+      return;
+    }
+
+    // Confirmation dialog only when room number is actually changed
     const result = await Swal.fire({
       title: "Change Room Number?",
       html: `Are you sure you want to change the room number for <strong>${student.name}</strong>?<br/><br/>
-             <span style="font-weight: bold">${student.roomNumber}</span> → 
-             <span style="font-weight: bold">${newRoomNumber}</span>`,
+           <span style="font-weight: bold">${student.roomNumber}</span> → 
+           <span style="font-weight: bold">${newRoomNumber}</span>`,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#28a745",
@@ -394,10 +410,9 @@ function Hostelstudents() {
     });
 
     if (!result.isConfirmed) {
-      return; // User cancelled
+      return;
     }
 
-    // Show loading state
     Swal.fire({
       title: "Processing ⏳",
       text: "Updating room number...",
@@ -408,7 +423,8 @@ function Hostelstudents() {
     });
 
     try {
-      await axios.post('/api/edit_student_room_number',
+      await axios.post(
+        '/api/edit_student_room_number',
         {
           student_id: student.registrationNumber,
           new_room_number: newRoomNumber
@@ -423,20 +439,33 @@ function Hostelstudents() {
         timer: 2000,
         showConfirmButton: false
       }).then(() => {
-        setStudentData(prev => prev?.map(student =>
-          student.id === studentId
-            ? { ...student, roomNumber: newRoomNumber }
-            : student
-        ));
 
-        setEditingRoomStates(prev => ({ ...prev, [studentId]: false }));
-        setTempRoomNumbers(prev => ({ ...prev, [studentId]: null }));
+        setStudentData(prev =>
+          prev?.map(student =>
+            student.id === studentId
+              ? { ...student, roomNumber: newRoomNumber }
+              : student
+          )
+        );
+
+        setEditingRoomStates(prev => ({
+          ...prev,
+          [studentId]: false
+        }));
+
+        setTempRoomNumbers(prev => ({
+          ...prev,
+          [studentId]: null
+        }));
       });
+
     } catch (error) {
       console.error("Error updating room number:", error);
+
       Swal.fire({
         title: "Error ❌",
-        text: error.response?.data?.message || "Failed to update room number. Please try again.",
+        text: error.response?.data?.message ||
+          "Failed to update room number. Please try again.",
         icon: "error",
         confirmButtonText: "OK"
       });
@@ -448,24 +477,24 @@ function Hostelstudents() {
   };
 
 
-const handleFoodTypeChange = (studentId, newValue) => {
-  setTempFoodTypes(prev => ({
-    ...prev,
-    [studentId]: newValue
-  }));
-};
+  const handleFoodTypeChange = (studentId, newValue) => {
+    setTempFoodTypes(prev => ({
+      ...prev,
+      [studentId]: newValue
+    }));
+  };
 
-const hasFoodTypeChanged = (studentId) => {
-  const student = studentsData?.find(
-    (s) => s.id === studentId
-  );
+  const hasFoodTypeChanged = (studentId) => {
+    const student = studentsData?.find(
+      (s) => s.id === studentId
+    );
 
-  return (
-    student &&
-    tempFoodTypes[studentId] &&
-    tempFoodTypes[studentId] !== student.foodType
-  );
-};
+    return (
+      student &&
+      tempFoodTypes[studentId] &&
+      tempFoodTypes[studentId] !== student.foodType
+    );
+  };
 
 
 
@@ -662,7 +691,7 @@ const hasFoodTypeChanged = (studentId) => {
                 />
                 <div className="details-primary-info">
                   <h3 className="details-name">{student.name}</h3>
-                  <p className="details-admission">Admission No: {student.admissionNumber}</p>
+                  <p className="details-admission"> {student.admissionNumber}</p>
                   <p className="details-year">{student.year}</p>
                   <p className="details-department">{departmentLabels[student.department]}</p>
                 </div>
@@ -741,57 +770,57 @@ const hasFoodTypeChanged = (studentId) => {
                     <span className="details-label">Area:</span>
                     <span>{student.area}</span>
                   </div>
-                <div className="details-info-item">
-  <span className="details-label">Food Type:</span>
+                  <div className="details-info-item">
+                    <span className="details-label">Food Type:</span>
 
-  {editingStates[student.id] ? (
-    <div className="details-food-edit">
+                    {editingStates[student.id] ? (
+                      <div className="details-food-edit">
 
-      {/* Dropdown */}
-      <select
-        value={tempFoodTypes[student.id] || student.foodType}
-        onChange={(e) =>
-          handleFoodTypeChange(student.id, e.target.value)
-        }
-        className="details-food-select"
-      >
-        <option value="Vegetarian">Vegetarian</option>
-        <option value="Non-Vegetarian">Non-Vegetarian</option>
-      </select>
+                        {/* Dropdown */}
+                        <select
+                          value={tempFoodTypes[student.id] || student.foodType}
+                          onChange={(e) =>
+                            handleFoodTypeChange(student.id, e.target.value)
+                          }
+                          className="details-food-select"
+                        >
+                          <option value="Vegetarian">Vegetarian</option>
+                          <option value="Non-Vegetarian">Non-Vegetarian</option>
+                        </select>
 
-      {/* Show buttons ONLY after changing dropdown */}
-      {hasFoodTypeChanged(student.id) && (
-        <>
-          <button
-            className="details-food-button save"
-            onClick={() => saveFoodType(student.id)}
-          >
-            ✔
-          </button>
+                        {/* Show buttons ONLY after changing dropdown */}
+                        {hasFoodTypeChanged(student.id) && (
+                          <>
+                            <button
+                              className="details-food-button save"
+                              onClick={() => saveFoodType(student.id)}
+                            >
+                              ✔
+                            </button>
 
-          <button
-            className="details-food-button cancel"
-            onClick={() => cancelEditing(student.id)}
-          >
-            ✘
-          </button>
-        </>
-      )}
+                            <button
+                              className="details-food-button cancel"
+                              onClick={() => cancelEditing(student.id)}
+                            >
+                              ✘
+                            </button>
+                          </>
+                        )}
 
-    </div>
-  ) : (
-    <div className="details-food-display">
-      <span>{student.foodType}</span>
+                      </div>
+                    ) : (
+                      <div className="details-food-display">
+                        <span>{student.foodType}</span>
 
-      <button
-        className="details-food-edit-button"
-        onClick={() => startEditing(student.id)}
-      >
-        Edit
-      </button>
-    </div>
-  )}
-</div>
+                        <button
+                          className="details-food-edit-button"
+                          onClick={() => startEditing(student.id)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {!student.vacateStatus && (
                     <div className="details-vaccate-display">
                       <button
@@ -833,22 +862,61 @@ const hasFoodTypeChanged = (studentId) => {
                 className="student-modal"
                 onClick={(e) => e.stopPropagation()}
               >
-               
+
 
                 <div className="modal-header-new">
-                  <img
-                    src={modalStudent.photo ? UrlParser(modalStudent.photo) : getAvatarUrl(modalStudent.name)}
-                    alt={modalStudent.name}
-                    className="modal-student-photo"
-                    onError={handlePhotoError(modalStudent.name)}
-                  />
-                  <div className="modal-header-text">
-                    <h2 className="modal-student-name">{modalStudent.name}</h2>
-                    <p className="modal-subtitle">
-                      {modalStudent.year || 'N/A'} • {departmentDisplay}
-                    </p>
-                    <p className="modal-admission">Admission No. {modalStudent.admissionNumber || 'N/A'}</p>
+
+                  {/* Close X */}
+                  <button
+                    type="button"
+                    className="modal-close-btn"
+                    aria-label="Close student details"
+                    onClick={() => setModalStudentId(null)}
+                  >
+                    <X size={22} strokeWidth={2} />
+                  </button>
+
+                  {/* Student profile */}
+                  <div className="modal-header-profile">
+
+                    <img
+                      src={
+                        modalStudent.photo
+                          ? UrlParser(modalStudent.photo)
+                          : getAvatarUrl(modalStudent.name)
+                      }
+                      alt={modalStudent.name}
+                      className="modal-student-photo"
+                      onError={handlePhotoError(modalStudent.name)}
+                    />
+
+                    <div className="modal-header-text">
+                      <h2 className="modal-student-name">
+                        {modalStudent.name}
+                      </h2>
+
+                      <p className="modal-subtitle">
+                        {modalStudent.year || 'N/A'} • {departmentDisplay}
+                      </p>
+
+                      <p className="modal-admission">
+                        {modalStudent.admissionNumber || 'N/A'}
+                      </p>
+                    </div>
+
                   </div>
+
+                  {/* Mark Vacate */}
+                  {!modalStudent.vacateStatus && (
+                    <button
+                      type="button"
+                      className="modal-vacate-btn"
+                      onClick={() => handleVacateStatus(modalStudent.id)}
+                    >
+                      Mark Vacate
+                    </button>
+                  )}
+
                 </div>
 
                 <div className="modal-divider" />
@@ -856,8 +924,12 @@ const hasFoodTypeChanged = (studentId) => {
                 <div className="modal-body">
                   {/* Hostel */}
                   <div className="modal-section-plain">
-                    <h3 className="modal-section-label">Hostel</h3>
-                    <div className="modal-columns">
+                    <h3 className="modal-section-label">
+                      <span className="modal-section-icon">
+                        <Home size={18} strokeWidth={2} />
+                      </span>
+                      <span>Hostel</span>
+                    </h3>                    <div className="modal-columns">
                       <div className="modal-col">
                         <span className="modal-col-label">Room</span>
                         {editingRoomStates[modalStudent.id] ? (
@@ -896,53 +968,53 @@ const hasFoodTypeChanged = (studentId) => {
 
                       <div className="modal-col">
                         <span className="modal-col-label">Food</span>
-                    {editingStates[modalStudent.id] ? (
-  <div className="details-food-edit">
+                        {editingStates[modalStudent.id] ? (
+                          <div className="details-food-edit">
 
-    <select
-      value={tempFoodTypes[modalStudent.id] || modalStudent.foodType}
-      onChange={(e) =>
-        handleFoodTypeChange(modalStudent.id, e.target.value)
-      }
-      className="details-food-select"
-    >
-      <option value="Vegetarian">Vegetarian</option>
-      <option value="Non-Vegetarian">Non-Vegetarian</option>
-    </select>
+                            <select
+                              value={tempFoodTypes[modalStudent.id] || modalStudent.foodType}
+                              onChange={(e) =>
+                                handleFoodTypeChange(modalStudent.id, e.target.value)
+                              }
+                              className="details-food-select"
+                            >
+                              <option value="Vegetarian">Vegetarian</option>
+                              <option value="Non-Vegetarian">Non-Vegetarian</option>
+                            </select>
 
-    {hasFoodTypeChanged(modalStudent.id) && (
-      <>
-        <button
-          className="details-food-button save"
-          onClick={() => saveFoodType(modalStudent.id)}
-        >
-          ✔
-        </button>
+                            {hasFoodTypeChanged(modalStudent.id) && (
+                              <>
+                                <button
+                                  className="details-food-button save"
+                                  onClick={() => saveFoodType(modalStudent.id)}
+                                >
+                                  ✔
+                                </button>
 
-        <button
-          className="details-food-button cancel"
-          onClick={() => cancelEditing(modalStudent.id)}
-        >
-          ✘
-        </button>
-      </>
-    )}
+                                <button
+                                  className="details-food-button cancel"
+                                  onClick={() => cancelEditing(modalStudent.id)}
+                                >
+                                  ✘
+                                </button>
+                              </>
+                            )}
 
-  </div>
-) : (
-  <>
-    <span className="modal-col-value">
-      {modalStudent.foodType || 'N/A'}
-    </span>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="modal-col-value">
+                              {modalStudent.foodType || 'N/A'}
+                            </span>
 
-    <button
-      className="details-food-edit-button"
-      onClick={() => startEditing(modalStudent.id)}
-    >
-      Edit
-    </button>
-  </>
-)}
+                            <button
+                              className="details-food-edit-button"
+                              onClick={() => startEditing(modalStudent.id)}
+                            >
+                              Edit
+                            </button>
+                          </>
+                        )}
                       </div>
 
                       <div className="modal-col">
@@ -967,8 +1039,12 @@ const hasFoodTypeChanged = (studentId) => {
 
                   {/* Contact */}
                   <div className="modal-section-plain">
-                    <h3 className="modal-section-label">Contact</h3>
-                    <div className="modal-columns">
+                    <h3 className="modal-section-label">
+                      <span className="modal-section-icon">
+                        <Phone size={18} strokeWidth={2} />
+                      </span>
+                      <span>Contact</span>
+                    </h3>                    <div className="modal-columns">
                       <div className="modal-col">
                         <span className="modal-col-label">Student</span>
                         <span className="modal-col-value">
@@ -995,23 +1071,8 @@ const hasFoodTypeChanged = (studentId) => {
                       </div>
                     </div>
                   </div>
+                  <div className="modal-footer"></div>
 
-                  <div className="modal-footer">
-                    {!modalStudent.vacateStatus && (
-                      <button
-                        className="details-vaccate-button modal-vacate-btn"
-                        onClick={() => handleVacateStatus(modalStudent.id)}
-                      >
-                        Mark Vaccate
-                      </button>
-                    )}
-                    <button
-                      className="modal-close-bottom"
-                      onClick={() => setModalStudentId(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>

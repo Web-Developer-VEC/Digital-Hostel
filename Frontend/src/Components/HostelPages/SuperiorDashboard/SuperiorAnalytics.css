@@ -761,3 +761,127 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   INLINE STUDENT MANIFEST INSIDE MAIN POPUP
+========================================================= */
+
+.hl-inline-student-section {
+  margin: 20px 24px 24px;
+
+  border: 1px solid #ead28c;
+  border-radius: 12px;
+
+  background: #fffdf7;
+
+  overflow: hidden;
+}
+
+
+.hl-inline-student-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 18px;
+
+  background: #fff8e5;
+
+  border-bottom: 1px solid #ead28c;
+}
+
+
+.hl-inline-student-header h4 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  color: #171717;
+}
+
+
+.hl-inline-close-btn {
+  width: 27px;
+  height: 27px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: #966515;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+
+.hl-inline-close-btn:hover {
+  background: #fff2c7;
+  color: #6f4d0c;
+}
+
+
+.hl-inline-student-list {
+  max-height: 230px;
+
+  overflow-y: auto;
+
+  padding: 8px 18px;
+}
+
+
+.hl-inline-student-list ul {
+  list-style: none;
+
+  padding: 0;
+  margin: 0;
+}
+
+
+.hl-inline-student-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 4px;
+
+  border-bottom: 1px solid #f2ead5;
+
+  font-size: 14px;
+  color: #222222;
+}
+
+
+.hl-inline-student-list li:last-child {
+  border-bottom: none;
+}
+
+
+.student-index {
+  min-width: 25px;
+
+  color: #b88624;
+
+  font-weight: 700;
+}
+
+
+.hl-inline-student-list p {
+  text-align: center;
+
+  padding: 15px;
+
+  margin: 0;
+
+  color: #777777;
+}

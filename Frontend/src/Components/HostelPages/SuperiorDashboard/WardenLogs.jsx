@@ -198,36 +198,57 @@ const WardenLogs = () => {
 
             {filteredData[monthYear].map((entry) => (
               <div key={entry.actionKey} className="HOS-W-warden-entry">
-                <p className="HOS-W-warden-status-text">
-                  <strong>{entry.wardenName}</strong> was{" "}
-                  <strong>DEACTIVATED</strong> on{" "}
-                  <strong>
-                    {new Date(entry.deactivatedDate).toLocaleString()}
-                  </strong>
-                </p>
 
-                {/* Show the transferred details with arrows */}
+                {/* Name row */}
+                <div className="HOS-W-entry-row HOS-W-entry-name-row">
+                  <span className="HOS-W-entry-name">{entry.wardenName}</span>
+                </div>
+
+                {/* Status row: Deactivated + Activated side by side */}
+                <div className="HOS-W-entry-row HOS-W-entry-status-row">
+                  <div className="HOS-W-status-block">
+                    <span className="HOS-W-status-badge HOS-W-status-badge-deactivated">
+                      Deactivated
+                    </span>
+                    <span className="HOS-W-entry-date">
+                      {new Date(entry.deactivatedDate).toLocaleString()}
+                    </span>
+                  </div>
+
+                  <span className="HOS-W-status-divider">—</span>
+
+                  <div className="HOS-W-status-block">
+                    <span className="HOS-W-status-badge HOS-W-status-badge-activated">
+                      Activated
+                    </span>
+                    <span className="HOS-W-entry-date">
+                      {new Date(entry.activatedDate).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Transferred row */}
                 {entry.reassignedTo.length > 0 && (
-                  <p className="HOS-W-warden-status-text">
-                    Responsibilities transferred: <br />
-                    {entry.reassignedTo.map((warden, idx) => (
-                      <span key={idx} className="HOS-W-transfer-text">
-                        <strong>
-                          {yearToAlphabet[warden.years] || warden.years}
-                        </strong>{" "}
-                        → <strong>{warden.name}</strong>
-                        <br />
-                      </span>
-                    ))}
-                  </p>
+                  <div className="HOS-W-entry-row HOS-W-entry-transfer">
+                    <span className="HOS-W-entry-label">
+                      Responsibilities transferred
+                    </span>
+                    <div className="HOS-W-transfer-list">
+                      {entry.reassignedTo.map((warden, idx) => (
+                        <div key={idx} className="HOS-W-transfer-text">
+                          <span className="HOS-W-transfer-year">
+                            {yearToAlphabet[warden.years] || warden.years}
+                          </span>
+                          <span className="HOS-W-transfer-arrow">→</span>
+                          <span className="HOS-W-transfer-name">
+                            {warden.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
-                <p className="HOS-W-warden-status-text">
-                  Activated again on{" "}
-                  <strong>
-                    {new Date(entry.activatedDate).toLocaleString()}
-                  </strong>
-                </p>
               </div>
             ))}
           </div>

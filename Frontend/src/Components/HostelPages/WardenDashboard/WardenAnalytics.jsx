@@ -243,7 +243,6 @@ const Dashboard = () => {
   };
 
   const handleCardClick = (card) => {
-    // Check if the card has a student list with names
     const namesList =
       card.names?.names || (Array.isArray(card.names) ? card.names : []);
 
@@ -257,6 +256,10 @@ const Dashboard = () => {
       return;
     }
 
+
+    setShowNameList(false);
+    setNameListData([]);
+
     setSelectedCard(card);
     setShowNames(true);
   };
@@ -264,6 +267,10 @@ const Dashboard = () => {
   const closeModal = () => {
     setShowNames(false);
     setShowChartPopup(false);
+
+
+    setShowNameList(false);
+    setNameListData([]);
   };
 
   const handlePieMouseEnter = (data) => {
@@ -327,7 +334,8 @@ const Dashboard = () => {
           dates: [],
           popupChartData,
         });
-
+        setShowNameList(false);
+        setNameListData([]);
         setShowChartPopup(true);
       } else {
         throw new Error(
@@ -772,69 +780,43 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Nested student list flyout */}
+                {/* Inline Student Details */}
                 {showNameList && (
-                  <div className="hl-submodal-overlay">
-                    <div className="hl-submodal-content">
-                      <div className="hl-submodal-head">
-                        <h4>Student Manifest</h4>
-                        <button
-                          className="hl-btn-close"
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            fontSize: "0.9rem",
-                          }}
-                          onClick={() => setShowNameList(false)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <div className="hl-submodal-scroll">
+                  <div className="hl-inline-student-section">
+                    <div className="hl-inline-student-header">
+                      <h4>Student Manifest</h4>
+
+                      <button
+                        className="hl-inline-close-btn"
+                        onClick={() => setShowNameList(false)}
+                        aria-label="Close student list"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <div className="hl-inline-student-list">
+                      {nameListData.length > 0 ? (
                         <ul>
-                          {nameListData.length > 0 ? (
-                            nameListData.map((name, index) => (
-                              <li key={index}>{name}</li>
-                            ))
-                          ) : (
-                            <li>No students found</li>
-                          )}
+                          {nameListData.map((name, index) => (
+                            <li key={index}>
+                              <span className="student-index">
+                                {index + 1}.
+                              </span>
+
+                              <span>
+                                {typeof name === "string" ? name : name.name}
+                              </span>
+                            </li>
+                          ))}
                         </ul>
-                      </div>
+                      ) : (
+                        <p>No students found</p>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Reason sub-donut */}
-                <div style={{ padding: "0 24px 20px 24px" }}>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={
-                          chartPopupData?.popupChartData?.length > 0
-                            ? chartPopupData.popupChartData
-                            : [{ name: "No Data", value: 1 }]
-                        }
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={75}
-                        dataKey="value"
-                      >
-                        {chartPopupData?.popupChartData?.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={
-                              entry.color ||
-                              BRAND_COLORS[index % BRAND_COLORS.length]
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
               </>
             )}
           </div>
