@@ -351,9 +351,8 @@ function LoginForm() {
 
             <button
               type="button"
-              className={`HL-dropdown-trigger ${
-                dropdownOpen ? "HL-dropdown-active" : ""
-              }`}
+              className={`HL-dropdown-trigger ${dropdownOpen ? "HL-dropdown-active" : ""
+                }`}
               onClick={() =>
                 setDropdownOpen(!dropdownOpen)
               }
@@ -372,9 +371,8 @@ function LoginForm() {
 
               <ChevronDown
                 size={19}
-                className={`HL-dropdown-chevron ${
-                  dropdownOpen ? "HL-chevron-rotate" : ""
-                }`}
+                className={`HL-dropdown-chevron ${dropdownOpen ? "HL-chevron-rotate" : ""
+                  }`}
               />
 
             </button>
@@ -414,11 +412,10 @@ function LoginForm() {
                       <button
                         type="button"
                         key={option.value}
-                        className={`HL-dropdown-option ${
-                          type === option.value
+                        className={`HL-dropdown-option ${type === option.value
                             ? "HL-option-selected"
                             : ""
-                        }`}
+                          }`}
                         onClick={() => {
                           setLoginType(option.value);
                           setDropdownOpen(false);
@@ -535,18 +532,13 @@ function LoginForm() {
 
             <input
               id="password"
-              type={
-                showPassword
-                  ? "text"
-                  : "password"
-              }
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="HL-form-input HL-password-input"
             />
 
