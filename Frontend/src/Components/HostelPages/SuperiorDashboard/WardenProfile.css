@@ -187,6 +187,7 @@ body.warden-modal-open {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  margin-left:10px;
 }
 
 
